@@ -8,3 +8,5 @@
 - Make instructions page 
 - figure out data.sql
 - move main .py to app.py 
+- cannot see immediate updates to edits in volunteer
+- need to finish neighbor table 
