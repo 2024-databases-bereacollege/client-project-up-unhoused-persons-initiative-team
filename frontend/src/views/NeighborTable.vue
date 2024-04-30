@@ -31,7 +31,13 @@ export default {
   data() {
     return {
       tableHeaders: [
-        { title: 'Neighbor ID', key: 'NeighborID' },
+      {
+    title: 'Neighbor ID',
+    key: 'NeighborID',
+    sortable: true,
+    // Use a method to generate the link
+    cellRenderer: this.renderNeighborIDLink,
+  },
         { title: 'First Name', key: 'FirstName' },
         { title: 'Last Name', key: 'LastName' },
         { title: 'Date of Birth', key: 'DateOfBirth' },
@@ -99,7 +105,11 @@ export default {
       });
   } else {
     // Create a new neighbor
+    // eslint-disable-next-line no-unused-vars
     const { NeighborID, ...newNeighbor } = item; // Exclude NeighborID from the item object
+
+    newNeighbor.Created_date = new Date().toISOString();
+
     axios.post('http://127.0.0.1:5000/api/neighbors', newNeighbor)
       .then(response => {
         this.neighbors.push(response.data);
@@ -125,6 +135,9 @@ export default {
       this.editedIndex = this.neighbors.indexOf(item);
       this.editedItem = Object.assign({}, item);
     },
+    renderNeighborIDLink(neighborID) {
+    return `<router-link to="/neighbors/${neighborID}">${neighborID}</router-link>`;
+  },
     deleteItem(item) {
       this.editedIndex = this.neighbors.indexOf(item);
       this.editedItem = Object.assign({}, item);
