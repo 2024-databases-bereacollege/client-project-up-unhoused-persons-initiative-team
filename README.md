@@ -1,19 +1,19 @@
 # UP initiative project v1
 
-### This project was designed as part of the course Computer Science 330 - Database Systems in the Spring of 2024. We partner with the organization UP Initiative of Madison County to assist in their mission of supporting unhoused individuals and people struggling with housing security in the region
+This project was designed as part of the course Computer Science 330 - Database Systems in the Spring of 2024. We partner with the organization UP Initiative of Madison County to assist in their mission of supporting unhoused individuals and people struggling with housing security in the region
 
 ## PURPOSE OF THE APPLICATION 
-UP initiative was founded in late 2023, and their work supports the community. Their main needs include:
+The UP Initiative, founded in late 2023, plays a crucial role in supporting the community with two primary needs:
 ### Centralization of information:  
-UP wants for all of their neighbors,  partners, and overall organization to be easy accessible for grant application and annual report purposes. Therefore, they want a centralized record of everything the organization does and easy access for follow-up of everyone the organization assists.
+The UP Initiative aims to centralize all data related to neighbors, partners, and organizational activities. This centralized information repository is vital for facilitating grant applications and generating annual reports, ensuring streamlined access for organizational follow-ups.
 ### Control of Inventory: 
-They want to have a better control of inventory so in the future they can announce what items are mostly needed and what items are abundant.
+Enhanced inventory management is crucial for the UP Initiative. Accurate inventory tracking helps communicate current needs to potential donors, identifying which items are most needed and which are plentiful.
 
 
-
-## Technical Information for Class purposes 
-Here you can find more information regarding the project milestones while we took CSC 330
-!(/workspaces/client-project-up-unhoused-persons-initiative-team/Milestones_Progress.md)
+## Key Documentation and Project Insights:
+###
+Detailed project milestones and decision-making processes are documented under:
+![Technical Information of project development](Milestones_Progress.md)
 
 
 ## Created by: 
@@ -22,18 +22,26 @@ Matheus Bender,
 Nicholas Hamilton,
 Michel Moncada-Rabassa
 
-
-## How to Use:
-
-
-
-
+# Database Usage Instructions
+## Setup and Operation
+To use the application database, follow these steps:
+###  How to use database:
+Step 1 -> download all required files: package.json, pipfile.lock, Requirements.md
+Step 2 -> setup a backend server: on the terminal, open "flaskapp directory", start the "pipenv shell" virtual environment, run app.py "python app.py" (send API calls to frontend)
+### For backend, on the terminal, type
+cd flaskapp
+pipenv shell
+python app.py
+Step 3 -> setup a frontend server: directory ""frontend" and start node.js. The below commands run a local environment, but creating the site will need npm to build.
+### For frontend, on the terminal, type:
+cd frontend
+npm run serve 
 
 
 ## Development 
-This project starts with conceptualization and business rules, followed by relationships and cardinalities, and UP database conceptual schema.
+The development of the UP Initiative application involved a thorough planning phase that defined the conceptualization, business rules, relationships, cardinalities, and the database schema.
 
-## Project entities
+## Project Entities and Attributes:
 ### Neighbors:  
 a houseless person who seeks UP for support. They can be classified as emergency housed (e.g. a person sleeps in someone’s house), underhoused (they may have a shelter, but it is not optimal. e.g. a shed or trailer without access to electricity or water, or similar precarious situations).
 Attributes: NeighborID, FirstName, LastName, Date of Birth, phone, email HasStateId (bool), HasPet (bool), location.
@@ -88,9 +96,15 @@ Using the VISIT SERVICE, a VOLUNTEER can start a process to assist the NEIGHBOR 
 A VISIT SERVICE is provided by one SERVICE PROVIDER , whereas a SERVICE PROVIDER can provide at least one SERVICE. The SERVICE is then tracked on the NEIGHBOR’s record and followed up as necessary by at least one UP ADMINISTRATOR. 
 
 ## Conceptual Model
-Here is the database schema for better understanding.
+The tables of UP database follow the following dynamic:
+
+"Visit_Record" has a neighbor registered by a volunteer who has access permission. That record centralizes vital information about the neighbor and their visits to UP. Through "Visit_Service", UP can follow which service in used by which neighbor. The services are provided by partners or UP, which is stored in a associative entity called "Service". "Service" is connected to "Service_Provider", which in turn have further information about each partner that assists UP's mission or UP itself.
+
+On the rest of the relations, "Visit_Record" have the information about people working at UP, called "Volunteer". The "Volunteer" control the inventory, and can have access to the "Visit_Record". Once a "Visit_Service" that uses UP's inventory is stored in "Visit_Record", the "Inventory_Usage" catalogs the change, updating the "Inventory" table. 
+
+Below is the database schema for illustrating the explanation above:
+
 ![brief alt text](Images/Schemas/Conceptual_Schema_04-03-2024.png)
 
-## Normalization on the third form
-![brief alt text](Images/Schemas/Relational_Schema_03-27-24.png)
+
 
