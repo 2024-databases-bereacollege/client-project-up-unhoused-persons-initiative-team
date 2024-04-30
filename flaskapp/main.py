@@ -118,7 +118,21 @@ def delete_volunteer(volunteer_id):
 ################ neighbors below ############################    
 @app.route('/api/neighbors', methods=['GET'])
 def get_neighbors():
-    neighbors = [neighbor.to_dict() for neighbor in Neighbor.select()]
+    neighbors = [
+        {
+            'NeighborID': neighbor.NeighborID,
+            'FirstName': neighbor.FirstName,
+            'LastName': neighbor.LastName,
+            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d'),
+            'Phone': neighbor.Phone,
+            'Location': neighbor.Location,
+            'Email': neighbor.Email,
+            'Created_date': neighbor.Created_date.strftime('%Y-%m-%d'),
+            'HasStateID': neighbor.HasStateID,
+            'HasPet': neighbor.HasPet
+        }
+        for neighbor in Neighbor.select()
+    ]
     return jsonify(neighbors)
 
 @app.route('/api/neighbors', methods=['POST'])
