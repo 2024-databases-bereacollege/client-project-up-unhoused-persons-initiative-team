@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash #Using for passwords 
 from models import *
 
+#Different way of sending the information to the front end for the client to use whichever they prefer.
 
 app = Flask(__name__)
 app.config.from_object(__name__)
