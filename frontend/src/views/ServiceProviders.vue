@@ -1,202 +1,163 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="tableData"
-    :sort-by="[{ key: 'calories', order: 'asc' }]"
-  >
-    <template v-slot:top>
-      <v-toolbar
-        flat
-      >
-        <v-toolbar-title>ServiceProviders</v-toolbar-title>
-        <v-divider
-          class="mx-4"
-          inset
-          vertical
-        ></v-divider>
-        <v-spacer></v-spacer>
-        <v-dialog v-model="dialog" max-width="500px">
-  <template v-slot:activator="{ on, attrs }">
-    <v-btn class="mb-2" color="primary" dark v-bind="attrs" v-on="on">
-      New Item
-    </v-btn>
-  </template>
-  <v-card>
-    <v-card-title>
-      <span class="text-h5">{{ formTitle }}</span>
-    </v-card-title>
-
-    <v-card-text>
-      <v-container>
-        <v-row>
-          <v-col cols="12" md="4" sm="6" v-for="(value, key) in editedItem" :key="key">
-            <v-text-field
-              v-model="editedItem[key]"
-              :label="capitalizeFirstLetter(key)"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card-text>
-
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-      <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
-
-
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-toolbar>
-    </template>
-<!-- eslint-disable-next-line vue/valid-v-slot -->
-<template v-slot:item.actions="{ item }">
-      <v-icon
-        class="me-2"
-        size="small"
-        @click="editItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        size="small"
-        @click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon>
-    </template>
-    <template v-slot:no-data>
-      <v-btn
-        color="primary"
-        @click="initialize"
-      >
-        Reset
-      </v-btn>
-    </template>
-  </v-data-table>
+  <div>
+    <data-table
+      tableTitle="Service Providers"
+      :edited-item="editedItem"
+      @update:edited-item="updateEditedItem"
+      @update:has-state-id="updateHasStateID"
+      @update:has-pet="updateHasPet"
+      @save="saveItem"
+      :headers="tableHeaders"
+      :items="neighbors"
+      :default-item="defaultItem"
+      :on-edit="editItem"
+      :on-delete="deleteItem"
+      @delete-item-confirm="deleteItemConfirm($event)"
+      @close="close"
+      @close-delete="closeDelete"
+      sort-by="NeighborID"
+      sort-order="asc"
+    ></data-table>
+  </div>
 </template>
-
-
 <script>
 import axios from 'axios';
+import DataTable from '@/components/NeighborDataTable.vue';
 
 export default {
+  components: {
+    DataTable,
+  },
   data() {
     return {
-      dialog: false,
-      dialogDelete: false,
-      headers: [], // Will be dynamically set based on fetched data
-      tableData: [], // Renamed from 'desserts' for clarity and consistency
+      tableHeaders: [
+      {
+    title: 'Neighbor ID',
+    key: 'NeighborID',
+    sortable: true,
+    cellRenderer: this.renderNeighborIDLink,
+  },
+        { title: 'First Name', key: 'FirstName' },
+        { title: 'Last Name', key: 'LastName' },
+        { title: 'Date of Birth', key: 'DateOfBirth' },
+        { title: 'Phone', key: 'Phone' },
+        { title: 'Location', key: 'Location' },
+        { title: 'Email', key: 'Email' },
+        { title: 'Created Date', key: 'Created_date' },
+        { title: 'Has State ID', key: 'HasStateID' },
+        { title: 'Has Pet', key: 'HasPet' },
+        { title: 'Actions', key: 'actions', sortable: false },
+
+      ],
+      neighbors: [],
       editedIndex: -1,
-      editedItem: {},
-      defaultItem: {},
+      editedItem: {
+        NeighborID: '',
+        FirstName: '',
+        LastName: '',
+        DateOfBirth: '',
+        Phone: '',
+        Location: '',
+        Email: '',
+        Created_date: '',
+        HasStateID: false,
+        HasPet: false,
+      },
+      defaultItem: {
+        NeighborID: '',
+        FirstName: '',
+        LastName: '',
+        DateOfBirth: '',
+        Phone: '',
+        Location: '',
+        Email: '',
+        Created_date: '',
+        HasStateID: false,
+        HasPet: false,
+      },
     };
   },
-
-  computed: {
-    formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
-    },
-  },
-
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
-  },
-
-  mounted() {
+  created() {
     this.fetchData();
   },
-
   methods: {
     fetchData() {
-      axios.get('http://127.0.0.1:5000/api/service_providers')
+      axios.get('http://127.0.0.1:5000/api/neighbors')
         .then(response => {
-          this.tableData = response.data;
-          // Dynamically create headers based on keys of the first item if data exists
-          if (this.tableData.length > 0) {
-            this.headers = Object.keys(this.tableData[0]).map(key => ({
-              text: this.capitalizeFirstLetter(key),
-              value: key,
-            }));
-            // For actions, if needed
-            this.headers.push({ text: 'Actions', value: 'actions', sortable: false });
-          }
+          this.neighbors = response.data;
         })
-        .catch(error => console.error(error));
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
     },
-
-    capitalizeFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    },
-
-    editItem(item) {
-      this.editedIndex = this.tableData.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
-    },
-
-    deleteItem(item) {
-      this.editedIndex = this.tableData.indexOf(item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.tableData.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
+    saveItem(item) {
+  if (this.editedIndex > -1) {
+    // Update an existing neighbor
+    const neighborID = this.neighbors[this.editedIndex].NeighborID;
+    axios.put(`http://127.0.0.1:5000/api/neighbors/${neighborID}`, item)
+      .then(response => {
+        Object.assign(this.neighbors[this.editedIndex], response.data);
+        this.close();
+      })
+      .catch(error => {
+        console.error('Error updating neighbor:', error);
       });
-    },
+  } else {
+    // Create a new neighbor
+    // eslint-disable-next-line no-unused-vars
+    const { NeighborID, ...newNeighbor } = item; // Exclude NeighborID from the item object
 
-    closeDelete() {
-      this.dialogDelete = false;
-    },
+    newNeighbor.Created_date = new Date().toISOString();
 
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.tableData[this.editedIndex], this.editedItem);
-      } else {
-        this.tableData.push(this.editedItem);
+    axios.post('http://127.0.0.1:5000/api/neighbors', newNeighbor)
+      .then(response => {
+        this.neighbors.push(response.data);
+        this.close();
+      })
+      .catch(error => {
+        console.error('Error creating neighbor:', error);
+      });
       }
-      this.close();
+    },
+    deleteItemConfirm(index) {
+      const neighborID = this.neighbors[index].NeighborID;
+      axios.delete(`http://127.0.0.1:5000/api/neighbors/${neighborID}`)
+        .then(() => {
+          this.neighbors.splice(index, 1);
+          this.closeDelete();
+        })
+        .catch(error => {
+          console.error('Error deleting neighbor:', error);
+        });
+    },
+    editItem(item) {
+      this.editedIndex = this.neighbors.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+    },
+    renderNeighborIDLink(neighborID) {
+    return `<router-link to="/neighbors/${neighborID}">${neighborID}</router-link>`;
+  },
+    deleteItem(item) {
+      this.editedIndex = this.neighbors.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+    },
+    updateHasStateID(value) {
+      this.editedItem.HasStateID = value;
+    },
+    updateHasPet(value) {
+      this.editedItem.HasPet = value;
+    },
+    close() {
+      this.editedIndex = -1;
+      this.editedItem = Object.assign({}, this.defaultItem);
+    },
+    closeDelete() {
+      this.editedIndex = -1;
+      this.editedItem = Object.assign({}, this.defaultItem);
+    },
+    updateEditedItem(item) {
+      this.editedItem = item;
     },
   },
 };
 </script>
-
-
-<style>
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 8px;
-  border: 1px solid #ccc;
-}
-thead {
-  background-color: #eee;
-}
-</style>
