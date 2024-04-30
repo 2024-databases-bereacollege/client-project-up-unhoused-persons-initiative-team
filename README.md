@@ -13,7 +13,7 @@ Enhanced inventory management is crucial for the UP Initiative. Accurate invento
 ## Key Documentation and Project Insights:
 ###
 Detailed project milestones and decision-making processes are documented under:
-![Technical Information of project development](/workspaces/client-project-up-unhoused-persons-initiative-team/Milestones_Progress.md)
+![Technical Information of project development](Milestones_Progress.md)
 
 
 ## Created by: 
@@ -104,7 +104,7 @@ On the rest of the relations, "Visit_Record" have the information about people w
 
 Below is the database schema for illustrating the explanation above:
 
-![brief alt text](design_milestones/Images/Schemas/Conceptual_Schema_04-03-2024.png)
+![brief alt text](Images/Schemas/Conceptual_Schema_04-03-2024.png)
 
 
 
