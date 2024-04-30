@@ -107,6 +107,9 @@ export default {
     // Create a new neighbor
     // eslint-disable-next-line no-unused-vars
     const { NeighborID, ...newNeighbor } = item; // Exclude NeighborID from the item object
+
+    newNeighbor.Created_date = new Date().toISOString();
+
     axios.post('http://127.0.0.1:5000/api/neighbors', newNeighbor)
       .then(response => {
         this.neighbors.push(response.data);
