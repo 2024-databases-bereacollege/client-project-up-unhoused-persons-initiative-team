@@ -135,6 +135,54 @@ def get_neighbors():
     ]
     return jsonify(neighbors)
 
+@app.route('/api/IndividualVisitLog', methods=['PUT'])
+def update_visit_log():
+    data = request.get_json()
+    inventory_data = data.get('inventory')
+    visit_service_data = data.get('visit_service')
+    volunteer_data = data.get('volunteer')
+
+    response = {}
+
+    # Update Inventory
+    inventory_id = inventory_data.get('inventory_id')
+    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+    if inventory:
+        for key, value in inventory_data.items():
+            if key != 'inventory_id':  # Exclude the ID from the fields to update
+                setattr(inventory, key, value)
+        inventory.save()
+        response['inventory'] = inventory.to_dict()
+    else:
+        return jsonify({'error': 'Inventory not found'}), 404
+
+    # Update Visit Service
+    record_id = visit_service_data.get('record_id')
+    visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
+    if visit_service:
+        for key, value in visit_service_data.items():
+            if key != 'record_id':  # Exclude the ID from the fields to update
+                setattr(visit_service, key, value)
+        visit_service.save()
+        response['visit_service'] = visit_service.to_dict()
+    else:
+        return jsonify({'error': 'Visit service record not found'}), 404
+
+    # Update Volunteer
+    volunteer_id = volunteer_data.get('volunteer_id')
+    volunteer = Volunteer.get_or_none(Volunteer.VolunteerID == volunteer_id)
+    if volunteer:
+        for key, value in volunteer_data.items():
+            if key != 'volunteer_id':  # Exclude the ID from the fields to update
+                setattr(volunteer, key, value)
+        volunteer.save()
+        response['volunteer'] = volunteer.to_dict()
+    else:
+        return jsonify({'error': 'Volunteer not found'}), 404
+
+    # Assuming all updates are successful
+    return jsonify(response)
+
 @app.route('/api/neighbors', methods=['POST'])
 def create_neighbor():
     data = request.get_json()
