@@ -33,8 +33,8 @@
           <td>{{ neighbor.HasPet ? 'Yes' : 'No' }}</td>
         </tr>
       </table>
-      <h3>Visit Records</h3>
-      <IndividualVisitLog :visits="visitRecords" />
+      <h3>Visit Log</h3>
+      <IndividualVisitLog :visits="visitLogData" />
     </template>
     <template v-else>
       <p>Loading neighbor details...</p>
@@ -61,7 +61,7 @@ export default {
   data() {
     return {
       neighbor: null,
-      visitRecords: [],
+      visitLogData: [] // Initialize with an empty array
     };
   },
   mounted() {
