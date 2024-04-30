@@ -13,43 +13,34 @@
   
       <main>
         <section class="instructions">
-          <h1>Getting Started with the Database</h1>
+          <h1>Getting Started with the UP Initiative App</h1>
           <p>Follow these step-by-step instructions to set up and work with the database:</p>
   
           <ol>
             <li>
-              <h2>Database Setup</h2>
-              <p>First, make sure you have the necessary database software installed on your system. We recommend using [Database Software Name].</p>
-              <p>Once installed, create a new database for your project using the following command:</p>
-              <pre><code>[Database Creation Command]</code></pre>
+              <h2> Add Visit </h2>
+              <p>  Fill the necessary fields for your visit to update your database. </p>
             </li>
   
             <li>
-              <h2>Database Configuration</h2>
-              <p>Next, configure your application to connect to the database. Open the configuration file located at [Configuration File Path] and update the following settings:</p>
-              <pre><code>[Database Configuration Settings]</code></pre>
-              <p>Make sure to replace the placeholders with your actual database credentials.</p>
+              <h2> Volunteers Information </h2>
+              <p> Click "New Entry" on the right corner to create a new "Volunteer" </p>
+              <p> Click the pen icon to edit a volunteer information, or the X to delete it </p>
             </li>
   
             <li>
-              <h2>Creating Database Tables</h2>
-              <p>To create the necessary database tables for your application, run the following command:</p>
-              <pre><code>[Database Table Creation Command]</code></pre>
-              <p>This command will set up the required tables based on your application's schema.</p>
+              <h2> Neighbors Information </h2>
+              <p> Check all of the neighbors and sort them based on different characteristcs, like having state id or not </p>
             </li>
   
             <li>
-              <h2>Inserting Sample Data</h2>
-              <p>If you want to populate your database with sample data, you can use the following command:</p>
-              <pre><code>[Sample Data Insertion Command]</code></pre>
-              <p>Modify the sample data according to your needs before running the command.</p>
+              <h2> Visit Record </h2>
+              <p> See what has been happening with UP and who has been helped </p>
             </li>
   
             <li>
-              <h2>Querying the Database</h2>
-              <p>To query the database and retrieve data, you can use the following code snippet:</p>
-              <pre><code>[Database Query Code Snippet]</code></pre>
-              <p>Adjust the query based on your specific requirements and the structure of your database tables.</p>
+              <h2> Inventory </h2>
+              <p> Add items to the inventory and modify it according to your needs </p>
             </li>
           </ol>
   
@@ -68,7 +59,6 @@
     name: 'GetStarted',
   }
   </script>
-  
   <style scoped>
   /* Add your custom styles here */
   </style>

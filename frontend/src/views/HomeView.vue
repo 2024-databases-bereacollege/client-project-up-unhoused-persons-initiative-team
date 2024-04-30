@@ -1,7 +1,7 @@
 <template>
   <div class="homepage">
     <header>
-      <h1>UP Initiative Database</h1>
+      <h1>Welcome to the UP Initiative Application!</h1>
     </header>
 
     <main>
@@ -18,18 +18,24 @@
       <section class="features">
         <div class="feature">
           <i class="fas fa-rocket"></i>
-          <h2>Fast and Efficient</h2>
-          <p>Experience lightning-fast performance and seamless user experience.</p>
+          <h2>Centralized Information</h2>
+          <p>Discover everything you need in one convenient location! </p>
+          <p>Explore the side tabs to access comprehensive details about your organization and its operations.  </p>
+          <p> It's all designed to be right at your fingertips, simplifying how you connect with the information that matters most. </p>
         </div>
         <div class="feature">
           <i class="fas fa-mobile-alt"></i>
-          <h2>Responsive Design</h2>
-          <p>Enjoy a fully responsive website that looks great on all devices.</p>
+          <h2>Keep Track of Your Inventory</h2>
+          <p>Managing your inventory has never been easier!  </p>
+          <p> Add or remove items with just a few clicks, and instantly see which items are most needed. </p>
+          <p> This streamlined view helps you stay prepared and responsive, ensuring you always have the essentials for those we serve. </p>
         </div>
         <div class="feature">
           <i class="fas fa-shield-alt"></i>
-          <h2>Secure and Reliable</h2>
-          <p>Your data is safe with our robust security measures and reliable infrastructure.</p>
+          <h2>Create, Follow Up, and Edit Files with a Single Click</h2>
+          <p> Visit the Neighbors page to quickly create and update profiles for new neighbors.  </p>
+          <p> Here, you can access crucial information and review their recent interactions with UP. </p>
+          <p> Our intuitive tools make it simple to follow each neighbor's journey and provide support every step of the way. </p>
         </div>
       </section>
     </main>
