@@ -1,6 +1,7 @@
 <template>
   <div class="neighbor-profile">
     <h1>Neighbor Profile</h1>
+    <template v-if="neighbor">
     <h2>{{ neighbor.FirstName }} {{ neighbor.LastName }}</h2>
     <table>
       <tr>
@@ -34,8 +35,13 @@
     </table>
     <h3>Visit Records</h3>
     <IndividualVisitLog :visits="visitRecords" />
+  </template>
+    <template v-else>
+      <p>Loading neighbor details...</p>
+    </template>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -56,6 +62,7 @@ export default {
   props: ['ID'],
   data() {
     return {
+      //neighbor: null,
       neighbor: {
         NeighborID: null,
         VolunteerID: null,
@@ -85,17 +92,7 @@ export default {
   },
 };
 </script>
-<!-- 
-    // Fetch visit records from the API based on neighborID
-    // Update the `visitRecords` data property with the fetched data
-    // Example:
-    // axios.get(`/api/neighbors/${neighborID}/visits`)
-    //   .then(response => {
-    //     this.visitRecords = response.data;
-    //   })
-    //   .catch(error => {
-    //     console.error(error);
-    //   }); -->
+
 
 <style scoped>
 .neighbor-profile {
@@ -131,7 +128,17 @@ i {
 }
 </style>
 
-
+<!-- 
+    // Fetch visit records from the API based on neighborID
+    // Update the `visitRecords` data property with the fetched data
+    // Example:
+    // axios.get(`/api/neighbors/${neighborID}/visits`)
+    //   .then(response => {
+    //     this.visitRecords = response.data;
+    //   })
+    //   .catch(error => {
+    //     console.error(error);
+    //   }); -->
 
 
 <!-- <template>
