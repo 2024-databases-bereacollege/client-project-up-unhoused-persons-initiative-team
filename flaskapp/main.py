@@ -186,7 +186,16 @@ def update_visit_log():
 @app.route('/api/neighbors', methods=['POST'])
 def create_neighbor():
     data = request.get_json()
-    neighbor = Neighbor(**data)
+        # Set default values for VolunteerID and OrganizationID if they are not provided
+    volunteer_id = data.get('VolunteerID', 1)
+    organization_id = data.get('OrganizationID', 1)
+        # Include the default values in the data dictionary
+    neighbor_data = {
+        'VolunteerID': volunteer_id,
+        'OrganizationID': organization_id,
+        **data
+    }
+    neighbor = Neighbor(**neighbor_data)
     neighbor.save()
     return jsonify(neighbor.to_dict()), 201
 

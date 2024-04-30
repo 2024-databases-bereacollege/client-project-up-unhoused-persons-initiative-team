@@ -35,7 +35,6 @@ export default {
     title: 'Neighbor ID',
     key: 'NeighborID',
     sortable: true,
-    // Use a method to generate the link
     cellRenderer: this.renderNeighborIDLink,
   },
         { title: 'First Name', key: 'FirstName' },

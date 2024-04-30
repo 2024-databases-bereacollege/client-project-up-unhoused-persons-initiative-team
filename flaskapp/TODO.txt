@@ -13,3 +13,4 @@
 - Neighbor profile pages
 - Need to add a quantity spot on the select inventory combobox table
 - edit index.html
+- Need to attach volunteer to add neighbor 
