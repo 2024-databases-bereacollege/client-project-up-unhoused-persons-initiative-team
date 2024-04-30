@@ -276,6 +276,28 @@ def delete_visit_record(record_id):
     
 ################ inventory usage below ############################
 
+from peewee import *
+
+@app.route('/api/IndividualVisitLog', methods=['GET'])
+def get_IndividualVisitLog():
+    query = (Visit_Service
+             .select(
+                 Visit_Service.Date.alias('VisitDate'), 
+                 Services.ServiceType.alias('ServiceName'), 
+                 Visit_Service.Description, 
+                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName')
+             )
+             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
+             .switch(Visit_Service)  # Return to Visit_Service to join another table
+             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
+             .join(Volunteer)  # This joins Visit_Record to Volunteer
+             .order_by(Visit_Service.Date.desc()))  # Optional: orders the results by the date of the visit
+
+    # Convert the query to a list of dictionaries (assuming you want to return JSON)
+    result = [item for item in query.dicts()]
+    return jsonify(result)  # You will need to import jsonify from flask
+
+
 @app.route('/api/inventory_usageAD', methods=['GET'])
 def get_inventory_usageAD():
     query = (Inventory
