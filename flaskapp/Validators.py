@@ -2,7 +2,7 @@
 # Each function takes model fields as arguments and checks for proper formatting and data integrity.
 # If a field does not meet the expected criteria, a ValueError is raised with an explanation.
 
-TODO: implement this on main.py
+#TODO: implement this on main.py or app.py
 
 def validate_service_provider(organization_name, contact_person, email, phone):
     if not 0 < len(organization_name) <= 255:

@@ -7,4 +7,9 @@
 - No need for vol ID in neighbor Models table
 - Make instructions page 
 - figure out data.sql
-- move main .py to app.py 
+-Change main.py to app.py
+- cannot see immediate updates to edits in volunteer
+- need to finish neighbor table 
+- Neighbor profile pages
+- Need to add a quantity spot on the select inventory combobox table
+- edit index.html

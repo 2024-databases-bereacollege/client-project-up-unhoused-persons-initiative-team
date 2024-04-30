@@ -34,7 +34,7 @@ export default {
       axios.get(path)
         .then((res) => {
           console.log(res.data);
-          this.msg = res.data.message; // Assuming all responses have a "message" field
+          this.msg = res.data.message; 
         })
         .catch((err) => {
           console.error(err);
@@ -42,7 +42,6 @@ export default {
     },
   },
   created() {
-    // Optional: Fetch from a default path when the component is created
     this.fetchFromRoot();
   },
 }

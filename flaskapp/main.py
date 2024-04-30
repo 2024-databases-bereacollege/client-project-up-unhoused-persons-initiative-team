@@ -111,63 +111,7 @@ def delete_volunteer(volunteer_id):
     volunteer.delete_instance()
     return '', 204
 
-# @app.route('/api/volunteers', methods=['PUT']) #PUT request to update a volunteer
-# def update_volunteer(id):
-#     volunteer = Volunteer.query.get(id)
-#     if not volunteer:
-#         return jsonify({'error': 'Volunteer not found'}), 404
 
-#     data = request.get_json()
-#     print("Received data for update:", data) 
-
-#     for key, value in data.items():
-#         if hasattr(volunteer, key):  
-#             setattr(volunteer, key, value)
-
-#     db.session.commit()  # TODO adjust from session
-#     return jsonify(volunteer.to_dict()), 200
-
-# @app.route('/api/volunteers', methods=['DELETE']) #DELETE request to delete a volunteer
-# def delete_volunteer(id):
-#     volunteer = Volunteer.query.get(id)
-#     if not volunteer:
-#         return jsonify({'error': 'Volunteer not found'}), 404
-
-#     db.session.delete(volunteer)
-#     db.session.commit()
-#     return jsonify({'success': 'Volunteer deleted'}), 200
-
-# @app.route('/api/volunteers', methods=['POST'])
-# def add_volunteer():
-#     try:
-#         data = request.get_json()
-#         app.logger.info('Received data: %s', data)
-
-#         if not all(key in data for key in ['FirstName', 'LastName', 'Password', 'Email', 'Phone', 'HasRecordAccess']):
-#             app.logger.error('Missing one or more required fields')
-#             return jsonify({"error": "Missing data for one or more fields"}), 400
-
-#         volunteer = Volunteer.create(
-#             first_name=data['FirstName'],
-#             last_name=data['LastName'],
-#             password=generate_password_hash(data['Password']),
-#             email=data['Email'],
-#             phone=data['Phone'],
-#             has_record_access=data['HasRecordAccess']
-#         )
-#         app.logger.info('Volunteer created with ID: %s', volunteer.id)
-
-#         return jsonify({
-#             "id": volunteer.id,
-#             "first_name": volunteer.first_name,
-#             "last_name": volunteer.last_name,
-#             "email": volunteer.email,
-#             "phone": volunteer.phone,
-#             "has_record_access": volunteer.has_record_access
-#         }), 201
-#     except Exception as e:
-#         app.logger.error('Error adding volunteer: %s', e, exc_info=True)
-#         return jsonify({"error": str(e)}), 500
 
 ################ volunteers above ############################
     
@@ -207,7 +151,7 @@ def delete_neighbor(neighbor_id):
 
 ################ neighbors above ############################
 
-
+################ service providers below ############################
 
 @app.route('/api/service_providers', methods=['GET'])
 def get_service_providers():
@@ -215,8 +159,37 @@ def get_service_providers():
     service_providers = [provider.to_dict() for provider in query]
     return jsonify(service_providers)
 
+@app.route('/api/service_providers', methods=['POST'])
+def create_service_provider():
+    data = request.get_json()
+    provider = Service_Providers(**data)
+    provider.save()
+    return jsonify(provider.to_dict()), 201
 
+@app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
+def update_service_provider(provider_id):
+    data = request.get_json()
+    provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+    if provider:
+        for key, value in data.items():
+            setattr(provider, key, value)
+        provider.save()
+        return jsonify(provider.to_dict())
+    else:
+        return jsonify({'error': 'Service Provider not found'}), 404
+    
+@app.route('/api/service_providers/<int:provider_id>', methods=['DELETE'])
+def delete_service_provider(provider_id):
+    provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+    if provider:
+        provider.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Service Provider not found'}), 404
 
+################ service providers above ############################
+    
+################ services below ############################
 @app.route('/api/services', methods=['GET'])
 def get_services():
     query = (Services
@@ -234,7 +207,74 @@ def get_services():
 
     return jsonify(services)
 
+@app.route('/api/services', methods=['POST'])
+def create_service():
+    data = request.get_json()
+    service = Services(**data)
+    service.save()
+    return jsonify(service.to_dict()), 201
 
+@app.route('/api/services/<int:service_id>', methods=['PUT'])
+def update_service(service_id):
+    data = request.get_json()
+    service = Services.get_or_none(Services.ServiceID == service_id)
+    if service:
+        for key, value in data.items():
+            setattr(service, key, value)
+        service.save()
+        return jsonify(service.to_dict())
+    else:
+        return jsonify({'error': 'Service not found'}), 404
+
+@app.route('/api/services/<int:service_id>', methods=['DELETE'])
+def delete_service(service_id):
+    service = Services.get_or_none(Services.ServiceID == service_id)
+    if service:
+        service.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Service not found'}), 404
+    
+################ services above ############################
+    
+################ visit records below ############################
+@app.route('/api/visit_records', methods=['GET'])
+def get_visit_records():
+    query = Visit_Record.select()
+    visit_records = [record.to_dict() for record in query]
+    return jsonify(visit_records)
+
+@app.route('/api/visit_records', methods=['POST'])
+def create_visit_record():
+    data = request.get_json()
+    visit_record = Visit_Record(**data)
+    visit_record.save()
+    return jsonify(visit_record.to_dict()), 201
+
+@app.route('/api/visit_records/<int:record_id>', methods=['PUT'])
+def update_visit_record(record_id):
+    data = request.get_json()
+    visit_record = Visit_Record.get_or_none(Visit_Record.RecordID == record_id)
+    if visit_record:
+        for key, value in data.items():
+            setattr(visit_record, key, value)
+        visit_record.save()
+        return jsonify(visit_record.to_dict())
+    else:
+        return jsonify({'error': 'Visit Record not found'}), 404
+    
+@app.route('/api/visit_records/<int:record_id>', methods=['DELETE'])
+def delete_visit_record(record_id):
+    visit_record = Visit_Record.get_or_none(Visit_Record.RecordID == record_id)
+    if visit_record:
+        visit_record.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Visit Record not found'}), 404
+    
+################ visit records above ############################
+    
+################ inventory usage below ############################
 
 @app.route('/api/inventory_usageAD', methods=['GET'])
 def get_inventory_usageAD():
@@ -251,12 +291,43 @@ def get_inventory_usageAD():
 
     return jsonify(inventory_usage_data)
 
+@app.route('/api/inventory_usage', methods=['GET'])
+def get_inventory_usage():
+    query = Inventory_Usage.select()
+    inventory_usage = [usage.to_dict() for usage in query]
+    return jsonify(inventory_usage)
 
-@app.route('/api/visit_records', methods=['GET'])
-def get_visit_records():
-    query = Visit_Record.select()
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
+@app.route('/api/inventory_usage', methods=['POST'])
+def create_inventory_usage():
+    data = request.get_json()
+    inventory_usage = Inventory_Usage(**data)
+    inventory_usage.save()
+    return jsonify(inventory_usage.to_dict()), 201
+
+@app.route('/api/inventory_usage/<int:usage_id>', methods=['PUT'])
+def update_inventory_usage(usage_id):
+    data = request.get_json()
+    inventory_usage = Inventory_Usage.get_or_none(Inventory_Usage.Inventory_UseID == usage_id)
+    if inventory_usage:
+        for key, value in data.items():
+            setattr(inventory_usage, key, value)
+        inventory_usage.save()
+        return jsonify(inventory_usage.to_dict())
+    else:
+        return jsonify({'error': 'Inventory Usage not found'}), 404
+    
+@app.route('/api/inventory_usage/<int:usage_id>', methods=['DELETE'])
+def delete_inventory_usage(usage_id):
+    inventory_usage = Inventory_Usage.get_or_none(Inventory_Usage.Inventory_UseID == usage_id)
+    if inventory_usage:
+        inventory_usage.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Inventory Usage not found'}), 404
+    
+################ inventory usage above ############################
+    
+################ inventory below ############################
 
 @app.route('/api/inventory', methods=['GET'])
 def get_inventory():
@@ -264,17 +335,78 @@ def get_inventory():
     inventory = [item.to_dict() for item in query]
     return jsonify(inventory)
 
-@app.route('/api/inventory_usage', methods=['GET'])
-def get_inventory_usage():
-    query = Inventory_Usage.select()
-    inventory_usage = [usage.to_dict() for usage in query]
-    return jsonify(inventory_usage)
+@app.route('/api/inventory', methods=['POST'])
+def create_inventory():
+    data = request.get_json()
+    inventory = Inventory(**data)
+    inventory.save()
+    return jsonify(inventory.to_dict()), 201
+
+@app.route('/api/inventory/<int:inventory_id>', methods=['PUT'])
+def update_inventory(inventory_id):
+    data = request.get_json()
+    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+    if inventory:
+        for key, value in data.items():
+            setattr(inventory, key, value)
+        inventory.save()
+        return jsonify(inventory.to_dict())
+    else:
+        return jsonify({'error': 'Inventory Item not found'}), 404
+    
+@app.route('/api/inventory/<int:inventory_id>', methods=['DELETE'])
+def delete_inventory(inventory_id):
+    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+    if inventory:
+        inventory.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Inventory Item not found'}), 404
+    
+################ inventory above ############################
+    
+################ visit services below ############################
+
+@app.route('/api/visit_services', methods=['GET'])
+def get_visit_services():
+    query = Visit_Service.select()
+    visit_services = [service.to_dict() for service in query]
+    return jsonify(visit_services)
+
+@app.route('/api/visit_services', methods=['POST'])
+def create_visit_service():
+    data = request.get_json()
+    visit_service = Visit_Service(**data)
+    visit_service.save()
+    return jsonify(visit_service.to_dict()), 201
+
+@app.route('/api/visit_services/<int:service_id>', methods=['PUT'])
+def update_visit_service(service_id):
+    data = request.get_json()
+    visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
+    if visit_service:
+        for key, value in data.items():
+            setattr(visit_service, key, value)
+        visit_service.save()
+        return jsonify(visit_service.to_dict())
+    else:
+        return jsonify({'error': 'Visit Service not found'}), 404
+    
+@app.route('/api/visit_services/<int:service_id>', methods=['DELETE'])
+def delete_visit_service(service_id):
+    visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
+    if visit_service:
+        visit_service.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Visit Service not found'}), 404
+    
+################ visit services above ############################
+    
 
 
 
-@app.route('/', methods=['GET'])
-def home():
-    return jsonify({"message": "Response from root - Home page - This is being sent by backend /"})
+
 
 # Sara's Queries ########################################################
 

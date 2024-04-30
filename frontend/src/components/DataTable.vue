@@ -1,3 +1,5 @@
+<!--This is used as a child component of VolunteerTable.vue in views-->
+
 <template>
   <v-data-table
     :headers="headers"
