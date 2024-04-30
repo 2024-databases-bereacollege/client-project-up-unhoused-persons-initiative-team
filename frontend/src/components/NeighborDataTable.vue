@@ -126,6 +126,7 @@
     </v-data-table>
   </template>
   <script>
+    import axios from 'axios';
   export default {
     props: {
       tableTitle: {
@@ -205,6 +206,31 @@
       initialize() {
         // Initialize the data table
       },
+      saveItem(item) {
+    if (this.editedIndex > -1) {
+      // Update an existing neighbor
+      const neighborID = this.neighbors[this.editedIndex].NeighborID;
+      axios.put(`http://127.0.0.1:5000/api/neighbors/${neighborID}`, item)
+        .then(response => {
+          Object.assign(this.neighbors[this.editedIndex], response.data);
+          this.close();
+        })
+        .catch(error => {
+          console.error('Error updating neighbor:', error);
+        });
+    } else {
+      // Create a new neighbor
+      axios.post('http://127.0.0.1:5000/api/neighbors', item)
+        .then(response => {
+          this.neighbors.push(response.data);
+          this.close();
+        })
+        .catch(error => {
+          console.error('Error creating neighbor:', error);
+        });
+      } 
+        },
+
       editItem(item) {
         console.log('Edit button clicked for item:', item);
         this.editedIndex = this.items.indexOf(item);
@@ -227,6 +253,7 @@
           this.editedIndex = -1;
           this.$emit('close');
         });
+        
       },
       closeDelete() {
         this.dialogDelete = false;

@@ -1,278 +1,150 @@
 <template>
   <div>
-    <v-data-table
-      :headers="headers"
+    <data-table
+      tableTitle="Neighbors"
+      :edited-item="editedItem"
+      @update:edited-item="updateEditedItem"
+      @update:has-state-id="updateHasStateID"
+      @update:has-pet="updateHasPet"
+      @save="saveItem"
+      :headers="tableHeaders"
       :items="neighbors"
-      :sort-by="['Created_date']"
-      :sort-desc="[true]"
-      class="elevation-1"
-    >
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>Neighbors</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark v-bind="attrs" v-on="on">
-                New Neighbor
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="text-h5">{{ formTitle }}</span>
-              </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <!-- Add input fields for neighbor properties -->
-                  <v-text-field v-model="editedItem.FirstName" label="First Name"></v-text-field>
-                  <v-text-field v-model="editedItem.LastName" label="Last Name"></v-text-field>
-                  <v-menu v-model="dateMenu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="auto">
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field v-model="editedItem.DateOfBirth" label="Date of Birth" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on"></v-text-field>
-                    </template>
-                    <v-date-picker v-model="editedItem.DateOfBirth" @input="dateMenu = false"></v-date-picker>
-                  </v-menu>
-                  <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
-                  <v-textarea v-model="editedItem.Location" label="Location"></v-textarea>
-                  <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
-                  <v-checkbox v-model="editedItem.HasStateID" label="Has State ID"></v-checkbox>
-                  <v-checkbox v-model="editedItem.HasPet" label="Has Pet"></v-checkbox>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
-      </template>
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-        <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
-    </v-data-table>
+      :default-item="defaultItem"
+      :on-edit="editItem"
+      :on-delete="deleteItem"
+      @delete-item-confirm="deleteItemConfirm($event)"
+      @close="close"
+      @close-delete="closeDelete"
+      sort-by="NeighborID"
+      sort-order="asc"
+    ></data-table>
   </div>
 </template>
-
-
-<!-- <template>
-  <div>
-    <v-data-table
-      :headers="headers"
-      :items="neighbors"
-      :sort-by="['Created_date']"
-      :sort-desc="[true]"
-      class="elevation-1"
-    >
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>Neighbors</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
-  <template v-slot:activator="{ on, attrs }">
-    <v-btn color="primary" dark v-bind="attrs" v-on="on">
-      New Neighbor
-    </v-btn>
-  </template>
-  <v-card>
-    <v-card-title>
-      <span class="text-h5">{{ formTitle }}</span>
-    </v-card-title>
-    <v-card-text>
-      <v-container>
-        <-- Add input fields for neighbor properties --
-        <v-text-field v-model="editedItem.FirstName" label="First Name"></v-text-field>
-        <v-text-field v-model="editedItem.LastName" label="Last Name"></v-text-field>
-        <v-menu v-model="dateMenu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="auto">
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field v-model="editedItem.DateOfBirth" label="Date of Birth" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on"></v-text-field>
-          </template>
-          <v-date-picker v-model="editedItem.DateOfBirth" @input="dateMenu = false"></v-date-picker>
-        </v-menu>
-        <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
-        <v-textarea v-model="editedItem.Location" label="Location"></v-textarea>
-        <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
-        <v-checkbox v-model="editedItem.HasStateID" label="Has State ID"></v-checkbox>
-        <v-checkbox v-model="editedItem.HasPet" label="Has Pet"></v-checkbox>
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-      <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
-        </v-toolbar>
-      </template>
-      <-- eslint-disable-next-line vue/valid-v-slot --
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-        <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
-    </v-data-table>
-  </div>
-</template> -->
-
 <script>
 import axios from 'axios';
+import DataTable from '@/components/NeighborDataTable.vue';
 
 export default {
-  data: () => ({
-    dialog: false,
-    dialogDelete: false,
-    headers: [
-      { text: 'Neighbor ID', value: 'NeighborID'}, // needs to be a custom slot
-      { text: 'First Name', value: 'FirstName' },
-      { text: 'Last Name', value: 'LastName' },
-      { text: 'Date of Birth', value: 'DateOfBirth' },
-      { text: 'Phone', value: 'Phone' },
-      { text: 'Location', value: 'Location' },
-      { text: 'Email', value: 'Email' },
-      { text: 'Created Date', value: 'Created_date' },
-      { text: 'Has State ID', value: 'HasStateID' },
-      { text: 'Has Pet', value: 'HasPet' },
-      { text: 'Actions', value: 'actions', sortable: false },
-    ],
-    neighbors: [],
-    editedIndex: -1,
-    editedItem: {
-  NeighborID: '',
-  FirstName: '',
-  LastName: '',
-  DateOfBirth: '',
-  Phone: '',
-  Location: '',
-  Email: '',
-  HasStateID: false,
-  HasPet: false,
-    },
-    defaultItem: {
-  NeighborID: '',
-  FirstName: '',
-  LastName: '',
-  DateOfBirth: '',
-  Phone: '',
-  Location: '',
-  Email: '',
-  HasStateID: false,
-  HasPet: false,
-    },
-    dateMenu: false,
-  }),
-
-  computed: {
-    formTitle() {
-      return this.editedIndex === -1 ? 'New Neighbor' : 'Edit Neighbor';
-    },
+  components: {
+    DataTable,
   },
+  data() {
+    return {
+      tableHeaders: [
+        { title: 'Neighbor ID', key: 'NeighborID' },
+        { title: 'First Name', key: 'FirstName' },
+        { title: 'Last Name', key: 'LastName' },
+        { title: 'Date of Birth', key: 'DateOfBirth' },
+        { title: 'Phone', key: 'Phone' },
+        { title: 'Location', key: 'Location' },
+        { title: 'Email', key: 'Email' },
+        { title: 'Created Date', key: 'Created_date' },
+        { title: 'Has State ID', key: 'HasStateID' },
+        { title: 'Has Pet', key: 'HasPet' },
+        { title: 'Actions', key: 'actions', sortable: false },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    },
-    dialogDelete(val) {
-      val || this.closeDelete();
-    },
+      ],
+      neighbors: [],
+      editedIndex: -1,
+      editedItem: {
+        NeighborID: '',
+        FirstName: '',
+        LastName: '',
+        DateOfBirth: '',
+        Phone: '',
+        Location: '',
+        Email: '',
+        Created_date: '',
+        HasStateID: false,
+        HasPet: false,
+      },
+      defaultItem: {
+        NeighborID: '',
+        FirstName: '',
+        LastName: '',
+        DateOfBirth: '',
+        Phone: '',
+        Location: '',
+        Email: '',
+        Created_date: '',
+        HasStateID: false,
+        HasPet: false,
+      },
+    };
   },
-
   created() {
-    this.initialize();
+    this.fetchData();
   },
-
   methods: {
-    initialize() {
-      this.getResponse();
-    },
-
-    // Fetch neighbor data from backend
-    getResponse() {
-      const path = 'http://127.0.0.1:5000/api/neighbors';
-      axios
-        .get(path)
-        .then((response) => {
+    fetchData() {
+      axios.get('http://127.0.0.1:5000/api/neighbors')
+        .then(response => {
           this.neighbors = response.data;
         })
-        .catch((error) => {
-          console.error(error);
+        .catch(error => {
+          console.error('Error fetching data:', error);
         });
     },
-
-    editItem(item) {
-      this.editedIndex = this.neighbors.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
+    saveItem(item) {
+  if (this.editedIndex > -1) {
+    // Update an existing neighbor
+    const neighborID = this.neighbors[this.editedIndex].NeighborID;
+    axios.put(`http://127.0.0.1:5000/api/neighbors/${neighborID}`, item)
+      .then(response => {
+        Object.assign(this.neighbors[this.editedIndex], response.data);
+        this.close();
+      })
+      .catch(error => {
+        console.error('Error updating neighbor:', error);
+      });
+  } else {
+    // Create a new neighbor
+    const { NeighborID, ...newNeighbor } = item; // Exclude NeighborID from the item object
+    axios.post('http://127.0.0.1:5000/api/neighbors', newNeighbor)
+      .then(response => {
+        this.neighbors.push(response.data);
+        this.close();
+      })
+      .catch(error => {
+        console.error('Error creating neighbor:', error);
+      });
+      }
     },
-
-    deleteItem(item) {
-      this.editedIndex = this.neighbors.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      const neighborID = this.neighbors[this.editedIndex].NeighborID;
-      axios
-        .delete(`http://127.0.0.1:5000/api/neighbors/${neighborID}`)
+    deleteItemConfirm(index) {
+      const neighborID = this.neighbors[index].NeighborID;
+      axios.delete(`http://127.0.0.1:5000/api/neighbors/${neighborID}`)
         .then(() => {
-          this.neighbors.splice(this.editedIndex, 1);
+          this.neighbors.splice(index, 1);
           this.closeDelete();
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Error deleting neighbor:', error);
         });
     },
-
+    editItem(item) {
+      this.editedIndex = this.neighbors.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+    },
+    deleteItem(item) {
+      this.editedIndex = this.neighbors.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+    },
+    updateHasStateID(value) {
+      this.editedItem.HasStateID = value;
+    },
+    updateHasPet(value) {
+      this.editedItem.HasPet = value;
+    },
     close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+      this.editedIndex = -1;
+      this.editedItem = Object.assign({}, this.defaultItem);
     },
-
     closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+      this.editedIndex = -1;
+      this.editedItem = Object.assign({}, this.defaultItem);
     },
-
-    save() {
-      if (this.editedIndex > -1) {
-        const neighborID = this.neighbors[this.editedIndex].NeighborID;
-        axios
-          .put(`http://127.0.0.1:5000/api/neighbors/${neighborID}`, this.editedItem)
-          .then((response) => {
-            Object.assign(this.neighbors[this.editedIndex], response.data);
-            this.close();
-          })
-          .catch((error) => {
-            console.error('Error updating neighbor:', error);
-          });
-      } else {
-        axios
-          .post('http://127.0.0.1:5000/api/neighbors', this.editedItem)
-          .then((response) => {
-            this.neighbors.push(response.data);
-            this.close();
-          })
-          .catch((error) => {
-            console.error('Error creating neighbor:', error);
-          });
-      }
+    updateEditedItem(item) {
+      this.editedItem = item;
     },
   },
 };
