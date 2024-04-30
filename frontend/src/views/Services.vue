@@ -8,7 +8,7 @@
       <v-toolbar
         flat
       >
-        <v-toolbar-title>Volunteers</v-toolbar-title>
+        <v-toolbar-title>Services</v-toolbar-title>
         <v-divider
           class="mx-4"
           inset
