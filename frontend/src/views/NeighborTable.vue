@@ -1,4 +1,7 @@
-<template>
+<template v-slot:item.NeighborID="{ item }">
+  <v-btn text small color="primary" :to="{ path: `/Neighbors/${item.NeighborID}` }">
+    {{ item.NeighborID }}
+  </v-btn>
   <div>
     <v-data-table
       :headers="headers"
@@ -6,6 +9,7 @@
       :sort-by="['Created_date']"
       :sort-desc="[true]"
       class="elevation-1"
+      
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -80,6 +84,7 @@ export default {
     dialog: false,
     dialogDelete: false,
     headers: [
+      { text: 'Neighbor ID', value: 'NeighborID'}, // needs to be a custom slot 
       { text: 'First Name', value: 'FirstName' },
       { text: 'Last Name', value: 'LastName' },
       { text: 'Date of Birth', value: 'DateOfBirth' },
@@ -94,24 +99,26 @@ export default {
     neighbors: [],
     editedIndex: -1,
     editedItem: {
-      FirstName: '',
-      LastName: '',
-      DateOfBirth: '',
-      Phone: '',
-      Location: '',
-      Email: '',
-      HasStateID: false,
-      HasPet: false,
+  NeighborID: '',
+  FirstName: '',
+  LastName: '',
+  DateOfBirth: '',
+  Phone: '',
+  Location: '',
+  Email: '',
+  HasStateID: false,
+  HasPet: false,
     },
     defaultItem: {
-      FirstName: '',
-      LastName: '',
-      DateOfBirth: '',
-      Phone: '',
-      Location: '',
-      Email: '',
-      HasStateID: false,
-      HasPet: false,
+  NeighborID: '',
+  FirstName: '',
+  LastName: '',
+  DateOfBirth: '',
+  Phone: '',
+  Location: '',
+  Email: '',
+  HasStateID: false,
+  HasPet: false,
     },
     dateMenu: false,
   }),

@@ -13,6 +13,7 @@ import AddVisit from '@/views/AddVisit.vue';
 import Instructions from '@/views/Instructions.vue';
 import NeighborProfile from '@/components/NeighborProfile.vue';
 
+
 const routes = [
     { 
         path: '/', 
@@ -34,7 +35,7 @@ const routes = [
     { path: '/Inventory', component: Inventory },
     { path: '/Add_Visit', component: AddVisit},
     { path: '/Instructions', component: Instructions},
-    { path: '/Neighbors/:ID', component: NeighborProfile },//check syntax
+    { path: '/Neighbors/:ID', component: NeighborProfile, props: true },//check syntax
     { path: '/:pathMatch(.*)*', redirect: '/home' }, // Redirect all other paths to home
 ]
 
