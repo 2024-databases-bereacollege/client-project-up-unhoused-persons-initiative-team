@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import store from '@/store/auth'; // Import the authentication store module
+import store from '@/store'; // Import the main Vuex store
 
 // Import Views Components
 import HomeView from "@/views/HomeView.vue";
@@ -19,14 +19,14 @@ const routes = [
   { path: '/', redirect: '/home' },
   { path: '/home', component: HomeView },
   { path: '/login_page', component: LoginPage },
+  { path: '/Instructions', component: Instructions },
+  { path: '/Add_Visit', component: AddVisit },
   { path: '/Service_Providers', component: ServiceProviders, meta: { requiresAuth: true } },
   { path: '/Services', component: Services, meta: { requiresAuth: true } },
   { path: '/Volunteers', component: VolunteerTable, meta: { requiresAuth: true } },
   { path: '/Neighbors', component: NeighborTable, meta: { requiresAuth: true } },
   { path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },
   { path: '/Inventory', component: Inventory, meta: { requiresAuth: true } },
-  { path: '/Add_Visit', component: AddVisit, meta: { requiresAuth: true } },
-  { path: '/Instructions', component: Instructions },
   { path: '/Neighbors/:ID', component: NeighborProfile, props: true, meta: { requiresAuth: true } },
   { path: '/Neighbors/MNP', component: MainNeighborPage, meta: { requiresAuth: true } },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
@@ -38,9 +38,9 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-    const isAuthenticated = store.getters.isAuthenticated; // Get the authentication state from the store
-  
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isAuthenticated = store.getters['auth/isAuthenticated']; // Get the authentication state from the auth module
+
   if (requiresAuth && !isAuthenticated) {
     next('/login_page');
   } else {
