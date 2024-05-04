@@ -1,11 +1,13 @@
 <template>
     <div class="get-started">
       <header>
+
         <nav>
           <ul>
             <li><a href="/">Home</a></li>
           </ul>
         </nav>
+
       </header>
   
       <main>
@@ -45,9 +47,7 @@
         </section>
       </main>
   
-      <footer>
-        <p>&copy; 2024 UP Initative. All rights reserved.</p>
-      </footer>
+
     </div>
   </template>
   
@@ -57,5 +57,4 @@
   }
   </script>
   <style scoped>
-  /* Add your custom styles here */
   </style>
