@@ -197,7 +197,6 @@ def update_visit_log():
     else:
         return jsonify({'error': 'Volunteer not found'}), 404
 
-    # Assuming all updates are successful
     return jsonify(response)
 
 # API endpoint to create a neighbor
