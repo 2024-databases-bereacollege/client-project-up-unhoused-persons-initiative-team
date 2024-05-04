@@ -14,6 +14,7 @@ db.connect()
 #db.create_tables([Volunteer], safe=True)
 
 # ADD VISIT SECTION ##########################################
+# Function to get neighbors list
 def get_neighborsAV():
     neighbors_query = Neighbor.select(
         Neighbor.NeighborID,
@@ -29,6 +30,7 @@ def get_neighborsAV():
     ]
     return neighbors_list
 
+# Function to get volunteers list
 def get_volunteersAV():
     volunteers_query = Volunteer.select(
         Volunteer.VolunteerID, 
@@ -40,7 +42,7 @@ def get_volunteersAV():
         'FullName': f"{volunteer.FirstName} {volunteer.LastName}"
     } for volunteer in volunteers_query]
 
-
+# Function to get services list
 def get_servicesAV():
     services_query = Services.select()
     return [{
@@ -48,6 +50,7 @@ def get_servicesAV():
         'ServiceType': service.ServiceType
     } for service in services_query]
 
+# Function to get inventory list
 def get_inventoryAV():
     inventory_query = Inventory.select()
     return [{
@@ -56,7 +59,7 @@ def get_inventoryAV():
         'Number_Of_Item': inventory.Number_Of_Item
     } for inventory in inventory_query]
 
-
+# API endpoint to get visit details
 @app.route('/api/Add_Visit', methods=['GET'])
 def get_visit(): 
     data = {
@@ -72,7 +75,7 @@ def get_visit():
 ################ volunteers below ############################
 
 
-
+# API endpoint to get all volunteers
 @app.route('/api/volunteers', methods=['GET']) #GET request to get all volunteers
 def get_volunteers():
     # Query all volunteers from the database
@@ -81,7 +84,7 @@ def get_volunteers():
     
     return jsonify(volunteers)
 
-
+# API endpoint to create a volunteer
 @app.route('/api/volunteers', methods=['POST']) #POST request to create a volunteer
 def create_volunteer():
     data = request.get_json()
@@ -91,6 +94,7 @@ def create_volunteer():
     volunteer.save()
     return jsonify(volunteer.to_dict()), 201
 
+# API endpoint to update a volunteer
 @app.route('/api/volunteers/<int:volunteer_id>', methods=['PUT']) #PUT request to update a volunteer
 def update_volunteer(volunteer_id):
     data = request.get_json()
@@ -105,6 +109,7 @@ def update_volunteer(volunteer_id):
     else:
         return jsonify({'error': 'Volunteer not found'}), 404
 
+# API endpoint to delete a volunteer
 @app.route('/api/volunteers/<int:volunteer_id>', methods=['DELETE']) #DELETE request to delete a volunteer
 def delete_volunteer(volunteer_id):
     volunteer = Volunteer.get_by_id(volunteer_id)
@@ -115,7 +120,9 @@ def delete_volunteer(volunteer_id):
 
 ################ volunteers above ############################
     
-################ neighbors below ############################    
+################ neighbors below ############################ 
+
+# API endpoint to get all neighbors   
 @app.route('/api/neighbors', methods=['GET'])
 def get_neighbors():
     neighbors = [
@@ -135,6 +142,7 @@ def get_neighbors():
     ]
     return jsonify(neighbors)
 
+# API endpoint to edit visit_log
 @app.route('/api/IndividualVisitLog', methods=['PUT'])
 def update_visit_log():
     data = request.get_json()
@@ -183,6 +191,7 @@ def update_visit_log():
     # Assuming all updates are successful
     return jsonify(response)
 
+# API endpoint to create a neighbor
 @app.route('/api/neighbors', methods=['POST'])
 def create_neighbor():
     data = request.get_json()
@@ -199,6 +208,7 @@ def create_neighbor():
     neighbor.save()
     return jsonify(neighbor.to_dict()), 201
 
+# API endpoint to edit a neighbor
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['PUT'])
 def update_neighbor(neighbor_id):
     data = request.get_json()
@@ -211,6 +221,7 @@ def update_neighbor(neighbor_id):
     else:
         return jsonify({'error': 'Neighbor not found'}), 404
 
+# API endpoint to delete a neighbor
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['DELETE'])
 def delete_neighbor(neighbor_id):
     neighbor = Neighbor.get_or_none(Neighbor.NeighborID == neighbor_id)
@@ -224,12 +235,14 @@ def delete_neighbor(neighbor_id):
 
 ################ service providers below ############################
 
+# API endpoint to get service providers
 @app.route('/api/service_providers', methods=['GET'])
 def get_service_providers():
     query = Service_Providers.select()
     service_providers = [provider.to_dict() for provider in query]
     return jsonify(service_providers)
 
+# API endpoint to create service providers
 @app.route('/api/service_providers', methods=['POST'])
 def create_service_provider():
     data = request.get_json()
@@ -237,6 +250,7 @@ def create_service_provider():
     provider.save()
     return jsonify(provider.to_dict()), 201
 
+# API endpoint to edit service providers
 @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
 def update_service_provider(provider_id):
     data = request.get_json()
@@ -249,6 +263,7 @@ def update_service_provider(provider_id):
     else:
         return jsonify({'error': 'Service Provider not found'}), 404
     
+# API endpoint to delete service providers
 @app.route('/api/service_providers/<int:provider_id>', methods=['DELETE'])
 def delete_service_provider(provider_id):
     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
@@ -261,6 +276,7 @@ def delete_service_provider(provider_id):
 ################ service providers above ############################
     
 ################ services below ############################
+# API endpoint to get services
 @app.route('/api/services', methods=['GET'])
 def get_services():
     query = (Services
@@ -278,6 +294,7 @@ def get_services():
 
     return jsonify(services)
 
+# API endpoint to create services
 @app.route('/api/services', methods=['POST'])
 def create_service():
     data = request.get_json()
@@ -285,6 +302,7 @@ def create_service():
     service.save()
     return jsonify(service.to_dict()), 201
 
+# API endpoint to edit services
 @app.route('/api/services/<int:service_id>', methods=['PUT'])
 def update_service(service_id):
     data = request.get_json()
@@ -297,6 +315,7 @@ def update_service(service_id):
     else:
         return jsonify({'error': 'Service not found'}), 404
 
+# API endpoint to delete services
 @app.route('/api/services/<int:service_id>', methods=['DELETE'])
 def delete_service(service_id):
     service = Services.get_or_none(Services.ServiceID == service_id)
@@ -309,12 +328,14 @@ def delete_service(service_id):
 ################ services above ############################
     
 ################ visit records below ############################
+# API endpoint to get visit records
 @app.route('/api/visit_records', methods=['GET'])
 def get_visit_records():
     query = Visit_Record.select()
     visit_records = [record.to_dict() for record in query]
     return jsonify(visit_records)
 
+# API endpoint to create visit records
 @app.route('/api/visit_records', methods=['POST'])
 def create_visit_record():
     data = request.get_json()
@@ -322,6 +343,7 @@ def create_visit_record():
     visit_record.save()
     return jsonify(visit_record.to_dict()), 201
 
+# API endpoint to edit visit records
 @app.route('/api/visit_records/<int:record_id>', methods=['PUT'])
 def update_visit_record(record_id):
     data = request.get_json()
@@ -334,6 +356,7 @@ def update_visit_record(record_id):
     else:
         return jsonify({'error': 'Visit Record not found'}), 404
     
+# API endpoint to delete visit records
 @app.route('/api/visit_records/<int:record_id>', methods=['DELETE'])
 def delete_visit_record(record_id):
     visit_record = Visit_Record.get_or_none(Visit_Record.RecordID == record_id)
@@ -384,12 +407,14 @@ def get_inventory_usageAD():
 
     return jsonify(inventory_usage_data)
 
+# API endpoint to get inverntory_usage
 @app.route('/api/inventory_usage', methods=['GET'])
 def get_inventory_usage():
     query = Inventory_Usage.select()
     inventory_usage = [usage.to_dict() for usage in query]
     return jsonify(inventory_usage)
 
+# API endpoint to create inverntory_usage
 @app.route('/api/inventory_usage', methods=['POST'])
 def create_inventory_usage():
     data = request.get_json()
@@ -397,6 +422,7 @@ def create_inventory_usage():
     inventory_usage.save()
     return jsonify(inventory_usage.to_dict()), 201
 
+# API endpoint to edit inverntory_usage
 @app.route('/api/inventory_usage/<int:usage_id>', methods=['PUT'])
 def update_inventory_usage(usage_id):
     data = request.get_json()
@@ -409,6 +435,7 @@ def update_inventory_usage(usage_id):
     else:
         return jsonify({'error': 'Inventory Usage not found'}), 404
     
+# API endpoint to delete inverntory_usage
 @app.route('/api/inventory_usage/<int:usage_id>', methods=['DELETE'])
 def delete_inventory_usage(usage_id):
     inventory_usage = Inventory_Usage.get_or_none(Inventory_Usage.Inventory_UseID == usage_id)
@@ -421,13 +448,14 @@ def delete_inventory_usage(usage_id):
 ################ inventory usage above ############################
     
 ################ inventory below ############################
-
+# API endpoint to get inverntory
 @app.route('/api/inventory', methods=['GET'])
 def get_inventory():
     query = Inventory.select()
     inventory = [item.to_dict() for item in query]
     return jsonify(inventory)
 
+# API endpoint to create inverntory
 @app.route('/api/inventory', methods=['POST'])
 def create_inventory():
     data = request.get_json()
@@ -435,6 +463,7 @@ def create_inventory():
     inventory.save()
     return jsonify(inventory.to_dict()), 201
 
+# API endpoint to edit inverntory
 @app.route('/api/inventory/<int:inventory_id>', methods=['PUT'])
 def update_inventory(inventory_id):
     data = request.get_json()
@@ -447,6 +476,7 @@ def update_inventory(inventory_id):
     else:
         return jsonify({'error': 'Inventory Item not found'}), 404
     
+# API endpoint to delete inverntory
 @app.route('/api/inventory/<int:inventory_id>', methods=['DELETE'])
 def delete_inventory(inventory_id):
     inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
@@ -459,13 +489,14 @@ def delete_inventory(inventory_id):
 ################ inventory above ############################
     
 ################ visit services below ############################
-
+# API endpoint to get visit services
 @app.route('/api/visit_services', methods=['GET'])
 def get_visit_services():
     query = Visit_Service.select()
     visit_services = [service.to_dict() for service in query]
     return jsonify(visit_services)
 
+# API endpoint to create visit services
 @app.route('/api/visit_services', methods=['POST'])
 def create_visit_service():
     data = request.get_json()
@@ -473,6 +504,7 @@ def create_visit_service():
     visit_service.save()
     return jsonify(visit_service.to_dict()), 201
 
+# API endpoint to edit visit services
 @app.route('/api/visit_services/<int:service_id>', methods=['PUT'])
 def update_visit_service(service_id):
     data = request.get_json()
@@ -485,6 +517,7 @@ def update_visit_service(service_id):
     else:
         return jsonify({'error': 'Visit Service not found'}), 404
     
+# API endpoint to delete visit services
 @app.route('/api/visit_services/<int:service_id>', methods=['DELETE'])
 def delete_visit_service(service_id):
     visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
