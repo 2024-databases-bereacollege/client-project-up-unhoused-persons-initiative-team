@@ -136,7 +136,16 @@ def get_neighbors():
             'Email': neighbor.Email,
             'Created_date': neighbor.Created_date.strftime('%Y-%m-%d'),
             'HasStateID': neighbor.HasStateID,
-            'HasPet': neighbor.HasPet
+            'HasPet': neighbor.HasPet,
+            'HasChildren': neighbor.HasChildren,
+            'HasMedication': neighbor.HasMedication,
+            'HasFoodInsecurity': neighbor.HasFoodInsecurity,
+            'HasTransportation': neighbor.HasTransportation,
+            'HasJob': neighbor.HasJob,
+            'HasHousing': neighbor.HasHousing,
+            'HasInsurance': neighbor.HasInsurance,
+            'HasIncome': neighbor.HasIncome,
+            'Notes': neighbor.Notes
         }
         for neighbor in Neighbor.select()
     ]

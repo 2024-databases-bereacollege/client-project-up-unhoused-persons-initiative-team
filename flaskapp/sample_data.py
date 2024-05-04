@@ -118,8 +118,6 @@ def generate_sample_data():
     def neighbors_sample_data():
         return [
             {
-                'VolunteerID': 1,
-                'OrganizationID': 1,
                 'FirstName': 'Bob',
                 'LastName': 'Johnson',
                 'DateOfBirth': '1990-05-15',
@@ -127,11 +125,18 @@ def generate_sample_data():
                 'Location': '123 Main St',
                 'Email': 'bob@example.com',
                 'HasStateID': True,
-                'HasPet': False
+                'HasPet': False,
+                'HasChildren': False,
+                'HasMedication': True,
+                'HasFoodInsecurity': False,
+                'HasTransportation': True,
+                'HasJob': True,
+                'HasHousing': True,
+                'HasInsurance': True,
+                'HasIncome': True,
+                'Notes': 'Needs assistance with medication management'
             },
             {
-                'VolunteerID': 2,
-                'OrganizationID': 2,
                 'FirstName': 'Emily',
                 'LastName': 'Davis',
                 'DateOfBirth': '1985-09-20',
@@ -139,11 +144,18 @@ def generate_sample_data():
                 'Location': '456 Elm St',
                 'Email': 'emily@example.com',
                 'HasStateID': False,
-                'HasPet': True
+                'HasPet': True,
+                'HasChildren': True,
+                'HasMedication': False,
+                'HasFoodInsecurity': True,
+                'HasTransportation': False,
+                'HasJob': False,
+                'HasHousing': True,
+                'HasInsurance': False,
+                'HasIncome': False,
+                'Notes': 'Requires food assistance and transportation support'
             },
             {
-                'VolunteerID': 3,
-                'OrganizationID': 3,
                 'FirstName': 'Michael',
                 'LastName': 'Wilson',
                 'DateOfBirth': '1978-02-10',
@@ -151,11 +163,18 @@ def generate_sample_data():
                 'Location': '789 Oak Ave',
                 'Email': 'michael@example.com',
                 'HasStateID': True,
-                'HasPet': False
+                'HasPet': False,
+                'HasChildren': False,
+                'HasMedication': False,
+                'HasFoodInsecurity': False,
+                'HasTransportation': True,
+                'HasJob': True,
+                'HasHousing': True,
+                'HasInsurance': True,
+                'HasIncome': True,
+                'Notes': 'No specific assistance needed at the moment'
             },
             {
-                'VolunteerID': 4,
-                'OrganizationID': 4,
                 'FirstName': 'Sarah',
                 'LastName': 'Brown',
                 'DateOfBirth': '1995-12-03',
@@ -163,11 +182,18 @@ def generate_sample_data():
                 'Location': '321 Pine Rd',
                 'Email': 'sarah@example.com',
                 'HasStateID': True,
-                'HasPet': True
+                'HasPet': True,
+                'HasChildren': True,
+                'HasMedication': True,
+                'HasFoodInsecurity': False,
+                'HasTransportation': True,
+                'HasJob': True,
+                'HasHousing': True,
+                'HasInsurance': True,
+                'HasIncome': True,
+                'Notes': 'Needs occasional help with childcare'
             },
             {
-                'VolunteerID': 5,
-                'OrganizationID': 5,
                 'FirstName': 'David',
                 'LastName': 'Taylor',
                 'DateOfBirth': '1982-07-25',
@@ -175,7 +201,16 @@ def generate_sample_data():
                 'Location': '654 Cedar Ln',
                 'Email': 'david@example.com',
                 'HasStateID': False,
-                'HasPet': False
+                'HasPet': False,
+                'HasChildren': False,
+                'HasMedication': False,
+                'HasFoodInsecurity': False,
+                'HasTransportation': True,
+                'HasJob': False,
+                'HasHousing': False,
+                'HasInsurance': False,
+                'HasIncome': False,
+                'Notes': 'Seeking assistance with housing and employment'
             }
         ]
 
