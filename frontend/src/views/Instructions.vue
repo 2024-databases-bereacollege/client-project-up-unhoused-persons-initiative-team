@@ -2,6 +2,12 @@
     <div class="get-started">
       <header>
 
+        <nav>
+          <ul>
+            <li><a href="/">Home</a></li>
+          </ul>
+        </nav>
+
       </header>
   
       <main>
