@@ -4,8 +4,8 @@ from flask_cors import CORS #to allow the front end to communicate with the back
 from models import *
 
 
-
 app = Flask(__name__)
+app.secret_key = 'postgres'
 
 app.config.from_object(__name__)
 CORS(app)
@@ -15,27 +15,35 @@ db.connect()
 
 
 # LOGIN PAGE ##########################################################
-# API endpoint to login
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     last_name = data.get('username')
     password = data.get('password')
-    
+
+    print(f"Received login request for username: {last_name}")  # Add logging statement
+
+    # Check if the required fields are present
+    if not last_name or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+
     # Query the volunteer with the provided last name
     volunteer = Volunteer.get_or_none(Volunteer.LastName == last_name)
-    
-    if volunteer and check_password_hash(volunteer.Password, password):
-        # Login successful
-        session['logged_in'] = True
-        
-        # Convert the volunteer model to a dictionary
-        volunteer_data = volunteer.to_dict()
-        
-        return jsonify({'message': 'Login successful', 'volunteer': volunteer_data}), 200
+
+    if volunteer:
+        print(f"Found volunteer: {volunteer.to_dict()}")  # Add logging statement
+        if check_password_hash(volunteer.Password, password):
+            # Login successful
+            session['logged_in'] = True
+            volunteer_data = volunteer.to_dict()
+            return jsonify({'message': 'Login successful', 'volunteer': volunteer_data}), 200
+        else:
+            print("Password does not match")  # Add logging statement
     else:
-        # Invalid username or password
-        return jsonify({'error': 'Invalid username or password'}), 401
+        print("Volunteer not found")  # Add logging statement
+
+    # Invalid username or password
+    return jsonify({'error': 'Invalid username or password'}), 401
 # ADD VISIT SECTION ##########################################
 # Function to get neighbors list
 def get_neighborsAV():
