@@ -13,6 +13,29 @@ CORS(app)
 db.connect()
 #db.create_tables([Volunteer], safe=True)
 
+
+# LOGIN PAGE ##########################################################
+# API endpoint to login
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    last_name = data.get('username')
+    password = data.get('password')
+    
+    # Query the volunteer with the provided last name
+    volunteer = Volunteer.get_or_none(Volunteer.LastName == last_name)
+    
+    if volunteer and check_password_hash(volunteer.Password, password):
+        # Login successful
+        session['logged_in'] = True
+        
+        # Convert the volunteer model to a dictionary
+        volunteer_data = volunteer.to_dict()
+        
+        return jsonify({'message': 'Login successful', 'volunteer': volunteer_data}), 200
+    else:
+        # Invalid username or password
+        return jsonify({'error': 'Invalid username or password'}), 401
 # ADD VISIT SECTION ##########################################
 # Function to get neighbors list
 def get_neighborsAV():
@@ -85,15 +108,34 @@ def get_volunteers():
     return jsonify(volunteers)
 
 # API endpoint to create a volunteer
-@app.route('/api/volunteers', methods=['POST']) #POST request to create a volunteer
+@app.route('/api/volunteers', methods=['POST'])
 def create_volunteer():
     data = request.get_json()
-        # Remove the VolunteerID field from the data
+    # Remove the VolunteerID field from the data
     data.pop('VolunteerID', None)
+    
+    # Get the plain-text password from the request data
+    password = data.pop('Password', None)
+    
+    if password:
+        # Hash the password
+        hashed_password = generate_password_hash(password)
+        # Update the data dictionary with the hashed password
+        data['Password'] = hashed_password
+    
     volunteer = Volunteer(**data)
     volunteer.save()
     return jsonify(volunteer.to_dict()), 201
-
+# this below is original volunteer post request ########################################
+# @app.route('/api/volunteers', methods=['POST']) #POST request to create a volunteer
+# def create_volunteer():
+#     data = request.get_json()
+#         # Remove the VolunteerID field from the data
+#     data.pop('VolunteerID', None)
+#     volunteer = Volunteer(**data)
+#     volunteer.save()
+#     return jsonify(volunteer.to_dict()), 201
+########################################################################################
 # API endpoint to update a volunteer
 @app.route('/api/volunteers/<int:volunteer_id>', methods=['PUT']) #PUT request to update a volunteer
 def update_volunteer(volunteer_id):
