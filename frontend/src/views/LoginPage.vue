@@ -2,7 +2,7 @@
   <div class="login-page">
     <div class="login-box">
       <h1>Login</h1>
-      <form @submit.prevent="login">
+      <form @submit.prevent="onLogin">
         <div class="form-group">
           <label for="username">Username:</label>
           <input type="text" id="username" v-model="username" placeholder="Enter your username" required>
@@ -19,21 +19,33 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
     };
   },
   methods: {
-    login() {
-      // Perform login logic here
-      console.log('Username:', this.username);
-      console.log('Password:', this.password);
-      // You can add your authentication logic here
-    }
-  }
+    ...mapActions(['login']),
+    onLogin() {
+      const credentials = {
+        username: this.username,
+        password: this.password,
+      };
+      this.login(credentials)
+        .then(() => {
+          // Redirect to a protected page or perform other actions upon successful login
+          this.$router.push('/home');
+        })
+        .catch(error => {
+          // Handle login error
+          console.error('Login failed:', error);
+        });
+    },
+  },
 };
 </script>
 
