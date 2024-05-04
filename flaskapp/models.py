@@ -31,18 +31,28 @@ class Volunteer(baseModel):
     HasRecordAccess = BooleanField()
 
 class Neighbor(baseModel):
-    NeighborID = AutoField()
-    VolunteerID = ForeignKeyField(Volunteer, backref='neighbor')  # Ensured consistency in backref
-    OrganizationID = ForeignKeyField(Service_Providers, backref='neighbor')  # Adjusted for clarity and consistency
+    NeighborID = AutoField()  
     FirstName = CharField(max_length=255)
     LastName = CharField(max_length=255)
     DateOfBirth = DateField()
     Phone = CharField(max_length=20)
-    Location = TextField()  # Changed from Address to Location
+    Location = TextField()  
     Email = CharField(max_length=255)
     Created_date = DateTimeField(default=datetime.datetime.now)
     HasStateID = BooleanField()
     HasPet = BooleanField()
+    HasChildren = BooleanField() # Added everything below this
+    HasMedication = BooleanField()
+    HasFoodInsecurity = BooleanField()
+    HasTransportation = BooleanField()
+    HasJob = BooleanField()
+    HasHousing = BooleanField()
+    HasInsurance = BooleanField()
+    HasIncome = BooleanField()
+    Notes = TextField()
+    #Removed the two below
+    #VolunteerID = ForeignKeyField(Volunteer, backref='neighbor')  
+    #OrganizationID = ForeignKeyField(Service_Providers, backref='neighbor')
 class Visit_Service(baseModel):
     RecordID = AutoField() #IntegerField(primary_key=True)
     ServiceID = ForeignKeyField(Services, backref='visit_service')
@@ -59,8 +69,6 @@ class Inventory_Usage(baseModel):
     RecordID = ForeignKeyField(Visit_Record, backref='Inventory_Usage')
     Description_of_Item = CharField(max_length=255)
     Number_Of_Item_Used = IntegerField()
-
-
 class Inventory(baseModel):
     InventoryID = AutoField() #IntegerField(primary_key=True)
     NameOfItem = CharField(max_length=255)
