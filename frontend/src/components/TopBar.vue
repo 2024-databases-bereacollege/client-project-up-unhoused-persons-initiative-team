@@ -3,7 +3,7 @@
   <div class="top-bar">
     <h1 class="organization-name">UP Initiative</h1>
     <div class="menu-buttons">
-      <router-link to="/home" class="menu-button">
+      <router-link to="/" class="menu-button">
         <font-awesome-icon :icon="faHome" /> Home
       </router-link>
       <router-link to="/Instructions" class="menu-button">

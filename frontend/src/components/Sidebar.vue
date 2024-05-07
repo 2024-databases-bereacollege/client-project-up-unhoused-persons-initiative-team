@@ -7,18 +7,18 @@
   <router-link to="/" class="sidebar-link">
     <font-awesome-icon :icon="faHome" />
     <span>Home Page</span>
-  </router-link>
+  <!-- </router-link>
   <router-link to="/Instructions" class="sidebar-link">
     <font-awesome-icon :icon="faInfoCircle" />
-    <span>Instructions</span>
+    <span>Instructions</span> -->
   </router-link>
   <router-link to="/Add_Visit" class="sidebar-link">
     <font-awesome-icon :icon="faPlusCircle" />
     <span>Add Visit</span>
-  </router-link>
+  <!-- </router-link>
   <router-link to="/login_page" class="sidebar-link">
     <font-awesome-icon :icon="faSignInAlt" />
-    <span>Login Page</span>
+    <span>Login Page</span> -->
   </router-link>
   <router-link to="/Volunteers" class="sidebar-link">
     <font-awesome-icon :icon="faUserFriends" />
