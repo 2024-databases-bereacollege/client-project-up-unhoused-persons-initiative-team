@@ -125,7 +125,6 @@ export default {
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 import { mapActions } from 'vuex';
@@ -139,25 +138,27 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['setVolunteer']),
-    login() {
+    ...mapActions('auth', ['login', 'setVolunteer']),
+    async submitLogin() {
       const loginData = {
         username: this.username,
         password: this.password,
       };
 
-      axios.post('http://127.0.0.1:5000/api/login', loginData)
-        .then(response => {
-          // Login successful
-          const volunteer = response.data.volunteer;
-          this.setVolunteer(volunteer);
-          // Redirect to a logged-in page or perform other actions
-          this.$router.push('/dashboard');
-        })
-        .catch(error => {
-          console.error('Login failed:', error);
+      try {
+        const response = await axios.post('http://127.0.0.1:5000/api/login', loginData);
+        const volunteer = response.data.volunteer;
+        await this.setVolunteer(volunteer);
+        await this.login();
+        this.$router.push('/home');
+      } catch (error) {
+        console.error('Login failed:', error);
+        if (error.response && error.response.status === 401) {
           this.errorMessage = 'Invalid username or password. Please try again.';
-        });
+        } else {
+          this.errorMessage = 'An error occurred. Please try again later.';
+        }
+      }
     },
   },
 };

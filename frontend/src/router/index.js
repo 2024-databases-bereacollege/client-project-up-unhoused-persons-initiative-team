@@ -39,7 +39,10 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const isAuthenticated = store.getters['auth/isAuthenticated']; // Get the authentication state from the auth module
+  const isAuthenticated = store.getters['auth/isAuthenticated'];
+
+
+ // const isAuthenticated = store.getters['auth/isAuthenticated']; // Get the authentication state from the auth module
 
   if (requiresAuth && !isAuthenticated) {
     next('/login_page');

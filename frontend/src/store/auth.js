@@ -1,16 +1,22 @@
 // store/auth.js
 const authModule = {
+  namespaced: true,
     state: {
       isAuthenticated: false,
-      // Other authentication-related state properties
+      volunteer: null,
     },
     mutations: {
       setIsAuthenticated(state, value) {
         state.isAuthenticated = value;
       },
-      // Other authentication-related mutations
+    setVolunteer(state, volunteer) {
+      state.volunteer = volunteer;
+    },
     },
     actions: {
+      setVolunteer({ commit }, volunteer) {
+        commit('setVolunteer', volunteer);
+      },
       login({ commit }) {
         // Perform login logic, e.g., send a request to the server
         // If login is successful, update the authentication state
