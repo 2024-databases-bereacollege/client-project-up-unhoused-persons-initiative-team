@@ -13,6 +13,7 @@ import Inventory from '@/views/Inventory.vue';
 import AddVisit from '@/views/AddVisit.vue';
 import Instructions from '@/views/Instructions.vue';
 import NeighborProfile from '@/components/NeighborProfile.vue';
+import Queries from '@/views/Queries.vue';
 
 const routes = [
   { path: '/', redirect: '/home' },
@@ -27,6 +28,7 @@ const routes = [
   { path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },
   { path: '/Inventory', component: Inventory, meta: { requiresAuth: true } },
   { path: '/Neighbors/:ID', name: 'NeighborProfile', component: NeighborProfile, props: true, meta: { requiresAuth: true } },
+  { path: '/Queries', component: Queries, meta: { requiresAuth: true } },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ];
 

@@ -10,7 +10,7 @@ class baseModel(Model):
     class Meta:
         database = db
 class Service_Providers(baseModel):
-    OrganizationID = AutoField() #CharField(max_length=255, primary_key=True)
+    OrganizationID = AutoField() 
     Organization_Name = CharField(max_length=255)
     ContactPerson = CharField(max_length=255)
     Email = CharField(max_length=255)
@@ -50,29 +50,27 @@ class Neighbor(baseModel):
     HasInsurance = BooleanField()
     HasIncome = BooleanField()
     Notes = TextField()
-    #Removed the two below
-    #VolunteerID = ForeignKeyField(Volunteer, backref='neighbor')  
-    #OrganizationID = ForeignKeyField(Service_Providers, backref='neighbor')
+
 class Visit_Service(baseModel):
-    RecordID = AutoField() #IntegerField(primary_key=True)
+    RecordID = AutoField() 
     ServiceID = ForeignKeyField(Services, backref='visit_service')
     Description = TextField()
     Date = DateField()
 class Visit_Record(baseModel):
-    ServiceOrder = AutoField() #IntegerField(primary_key=True)
-    NeighborID = ForeignKeyField(Neighbor, backref='visit_record')  # Ensured consistency in backref
-    VolunteerID = ForeignKeyField(Volunteer, backref='visit_record')  # Ensured consistency in backref
-    RecordID = ForeignKeyField(Visit_Service, backref='visit_record') # Changed to Visit Service
+    ServiceOrder = AutoField() 
+    NeighborID = ForeignKeyField(Neighbor, backref='visit_record')  
+    VolunteerID = ForeignKeyField(Volunteer, backref='visit_record')  
+    RecordID = ForeignKeyField(Visit_Service, backref='visit_record') 
 class Inventory_Usage(baseModel):
-    Inventory_UseID = AutoField() #IntegerField(primary_key=True)
+    Inventory_UseID = AutoField() 
     NameOfItem = CharField(max_length=255)
     RecordID = ForeignKeyField(Visit_Record, backref='Inventory_Usage')
     Description_of_Item = CharField(max_length=255)
     Number_Of_Item_Used = IntegerField()
 class Inventory(baseModel):
-    InventoryID = AutoField() #IntegerField(primary_key=True)
+    InventoryID = AutoField()
     NameOfItem = CharField(max_length=255)
-    VolunteerID = ForeignKeyField(Volunteer, backref='inventory')  # Ensured consistency in backref
+    VolunteerID = ForeignKeyField(Volunteer, backref='inventory')  
     Description_of_Item = CharField(max_length=255)
     ExpirationDate = DateField()
     Number_Of_Item = IntegerField()

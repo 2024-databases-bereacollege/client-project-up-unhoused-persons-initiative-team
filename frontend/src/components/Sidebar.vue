@@ -44,6 +44,10 @@
     <font-awesome-icon :icon="faBox" />
     <span>Inventory</span>
   </router-link>
+  <router-link to="/Queries" class="sidebar-link">
+    <font-awesome-icon :icon="faClipboardList" />
+    <span>Queries</span>
+  </router-link>
   <!-- <router-link to="/Neighbors/MNP" class="sidebar-link">
     <font-awesome-icon :icon="faUsers" />
     <span>Individual Neighbor Records Links</span>
