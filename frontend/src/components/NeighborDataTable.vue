@@ -164,6 +164,12 @@
         </v-dialog>
       </v-toolbar>
     </template>
+    <!-- eslint-disable vue/valid-v-slot -->
+    <template v-slot:item.NeighborID="{ item }">
+      <v-btn text @click="openNeighborPage(item.NeighborID)">
+        {{ item.NeighborID }}
+      </v-btn>
+    </template>
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template v-slot:item.actions="{ item }">
       <v-icon class="me-2" size="small" @click="editItem(item)">
@@ -180,6 +186,7 @@
     </template>
   </v-data-table>
 </template>
+
   <script>
     import axios from 'axios';
   export default {
@@ -258,9 +265,16 @@
       this.initialize();
     },
     methods: {
+      
       initialize() {
         // Initialize the data table
       },
+    //   openNeighborPage(neighborID) {
+    //   this.$emit('open-neighbor-page', neighborID);
+    // },
+    openNeighborPage(neighborID) {
+    this.$router.push({ name: 'NeighborProfile', params: { ID: neighborID } });
+  },
       saveItem(item) {
     if (this.editedIndex > -1) {
       // Update an existing neighbor

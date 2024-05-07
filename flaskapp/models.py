@@ -22,7 +22,7 @@ class Services(baseModel):
     ServiceType = CharField(max_length=255)
     OrganizationID = ForeignKeyField(Service_Providers, backref='services')  # Adjusted for clarity and consistency
 class Volunteer(baseModel):
-    VolunteerID = AutoField() #IntegerField(primary_key=True)
+    VolunteerID = AutoField() 
     FirstName = CharField(max_length=255)
     LastName = CharField(max_length=255)
     Password = CharField()

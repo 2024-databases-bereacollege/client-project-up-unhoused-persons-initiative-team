@@ -75,7 +75,7 @@ def generate_sample_data():
             {
                 'FirstName': 'Alice',
                 'LastName': 'Smith',
-                'Password': 'password123',
+                'Password': '123',
                 'Email': 'alice@example.com',
                 'Phone': '987-654-3210',
                 'HasRecordAccess': True

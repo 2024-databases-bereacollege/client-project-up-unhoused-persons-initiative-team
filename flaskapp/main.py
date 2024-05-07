@@ -4,8 +4,8 @@ from flask_cors import CORS #to allow the front end to communicate with the back
 from models import *
 
 
-
 app = Flask(__name__)
+app.secret_key = 'postgres'
 
 app.config.from_object(__name__)
 CORS(app)
@@ -13,6 +13,37 @@ CORS(app)
 db.connect()
 #db.create_tables([Volunteer], safe=True)
 
+
+# LOGIN PAGE ##########################################################
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    last_name = data.get('username')
+    password = data.get('password')
+
+    print(f"Received login request for username: {last_name}")  # Add logging statement
+
+    # Check if the required fields are present
+    if not last_name or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+
+    # Query the volunteer with the provided last name
+    volunteer = Volunteer.get_or_none(Volunteer.LastName == last_name)
+
+    if volunteer:
+        print(f"Found volunteer: {volunteer.to_dict()}")  # Add logging statement
+        if check_password_hash(volunteer.Password, password):
+            # Login successful
+            session['logged_in'] = True
+            volunteer_data = volunteer.to_dict()
+            return jsonify({'message': 'Login successful', 'volunteer': volunteer_data}), 200
+        else:
+            print("Password does not match")  # Add logging statement
+    else:
+        print("Volunteer not found")  # Add logging statement
+
+    # Invalid username or password
+    return jsonify({'error': 'Invalid username or password'}), 401
 # ADD VISIT SECTION ##########################################
 # Function to get neighbors list
 def get_neighborsAV():
@@ -85,15 +116,34 @@ def get_volunteers():
     return jsonify(volunteers)
 
 # API endpoint to create a volunteer
-@app.route('/api/volunteers', methods=['POST']) #POST request to create a volunteer
+@app.route('/api/volunteers', methods=['POST'])
 def create_volunteer():
     data = request.get_json()
-        # Remove the VolunteerID field from the data
+    # Remove the VolunteerID field from the data
     data.pop('VolunteerID', None)
+    
+    # Get the plain-text password from the request data
+    password = data.pop('Password', None)
+    
+    if password:
+        # Hash the password
+        hashed_password = generate_password_hash(password)
+        # Update the data dictionary with the hashed password
+        data['Password'] = hashed_password
+    
     volunteer = Volunteer(**data)
     volunteer.save()
     return jsonify(volunteer.to_dict()), 201
-
+# this below is original volunteer post request ########################################
+# @app.route('/api/volunteers', methods=['POST']) #POST request to create a volunteer
+# def create_volunteer():
+#     data = request.get_json()
+#         # Remove the VolunteerID field from the data
+#     data.pop('VolunteerID', None)
+#     volunteer = Volunteer(**data)
+#     volunteer.save()
+#     return jsonify(volunteer.to_dict()), 201
+########################################################################################
 # API endpoint to update a volunteer
 @app.route('/api/volunteers/<int:volunteer_id>', methods=['PUT']) #PUT request to update a volunteer
 def update_volunteer(volunteer_id):
