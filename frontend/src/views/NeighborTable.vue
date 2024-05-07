@@ -23,6 +23,9 @@
       @delete-item-confirm="deleteItemConfirm($event)"
       @close="close"
       @close-delete="closeDelete"
+
+      @open-neighbor-page="openNeighborPage" 
+
       sort-by="NeighborID"
       sort-order="asc"
     ></data-table>
@@ -123,6 +126,9 @@ this.neighbors = response.data;
 console.error('Error fetching data:', error);
 });
 },
+openNeighborPage(neighborID) {
+      this.$router.push({ name: 'NeighborProfile', params: { ID: neighborID } });
+    },
 saveItem(item) {
   if (this.editedIndex > -1) {
     // Update an existing neighbor
