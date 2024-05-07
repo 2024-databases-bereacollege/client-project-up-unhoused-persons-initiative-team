@@ -27,7 +27,7 @@ const routes = [
   { path: '/Neighbors', component: NeighborTable, meta: { requiresAuth: true } },
   { path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },
   { path: '/Inventory', component: Inventory, meta: { requiresAuth: true } },
-  { path: '/Neighbors/:ID', component: NeighborProfile, props: true, meta: { requiresAuth: true } },
+  { path: '/Neighbors/:ID', name: 'NeighborProfile', component: NeighborProfile, props: true, meta: { requiresAuth: true } },
   { path: '/Neighbors/MNP', component: MainNeighborPage, meta: { requiresAuth: true } },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ];
