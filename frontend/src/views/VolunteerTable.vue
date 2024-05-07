@@ -21,7 +21,6 @@
 </template>
 
 <script>
-// default item above may be edited item instead
 import axios from 'axios';
 import DataTable from '@/components/DataTable.vue';
 

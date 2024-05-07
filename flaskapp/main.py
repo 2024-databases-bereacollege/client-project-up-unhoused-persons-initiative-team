@@ -17,6 +17,7 @@ db.connect()
 # LOGIN PAGE ##########################################################
 @app.route('/api/login', methods=['POST'])
 def login():
+
     data = request.get_json()
     last_name = data.get('username')
     password = data.get('password')
@@ -44,6 +45,7 @@ def login():
 
     # Invalid username or password
     return jsonify({'error': 'Invalid username or password'}), 401
+
 # ADD VISIT SECTION ##########################################
 # Function to get neighbors list
 def get_neighborsAV():
@@ -56,7 +58,7 @@ def get_neighborsAV():
     neighbors_list = [
         {
             'NeighborID': neighbor.NeighborID,
-            'FullName': f"{neighbor.FirstName} {neighbor.LastName}"
+            'FullName': f"{neighbor.FirstName} {neighbor.LastName}" #TODO update in case we dont have full name
         } for neighbor in neighbors_query
     ]
     return neighbors_list
@@ -101,6 +103,40 @@ def get_visit():
     }
     return jsonify(data)
 
+
+# API endpoint to edit visit_log after adding a visit
+@app.route('/api/IndividualVisitLog', methods=['PUT'])
+def update_visit_log():
+    data = request.get_json()
+    inventory_data = data.get('inventory')
+    visit_service_data = data.get('visit_service')
+    volunteer_data = data.get('volunteer')
+
+    response = {}
+    # Update Inventory
+    inventory_id = inventory_data.get('inventory_id')
+    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+    if inventory:
+        for key, value in inventory_data.items():
+            if key != 'inventory_id':  # Exclude the ID from the fields to update
+                setattr(inventory, key, value)
+        inventory.save()
+        response['inventory'] = inventory.to_dict()
+    else:
+        return jsonify({'error': 'Inventory not found'}), 404
+
+    # Update Visit Service
+    record_id = visit_service_data.get('record_id')
+    visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
+    if visit_service:
+        for key, value in visit_service_data.items():
+            if key != 'record_id':  # Exclude the ID from the fields to update
+                setattr(visit_service, key, value)
+        visit_service.save()
+        response['visit_service'] = visit_service.to_dict()
+    else:
+        return jsonify({'error': 'Visit service record not found'}), 404
+
 ##############################################################
 
 ################ volunteers below ############################
@@ -134,16 +170,7 @@ def create_volunteer():
     volunteer = Volunteer(**data)
     volunteer.save()
     return jsonify(volunteer.to_dict()), 201
-# this below is original volunteer post request ########################################
-# @app.route('/api/volunteers', methods=['POST']) #POST request to create a volunteer
-# def create_volunteer():
-#     data = request.get_json()
-#         # Remove the VolunteerID field from the data
-#     data.pop('VolunteerID', None)
-#     volunteer = Volunteer(**data)
-#     volunteer.save()
-#     return jsonify(volunteer.to_dict()), 201
-########################################################################################
+
 # API endpoint to update a volunteer
 @app.route('/api/volunteers/<int:volunteer_id>', methods=['PUT']) #PUT request to update a volunteer
 def update_volunteer(volunteer_id):
@@ -165,8 +192,6 @@ def delete_volunteer(volunteer_id):
     volunteer = Volunteer.get_by_id(volunteer_id)
     volunteer.delete_instance()
     return '', 204
-
-
 
 ################ volunteers above ############################
     
@@ -201,70 +226,13 @@ def get_neighbors():
     ]
     return jsonify(neighbors)
 
-# API endpoint to edit visit_log
-@app.route('/api/IndividualVisitLog', methods=['PUT'])
-def update_visit_log():
-    data = request.get_json()
-    inventory_data = data.get('inventory')
-    visit_service_data = data.get('visit_service')
-    volunteer_data = data.get('volunteer')
-
-    response = {}
-
-    # Update Inventory
-    inventory_id = inventory_data.get('inventory_id')
-    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
-    if inventory:
-        for key, value in inventory_data.items():
-            if key != 'inventory_id':  # Exclude the ID from the fields to update
-                setattr(inventory, key, value)
-        inventory.save()
-        response['inventory'] = inventory.to_dict()
-    else:
-        return jsonify({'error': 'Inventory not found'}), 404
-
-    # Update Visit Service
-    record_id = visit_service_data.get('record_id')
-    visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
-    if visit_service:
-        for key, value in visit_service_data.items():
-            if key != 'record_id':  # Exclude the ID from the fields to update
-                setattr(visit_service, key, value)
-        visit_service.save()
-        response['visit_service'] = visit_service.to_dict()
-    else:
-        return jsonify({'error': 'Visit service record not found'}), 404
-
-    # Update Volunteer
-    volunteer_id = volunteer_data.get('volunteer_id')
-    volunteer = Volunteer.get_or_none(Volunteer.VolunteerID == volunteer_id)
-    if volunteer:
-        for key, value in volunteer_data.items():
-            if key != 'volunteer_id':  # Exclude the ID from the fields to update
-                setattr(volunteer, key, value)
-        volunteer.save()
-        response['volunteer'] = volunteer.to_dict()
-    else:
-        return jsonify({'error': 'Volunteer not found'}), 404
-
-    return jsonify(response)
-
 # API endpoint to create a neighbor
 @app.route('/api/neighbors', methods=['POST'])
 def create_neighbor():
     data = request.get_json()
-        # Set default values for VolunteerID and OrganizationID if they are not provided
-    volunteer_id = data.get('VolunteerID', 1)
-    organization_id = data.get('OrganizationID', 1)
-        # Include the default values in the data dictionary
-    neighbor_data = {
-        'VolunteerID': volunteer_id,
-        'OrganizationID': organization_id,
-        **data
-    }
-    neighbor = Neighbor(**neighbor_data)
+    neighbor = Neighbor(**data)
     neighbor.save()
-    return jsonify(neighbor.to_dict()), 201
+    return jsonify(neighbor.to_dict()), 201 #TODO needs testing
 
 # API endpoint to edit a neighbor
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['PUT'])
@@ -426,9 +394,49 @@ def delete_visit_record(record_id):
     
 ################ visit records above ############################
     
+################ inventory below ############################
+# API endpoint to get inverntory
+@app.route('/api/inventory', methods=['GET'])
+def get_inventory():
+    query = Inventory.select()
+    inventory = [item.to_dict() for item in query]
+    return jsonify(inventory)
+
+# API endpoint to create inverntory
+@app.route('/api/inventory', methods=['POST'])
+def create_inventory():
+    data = request.get_json()
+    inventory = Inventory(**data)
+    inventory.save()
+    return jsonify(inventory.to_dict()), 201
+
+# API endpoint to edit inverntory
+@app.route('/api/inventory/<int:inventory_id>', methods=['PUT'])
+def update_inventory(inventory_id):
+    data = request.get_json()
+    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+    if inventory:
+        for key, value in data.items():
+            setattr(inventory, key, value)
+        inventory.save()
+        return jsonify(inventory.to_dict())
+    else:
+        return jsonify({'error': 'Inventory Item not found'}), 404
+    
+# API endpoint to delete inverntory
+@app.route('/api/inventory/<int:inventory_id>', methods=['DELETE'])
+def delete_inventory(inventory_id):
+    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+    if inventory:
+        inventory.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Inventory Item not found'}), 404
+    
+################ inventory above ############################
+#TODO everything below this is currently not in use, and needs to either be deleted or implemented. 
 ################ inventory usage below ############################
 
-from peewee import *
 
 @app.route('/api/IndividualVisitLog', methods=['GET'])
 def get_IndividualVisitLog():
@@ -443,11 +451,9 @@ def get_IndividualVisitLog():
              .switch(Visit_Service)  # Return to Visit_Service to join another table
              .join(Visit_Record)  # This joins Visit_Service to Visit_Record
              .join(Volunteer)  # This joins Visit_Record to Volunteer
-             .order_by(Visit_Service.Date.desc()))  # Optional: orders the results by the date of the visit
-
-    # Convert the query to a list of dictionaries (assuming you want to return JSON)
+             .order_by(Visit_Service.Date.desc()))  
     result = [item for item in query.dicts()]
-    return jsonify(result)  # You will need to import jsonify from flask
+    return jsonify(result)  
 
 
 @app.route('/api/inventory_usageAD', methods=['GET'])
@@ -505,46 +511,7 @@ def delete_inventory_usage(usage_id):
     
 ################ inventory usage above ############################
     
-################ inventory below ############################
-# API endpoint to get inverntory
-@app.route('/api/inventory', methods=['GET'])
-def get_inventory():
-    query = Inventory.select()
-    inventory = [item.to_dict() for item in query]
-    return jsonify(inventory)
 
-# API endpoint to create inverntory
-@app.route('/api/inventory', methods=['POST'])
-def create_inventory():
-    data = request.get_json()
-    inventory = Inventory(**data)
-    inventory.save()
-    return jsonify(inventory.to_dict()), 201
-
-# API endpoint to edit inverntory
-@app.route('/api/inventory/<int:inventory_id>', methods=['PUT'])
-def update_inventory(inventory_id):
-    data = request.get_json()
-    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
-    if inventory:
-        for key, value in data.items():
-            setattr(inventory, key, value)
-        inventory.save()
-        return jsonify(inventory.to_dict())
-    else:
-        return jsonify({'error': 'Inventory Item not found'}), 404
-    
-# API endpoint to delete inverntory
-@app.route('/api/inventory/<int:inventory_id>', methods=['DELETE'])
-def delete_inventory(inventory_id):
-    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
-    if inventory:
-        inventory.delete_instance()
-        return '', 204
-    else:
-        return jsonify({'error': 'Inventory Item not found'}), 404
-    
-################ inventory above ############################
     
 ################ visit services below ############################
 # API endpoint to get visit services
@@ -587,10 +554,6 @@ def delete_visit_service(service_id):
     
 ################ visit services above ############################
     
-
-
-
-
 
 # Sara's Queries ########################################################
 
@@ -812,52 +775,17 @@ def get_visits_by_volunteer(volunteer_id):
     visits = [visit.to_dict() for visit in query]
     return jsonify(visits)
 
-# @app.route('/api/services', methods=['GET'])
-# def get_services():
-#     query = Services.select()
-#     services = [service.to_dict() for service in query]
-#     return jsonify(services)
 
-# @app.route('/api/services', methods=['GET'])
-# def get_services():
-#     query = Services.select()
-#     services = [service.to_dict() for service in query]
-#     return jsonify(services)
+    # # Update Volunteer
+    # volunteer_id = volunteer_data.get('volunteer_id')
+    # volunteer = Volunteer.get_or_none(Volunteer.VolunteerID == volunteer_id)
+    # if volunteer:
+    #     for key, value in volunteer_data.items():
+    #         if key != 'volunteer_id':  # Exclude the ID from the fields to update
+    #             setattr(volunteer, key, value)
+    #     volunteer.save()
+    #     response['volunteer'] = volunteer.to_dict()
+    # else:
+    #     return jsonify({'error': 'Volunteer not found'}), 404
 
-#Below is example api call to get the neighbors from passing in, but with mock neighbors instead of real data
-# @app.route('/NeighborTableAdd', methods=['GET'])
-# def neighbor():
-#     # Mock neighbor object
-#     mock_neighbor = {
-#         "NeighborID": 1,
-#         "VolunteerID": 101,  # Assuming a volunteer ID; replace with relevant data
-#         "Organization": "Helping Hands",
-#         "FirstName": "John",
-#         "LastName": "Doe",
-#         "DateOfBirth": "1990-01-01",
-#         "Phone": "555-1234",
-#         "Location": "123 Main St, Anytown, USA",
-#         "Email": "johndoe@example.com",
-#         "Created_date": datetime.datetime.now().isoformat(),
-#         "HasStateID": True,
-#         "HasPet": False
-#     }
-#     mock_neighborTwo = {
-#         "NeighborID": 2,
-#         "VolunteerID": 102,  # Assuming a volunteer ID; replace with relevant data
-#         "Organization:": "Helping Hands",
-#         "FirstName": "Jane",
-#         "LastName": "Doe",
-#         "DateOfBirth": "1990-01-01",
-#         "Phone": "555-1234",
-#         "Location": "123 Main St, Anytown, USA",
-#         "Email": "janedoe@example.com",
-#         "Created_date": datetime.datetime.now().isoformat(),
-#         "HasStateID": True,
-#         "HasPet": False
-#     }
-#     return mock_neighbor, mock_neighborTwo
-    
-    # def neighbors():
-    # neighbors = neighbor()
-    # return jsonify(neighbors)
+    # return jsonify(response)

@@ -1,7 +1,7 @@
 <template>
   <div class="homepage">
     <header>
-      <h1>Welcome to the UP Initiative Application!</h1>
+      <h1>Welcome to the UP Initiative Database!</h1>
     </header>
 
     <main>
