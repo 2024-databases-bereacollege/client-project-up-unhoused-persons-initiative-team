@@ -20,7 +20,7 @@ const routes = [
   { path: '/home', component: HomeView },
   { path: '/login_page', component: LoginPage },
   { path: '/Instructions', component: Instructions },
-  { path: '/Add_Visit', component: AddVisit },
+  { path: '/Add_Visit', component: AddVisit, meta: { requiresAuth: true } },
   { path: '/Service_Providers', component: ServiceProviders, meta: { requiresAuth: true } },
   { path: '/Services', component: Services, meta: { requiresAuth: true } },
   { path: '/Volunteers', component: VolunteerTable, meta: { requiresAuth: true } },
