@@ -336,18 +336,16 @@ def delete_service_provider(provider_id):
 ################ service providers above ############################
     
 ################ services below ############################
-# API endpoint to get services
-    
-# API endpoint to get services
+    # API endpoint to get services
 @app.route('/api/ServicesAndProviders', methods=['GET'])
 def get_services():
     query = (
         Services
-        .select(Services, fn.COUNT(fn.DISTINCT(Visit_Record.NeighborID)).alias('TotalNeighbors'))
-        .join(Visit_Service)
-        .join(Visit_Record)
+        .select(Services, fn.COUNT(Visit_Record.NeighborID.distinct()).alias('TotalNeighbors'))
+        .join(Service_Providers, on=(Services.OrganizationID == Service_Providers.OrganizationID))
         .switch(Services)
-        .join(Service_Providers)
+        .join(Visit_Service, JOIN.LEFT_OUTER)
+        .join(Visit_Record, JOIN.LEFT_OUTER)
         .group_by(Services)
     )
     
@@ -360,7 +358,9 @@ def get_services():
         service_dict['Phone'] = service.OrganizationID.Phone
         service_dict['DateOfStart'] = service.OrganizationID.DateOfStart
         service_dict['TotalNeighbors'] = service.TotalNeighbors
+        service_dict['ServiceDescription'] = service.ServiceDescription
         
+        del service_dict['ServiceID']
         del service_dict['OrganizationID']
         
         services.append(service_dict)

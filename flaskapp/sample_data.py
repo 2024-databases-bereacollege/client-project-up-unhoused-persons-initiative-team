@@ -8,7 +8,7 @@ def generate_sample_data():
     def service_providers_sample_data():
         return [
             {
-                'Organization_Name': 'ABC Services',
+                'Organization_Name': 'Up Initative',
                 'ContactPerson': 'John Doe',
                 'Email': 'john@abcservices.com',
                 'Phone': '123-456-7890',
@@ -48,26 +48,62 @@ def generate_sample_data():
     def services_sample_data():
         return [
             {
+                'ServiceType': 'Clothing Closet',
+                'OrganizationID': 1,
+                'ServiceDescription': 'Clothing closet service'
+            },
+            {
+                'ServiceType': 'Laundry Service',
+                'OrganizationID': 1,
+                'ServiceDescription': 'Laundry service'
+            },
+            {
+                'ServiceType': 'Food Security',
+                'OrganizationID': 1,
+                'ServiceDescription': 'Food security service'
+            },
+            {
+                'ServiceType': 'Case Management',
+                'OrganizationID': 1,
+                'ServiceDescription': 'Case management service'
+            },
+            {
+                'ServiceType': 'Hygiene Kits',
+                'OrganizationID': 1,
+                'ServiceDescription': 'Hygiene kits distribution'
+            },
+            {
+                'ServiceType': 'Public Transportation and Gas Assistance',
+                'OrganizationID': 1,
+                'ServiceDescription': 'Assistance with public transportation and gas expenses'
+            },
+            {
                 'ServiceType': 'Cleaning',
-                'OrganizationID': 1
+                'OrganizationID': 4,
+                'ServiceDescription': 'Weekly cleaning service'
             },
             {
                 'ServiceType': 'Food Delivery',
-                'OrganizationID': 2
+                'OrganizationID': 2,
+                'ServiceDescription': 'Monthly food delivery'
             },
             {
                 'ServiceType': 'Clothing Donation',
-                'OrganizationID': 3
+                'OrganizationID': 3,
+                'ServiceDescription': 'Clothing donation drive'
             },
             {
                 'ServiceType': 'Medical Assistance',
-                'OrganizationID': 4
+                'OrganizationID': 5,
+                'ServiceDescription': 'Medical check-up and consultation'
             },
             {
                 'ServiceType': 'Job Training',
-                'OrganizationID': 5
+                'OrganizationID': 5,
+                'ServiceDescription': 'Job training workshop'
             }
         ]
+
 
     # Sample data for Volunteer table
     def volunteers_sample_data():

@@ -22,7 +22,7 @@ const routes = [
   { path: '/Instructions', component: Instructions },
   { path: '/Add_Visit', component: AddVisit, meta: { requiresAuth: true } }, //TODO: This needs to be a different security level.
   //{ path: '/Service_Providers', component: ServiceProviders, meta: { requiresAuth: true } },
-  { path: '/ServicesAndProviders', component: ServicesAndProviders, meta: { requiresAuth: true } },
+  { path: '/ServicesAndProviders', component: ServicesAndProviders, meta: { requiresAuth: true } }, //TODO lighter access
   { path: '/Volunteers', component: VolunteerTable, meta: { requiresAuth: true } },
   { path: '/Neighbors', component: NeighborTable, meta: { requiresAuth: true } },
   { path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },

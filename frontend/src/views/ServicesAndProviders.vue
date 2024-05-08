@@ -21,14 +21,15 @@ export default {
   data() {
     return {
       headers: [
-        { title: 'Service ID', key: 'ServiceID' },
-        { title: 'Service Type', key: 'ServiceType' },
+      { title: 'Service Type', key: 'ServiceType' },
+        { title: 'Service Description', key: 'ServiceDescription' },
         { title: 'Organization Name', key: 'Organization_Name' },
         { title: 'Contact Person', key: 'ContactPerson' },
         { title: 'Email', key: 'Email' },
         { title: 'Phone', key: 'Phone' },
         { title: 'Date of Start', key: 'DateOfStart' },
         { title: 'Total Neighbors', key: 'TotalNeighbors' },
+        { title: 'Actions', key: 'actions', sortable: false}
       ],
       services: [],
       loading: true,
