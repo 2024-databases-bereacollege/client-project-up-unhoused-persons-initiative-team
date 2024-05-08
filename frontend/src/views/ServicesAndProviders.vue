@@ -4,6 +4,7 @@
       <v-data-table
         :headers="headers"
         :items="services"
+        :items-per-page="100"
         :loading="loading"
         class="elevation-1"
       >

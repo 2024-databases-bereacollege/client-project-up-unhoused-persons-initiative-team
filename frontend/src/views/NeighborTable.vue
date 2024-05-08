@@ -17,6 +17,7 @@
       @save="saveItem"
       :headers="tableHeaders"
       :items="neighbors"
+      :items-per-page="100"
       :default-item="defaultItem"
       :on-edit="editItem"
       :on-delete="deleteItem"
