@@ -7,6 +7,7 @@
       <v-data-table
         :headers="headers"
         :items="services"
+        :items-per-page="100"
         :loading="loading"
         class="elevation-1"
       >
@@ -24,22 +25,12 @@
 
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
-        <v-card-title class="text-h5">Delete Service?</v-card-title>
+        <v-card-title class="text-h5">Delete Service</v-card-title>
+        <v-card-text>Are you sure you want to delete this service?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDeleteDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="deleteService">OK</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="deleteProviderDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5">Delete Service Provider?</v-card-title>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDeleteProviderDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="deleteServiceProvider">OK</v-btn>
+          <v-btn color="blue darken-1" text @click="deleteService">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -136,32 +127,10 @@ editItem(item) {
             this.services.splice(index, 1);
           }
           this.closeDeleteDialog();
-          this.openDeleteProviderDialog();
         })
         .catch(error => {
           console.error('Error deleting service:', error);
         });
-    },
-    openDeleteProviderDialog() {
-      this.deleteProviderDialog = true;
-    },
-    closeDeleteProviderDialog() {
-      this.selectedItem = null;
-      this.deleteProviderDialog = false;
-    },
-    deleteServiceProvider() {
-      const organizationID = this.selectedItem.OrganizationID;
-      axios.delete(`http://127.0.0.1:5000/api/service_providers/${organizationID}`)
-        .then(() => {
-          // Remove the service provider from the services array
-          this.services = this.services.filter(service => service.OrganizationID !== organizationID);
-          this.closeDeleteProviderDialog();
-        })
-        .catch(error => {
-          console.error('Error deleting service provider:', error);
-        });
-
-      this.closeDeleteProviderDialog();
     },
     saveItem() {
       if (this.editedIndex > -1) {
