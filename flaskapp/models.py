@@ -18,9 +18,9 @@ class Service_Providers(baseModel):
     DateOfStart = DateField()
 
 class Services(baseModel):
-    ServiceID = AutoField() #IntegerField(primary_key=True)
+    ServiceID = AutoField() 
     ServiceType = CharField(max_length=255)
-    OrganizationID = ForeignKeyField(Service_Providers, backref='services')  # Adjusted for clarity and consistency
+    OrganizationID = ForeignKeyField(Service_Providers, backref='services')  
 class Volunteer(baseModel):
     VolunteerID = AutoField() 
     FirstName = CharField(max_length=255)
