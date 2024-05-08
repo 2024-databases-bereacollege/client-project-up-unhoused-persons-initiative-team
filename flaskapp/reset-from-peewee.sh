@@ -32,3 +32,5 @@ pem migrate
 
 # Populate database with test data
 #python populate_data.py  # Run data population script #Commenting this out because this is a broken file -NH
+python sample_data.py
+python hashExistingPasswords.py

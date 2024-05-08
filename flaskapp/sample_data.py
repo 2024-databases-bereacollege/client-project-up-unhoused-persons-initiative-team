@@ -1,7 +1,7 @@
 from datetime import datetime
 from models import *
 from peewee import *
-db = PostgresqlDatabase("db", host="localhost", user="postgres", password="postgres")
+db = PostgresqlDatabase("postgres", host="db", user="postgres", password="postgres")
 
 def generate_sample_data():
     # Sample data for Service_Providers table
@@ -469,4 +469,3 @@ if __name__ == '__main__':
 #         Visit_Service.insert_many(visit_services_sample_data).execute()    
 #         Inventory.insert_many(inventory_sample_data).execute()
 #         Inventory_Usage.insert_many(inventory_usage_sample_data).execute()  
- 
