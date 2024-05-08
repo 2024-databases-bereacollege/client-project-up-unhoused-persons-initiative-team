@@ -17,6 +17,7 @@
         "PGUSER": "postgres",
         "PGDATABASE": "postgres",
         "PGPASSWORD": "postgres",
+		"FLASK_APP": "main.py",
 		"FLASK_DEBUG": 1
     },
 	// Use 'postCreateCommand' to run commands after the container is created.
