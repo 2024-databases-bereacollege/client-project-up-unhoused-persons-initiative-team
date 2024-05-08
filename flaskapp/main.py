@@ -336,7 +336,7 @@ def delete_service_provider(provider_id):
 ################ service providers above ############################
     
 ################ services below ############################
-    # API endpoint to get services
+    # API endpoint to get services for join table
 @app.route('/api/ServicesAndProviders', methods=['GET'])
 def get_services():
     query = (
@@ -360,12 +360,24 @@ def get_services():
         service_dict['TotalNeighbors'] = service.TotalNeighbors
         service_dict['ServiceDescription'] = service.ServiceDescription
         
-        del service_dict['ServiceID']
+        #del service_dict['ServiceID'] adding this back so we can delete based on service ID
         del service_dict['OrganizationID']
         
         services.append(service_dict)
     
     return jsonify(services)
+
+    # API endpoint to delete a service from join table
+@app.route('/api/ServicesAndProviders/<int:service_id>', methods=['DELETE'])
+def delete_service(service_id):
+    try:
+        service = Services.get(Services.ServiceID == service_id)
+        service.delete_instance()
+        return jsonify({'message': 'Service deleted successfully'})
+    except Services.DoesNotExist:
+        return jsonify({'error': 'Service not found'}), 404
+
+
 # @app.route('/api/services', methods=['GET'])
 # def get_services():
 #     query = (Services
@@ -384,35 +396,35 @@ def get_services():
 #     return jsonify(services)
 
 # API endpoint to create services
-@app.route('/api/services', methods=['POST'])
-def create_service():
-    data = request.get_json()
-    service = Services(**data)
-    service.save()
-    return jsonify(service.to_dict()), 201
+# @app.route('/api/services', methods=['POST'])
+# def create_service():
+#     data = request.get_json()
+#     service = Services(**data)
+#     service.save()
+#     return jsonify(service.to_dict()), 201
 
-# API endpoint to edit services
-@app.route('/api/services/<int:service_id>', methods=['PUT'])
-def update_service(service_id):
-    data = request.get_json()
-    service = Services.get_or_none(Services.ServiceID == service_id)
-    if service:
-        for key, value in data.items():
-            setattr(service, key, value)
-        service.save()
-        return jsonify(service.to_dict())
-    else:
-        return jsonify({'error': 'Service not found'}), 404
+# # API endpoint to edit services
+# @app.route('/api/services/<int:service_id>', methods=['PUT'])
+# def update_service(service_id):
+#     data = request.get_json()
+#     service = Services.get_or_none(Services.ServiceID == service_id)
+#     if service:
+#         for key, value in data.items():
+#             setattr(service, key, value)
+#         service.save()
+#         return jsonify(service.to_dict())
+#     else:
+#         return jsonify({'error': 'Service not found'}), 404
 
 # API endpoint to delete services
-@app.route('/api/services/<int:service_id>', methods=['DELETE'])
-def delete_service(service_id):
-    service = Services.get_or_none(Services.ServiceID == service_id)
-    if service:
-        service.delete_instance()
-        return '', 204
-    else:
-        return jsonify({'error': 'Service not found'}), 404
+# @app.route('/api/services/<int:service_id>', methods=['DELETE'])
+# def delete_service(service_id):
+#     service = Services.get_or_none(Services.ServiceID == service_id)
+#     if service:
+#         service.delete_instance()
+#         return '', 204
+#     else:
+#         return jsonify({'error': 'Service not found'}), 404
     
 ################ services above ############################
     
