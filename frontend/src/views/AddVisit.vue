@@ -52,7 +52,7 @@ export default {
           selectedValues: this.selectedValues,
           visitDescription: this.visitDescription,
         };
-        const response = await axios.post('http://127.0.0.1:5000/IndividualVisitLog', requestData);
+        const response = await axios.post('http://127.0.0.1:5000/api/IndividualVisitLog', requestData);
         console.log('Data submitted successfully:', response.data);
         // Handle success response
       } catch (error) {

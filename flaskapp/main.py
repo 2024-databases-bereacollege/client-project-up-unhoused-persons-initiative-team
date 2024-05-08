@@ -103,39 +103,73 @@ def get_visit():
     }
     return jsonify(data)
 
-
-# API endpoint to edit visit_log after adding a visit
-@app.route('/api/IndividualVisitLog', methods=['PUT'])
-def update_visit_log():
+# API endpoint to add a visit
+@app.route('/api/IndividualVisitLog', methods=['POST'])
+def individual_visit_log():
     data = request.get_json()
-    inventory_data = data.get('inventory')
-    visit_service_data = data.get('visit_service')
-    volunteer_data = data.get('volunteer')
+    selected_values = data.get('selectedValues')
+    visit_description = data.get('visitDescription')
 
-    response = {}
-    # Update Inventory
-    inventory_id = inventory_data.get('inventory_id')
-    inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
-    if inventory:
-        for key, value in inventory_data.items():
-            if key != 'inventory_id':  # Exclude the ID from the fields to update
-                setattr(inventory, key, value)
-        inventory.save()
-        response['inventory'] = inventory.to_dict()
-    else:
-        return jsonify({'error': 'Inventory not found'}), 404
+    # Process the selected values and visit description
+    # Update the respective tables based on the received data
 
-    # Update Visit Service
-    record_id = visit_service_data.get('record_id')
-    visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
-    if visit_service:
-        for key, value in visit_service_data.items():
-            if key != 'record_id':  # Exclude the ID from the fields to update
-                setattr(visit_service, key, value)
-        visit_service.save()
-        response['visit_service'] = visit_service.to_dict()
-    else:
-        return jsonify({'error': 'Visit service record not found'}), 404
+    # Example: Update Visit_Service table
+    visit_service = Visit_Service.create(
+        ServiceID=selected_values.get('Services'),
+        Description=visit_description,
+        Date=datetime.date.today()
+    )
+
+    # Example: Update Visit_Record table
+    visit_record = Visit_Record.create(
+        NeighborID=selected_values.get('Neighbor'),
+        VolunteerID=selected_values.get('Volunteer'),
+        RecordID=visit_service
+    )
+
+    # Example: Update Inventory_Usage table
+    inventory_usage = Inventory_Usage.create(
+        NameOfItem=selected_values.get('Inventory'),
+        RecordID=visit_record,
+        Description_of_Item='',  # Add appropriate description
+        Number_Of_Item_Used=1   # Add appropriate quantity
+    )
+
+    # Return a success response
+    return jsonify({'message': 'Data submitted successfully'})
+
+# # API endpoint to edit visit_log after adding a visit
+# @app.route('/api/IndividualVisitLog', methods=['PUT'])
+# def update_visit_log():
+#     data = request.get_json()
+#     inventory_data = data.get('inventory')
+#     visit_service_data = data.get('visit_service')
+#     volunteer_data = data.get('volunteer')
+
+#     response = {}
+#     # Update Inventory
+#     inventory_id = inventory_data.get('inventory_id')
+#     inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+#     if inventory:
+#         for key, value in inventory_data.items():
+#             if key != 'inventory_id':  # Exclude the ID from the fields to update
+#                 setattr(inventory, key, value)
+#         inventory.save()
+#         response['inventory'] = inventory.to_dict()
+#     else:
+#         return jsonify({'error': 'Inventory not found'}), 404
+
+#     # Update Visit Service
+#     record_id = visit_service_data.get('record_id')
+#     visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
+#     if visit_service:
+#         for key, value in visit_service_data.items():
+#             if key != 'record_id':  # Exclude the ID from the fields to update
+#                 setattr(visit_service, key, value)
+#         visit_service.save()
+#         response['visit_service'] = visit_service.to_dict()
+#     else:
+#         return jsonify({'error': 'Visit service record not found'}), 404
 
 ##############################################################
 
@@ -553,28 +587,10 @@ def delete_visit_service(service_id):
         return jsonify({'error': 'Visit Service not found'}), 404
     
 ################ visit services above ############################
-    
 
-# Sara's Queries ########################################################
-
-
-# 1. Identify all volunteers who are allowed to access records:
-@app.route('/api/volunteers/record_access', methods=['GET'])
-def get_volunteers_with_record_access():
-    query = Volunteer.select().where(Volunteer.HasRecordAccess == True)
-    volunteers = [volunteer.to_dict() for volunteer in query]
-    return jsonify(volunteers)
-
-# 2. Find all the records of visits made to a particular neighbor #TODO ensure this works on individual neighbor pages! 
-@app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
-def get_visit_records_for_neighbor(neighbor_id):
-    query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
-
-
+# The below queries allow the neighbor profiles to work. ###############
 # 3. Get a list of visit records along with the names of neighbors visited and the volunteer who made the visit
-#TODO NH i am removing date, if it makes sense to add, I will join visit service and add date
+#  i am removing date, if it makes sense to add, I will join visit service and add date
 @app.route('/api/visit_records/details', methods=['GET'])
 def get_visit_records_details():
     query = (Visit_Record
@@ -586,7 +602,6 @@ def get_visit_records_details():
         'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
     } for record in query]
     return jsonify(visit_records)
-
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['GET'])
 def get_neighbor_details(neighbor_id):
     try:
@@ -600,11 +615,13 @@ def get_neighbor_details(neighbor_id):
     except Neighbor.DoesNotExist:
         return jsonify({'error': 'Neighbor not found'}), 404
 
+#####################################################################################
+
 if __name__ == '__main__':
     app.run(debug=True)
 
 
-# Rest of the queries.
+# Rest of the queries- These are all currently unused. 
 
 
 
@@ -629,11 +646,6 @@ def get_expiring_inventory():
     expiring_inventory = [item.to_dict() for item in query]
     return jsonify(expiring_inventory)
 
-# 6. Count the number of neighbors who have pets
-@app.route('/api/neighbors/pets_count', methods=['GET'])
-def get_neighbors_with_pets_count():
-    pet_count = Neighbor.select().where(Neighbor.HasPet == True).count()
-    return jsonify({'PetCount': pet_count})
 
 # 7. Find all visit records conducted on a specific date
 @app.route('/api/visit_records/date/<date:date_string>', methods=['GET'])
