@@ -2,7 +2,7 @@
   <div>
     <v-card>
       <v-data-table
-        :headers="VDataTableHeaders"
+        :headers="headers"
         :items="services"
         :loading="loading"
         class="elevation-1"
@@ -17,19 +17,18 @@
 </template>
 
 <script>
-
 export default {
-
   data() {
     return {
       headers: [
-        { text: 'Service Type', value: 'ServiceType' },
-        { text: 'Organization Name', value: 'Organization_Name' },
-        { text: 'Contact Person', value: 'ContactPerson' },
-        { text: 'Email', value: 'Email' },
-        { text: 'Phone', value: 'Phone' },
-        { text: 'Date of Start', value: 'DateOfStart' },
-        { text: 'Total Neighbors', value: 'TotalNeighbors' },
+        { title: 'Service ID', key: 'ServiceID' },
+        { title: 'Service Type', key: 'ServiceType' },
+        { title: 'Organization Name', key: 'Organization_Name' },
+        { title: 'Contact Person', key: 'ContactPerson' },
+        { title: 'Email', key: 'Email' },
+        { title: 'Phone', key: 'Phone' },
+        { title: 'Date of Start', key: 'DateOfStart' },
+        { title: 'Total Neighbors', key: 'TotalNeighbors' },
       ],
       services: [],
       loading: true,
