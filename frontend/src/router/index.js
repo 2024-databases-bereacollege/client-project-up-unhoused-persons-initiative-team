@@ -4,8 +4,8 @@ import store from '@/store'; // Import the main Vuex store
 // Import Views Components
 import HomeView from "@/views/HomeView.vue";
 import LoginPage from "@/views/LoginPage.vue";
-import ServiceProviders from '@/views/ServiceProviders.vue';
-import Services from '@/views/Services.vue';
+//import ServiceProviders from '@/views/ServiceProviders.vue';
+import ServicesAndProviders from '@/views/ServicesAndProviders.vue';
 import VolunteerTable from '@/views/VolunteerTable.vue';
 import NeighborTable from '@/views/NeighborTable.vue';
 import VisitRecord from '@/views/VisitRecord.vue';
@@ -21,8 +21,8 @@ const routes = [
   { path: '/login_page', component: LoginPage },
   { path: '/Instructions', component: Instructions },
   { path: '/Add_Visit', component: AddVisit, meta: { requiresAuth: true } }, //TODO: This needs to be a different security level.
-  { path: '/Service_Providers', component: ServiceProviders, meta: { requiresAuth: true } },
-  { path: '/Services', component: Services, meta: { requiresAuth: true } },
+  //{ path: '/Service_Providers', component: ServiceProviders, meta: { requiresAuth: true } },
+  { path: '/ServicesAndProviders', component: ServicesAndProviders, meta: { requiresAuth: true } },
   { path: '/Volunteers', component: VolunteerTable, meta: { requiresAuth: true } },
   { path: '/Neighbors', component: NeighborTable, meta: { requiresAuth: true } },
   { path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },

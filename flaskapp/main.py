@@ -337,22 +337,51 @@ def delete_service_provider(provider_id):
     
 ################ services below ############################
 # API endpoint to get services
-@app.route('/api/services', methods=['GET'])
+    
+# API endpoint to get services
+@app.route('/api/ServicesAndProviders', methods=['GET'])
 def get_services():
-    query = (Services
-             .select(Services, fn.COUNT(fn.DISTINCT(Visit_Record.NeighborID)).alias('TotalNeighbors'))
-             .join(Visit_Service)
-             .join(Visit_Record)
-             .group_by(Services))
-
+    query = (
+        Services
+        .select(Services, fn.COUNT(fn.DISTINCT(Visit_Record.NeighborID)).alias('TotalNeighbors'))
+        .join(Visit_Service)
+        .join(Visit_Record)
+        .switch(Services)
+        .join(Service_Providers)
+        .group_by(Services)
+    )
+    
     services = []
     for service in query:
-        service_dict = service.to_dict()
-        # Add the TotalNeighbors count to the dictionary that is being sent to frontend
+        service_dict = model_to_dict(service)
+        service_dict['Organization_Name'] = service.OrganizationID.Organization_Name
+        service_dict['ContactPerson'] = service.OrganizationID.ContactPerson
+        service_dict['Email'] = service.OrganizationID.Email
+        service_dict['Phone'] = service.OrganizationID.Phone
+        service_dict['DateOfStart'] = service.OrganizationID.DateOfStart
         service_dict['TotalNeighbors'] = service.TotalNeighbors
+        
+        del service_dict['OrganizationID']
+        
         services.append(service_dict)
-
+    
     return jsonify(services)
+# @app.route('/api/services', methods=['GET'])
+# def get_services():
+#     query = (Services
+#              .select(Services, fn.COUNT(fn.DISTINCT(Visit_Record.NeighborID)).alias('TotalNeighbors'))
+#              .join(Visit_Service)
+#              .join(Visit_Record)
+#              .group_by(Services))
+
+#     services = []
+#     for service in query:
+#         service_dict = service.to_dict()
+#         # Add the TotalNeighbors count to the dictionary that is being sent to frontend
+#         service_dict['TotalNeighbors'] = service.TotalNeighbors
+#         services.append(service_dict)
+
+#     return jsonify(services)
 
 # API endpoint to create services
 @app.route('/api/services', methods=['POST'])

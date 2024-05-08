@@ -32,13 +32,13 @@
     <font-awesome-icon :icon="faClipboardList" />
     <span>Visit Record</span>
   </router-link>
-  <router-link to="/Services" class="sidebar-link">
+  <router-link to="/ServicesAndProviders" class="sidebar-link">
     <font-awesome-icon :icon="faHandHoldingHeart" />
-    <span>Services</span>
-  </router-link>
+    <span>Services and Providers</span>
+  <!-- </router-link>
   <router-link to="/Service_Providers" class="sidebar-link">
     <font-awesome-icon :icon="faBuilding" />
-    <span>Service Providers</span>
+    <span>Service Providers</span> -->
   </router-link>
   <router-link to="/Inventory" class="sidebar-link">
     <font-awesome-icon :icon="faBox" />

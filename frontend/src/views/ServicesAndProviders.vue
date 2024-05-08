@@ -1,21 +1,25 @@
 <template>
   <div>
-    <v-data-table
-      :headers="headers"
-      :items="services"
-      :loading="loading"
-      class="elevation-1"
-    >
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.DateOfStart="{ item }">
-        {{ formatDate(item.DateOfStart) }}
-      </template>
-    </v-data-table>
+    <v-card>
+      <v-data-table
+        :headers="VDataTableHeaders"
+        :items="services"
+        :loading="loading"
+        class="elevation-1"
+      >
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.DateOfStart="{ item }">
+          {{ formatDate(item.DateOfStart) }}
+        </template>
+      </v-data-table>
+    </v-card>
   </div>
 </template>
 
 <script>
+
 export default {
+
   data() {
     return {
       headers: [
@@ -36,7 +40,7 @@ export default {
   },
   methods: {
     fetchServices() {
-      fetch('http://127.0.0.1:5000/api/services')
+      fetch('http://127.0.0.1:5000/api/ServicesAndProviders')
         .then(response => response.json())
         .then(data => {
           this.services = data;
