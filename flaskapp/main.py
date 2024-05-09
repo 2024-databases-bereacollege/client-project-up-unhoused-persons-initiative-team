@@ -666,7 +666,7 @@ def get_neighbor_details(neighbor_id):
         neighbor_info = {
             'NeighborID': neighbor.NeighborID,
             'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
-            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d')  # Format date of birth
+            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d') if neighbor.DateOfBirth else None
         }
         return jsonify(neighbor_info), 200
     except Neighbor.DoesNotExist:
