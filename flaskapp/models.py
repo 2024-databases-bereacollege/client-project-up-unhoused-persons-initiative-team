@@ -1,5 +1,5 @@
 from peewee import *
-import datetime
+from datetime import datetime 
 from playhouse.shortcuts import model_to_dict # Allows us to send data as dictionaries
 # Database Configuration
 db = PostgresqlDatabase("db",host="localhost",user="postgres",password="postgres") #updated from mydb = PostgresqlDatabase("postgres",host="localhost",user="postgres",password="postgres") 
@@ -22,7 +22,7 @@ class Services(baseModel):
     ServiceType = CharField(max_length=255)
     OrganizationID = ForeignKeyField(Service_Providers, backref='services') 
     ServiceDescription = TextField() 
-    
+
 class Volunteer(baseModel):
     VolunteerID = AutoField() 
     FirstName = CharField(max_length=255)
@@ -33,25 +33,25 @@ class Volunteer(baseModel):
     HasRecordAccess = BooleanField()
 
 class Neighbor(baseModel):
-    NeighborID = AutoField()  
-    FirstName = CharField(max_length=255)
-    LastName = CharField(max_length=255)
-    DateOfBirth = DateField()
-    Phone = CharField(max_length=20)
-    Location = TextField()  
-    Email = CharField(max_length=255)
-    Created_date = DateTimeField(default=datetime.datetime.now)
-    HasStateID = BooleanField()
-    HasPet = BooleanField()
-    HasChildren = BooleanField() # Added everything below this
-    HasMedication = BooleanField()
-    HasFoodInsecurity = BooleanField()
-    HasTransportation = BooleanField()
-    HasJob = BooleanField()
-    HasHousing = BooleanField()
-    HasInsurance = BooleanField()
-    HasIncome = BooleanField()
-    Notes = TextField()
+    NeighborID = AutoField()
+    FirstName = CharField(max_length=255, null=True)
+    LastName = CharField(max_length=255, null=True)
+    DateOfBirth = DateField(null=True, default=None)
+    Phone = CharField(max_length=20, null=True)
+    Location = TextField(null=True)
+    Email = CharField(max_length=255, null=True)
+    Created_date = DateTimeField(default=datetime.now)
+    HasStateID = BooleanField(default=False)
+    HasPet = BooleanField(default=False)
+    HasChildren = BooleanField(default=False)
+    HasMedication = BooleanField(default=False)
+    HasFoodInsecurity = BooleanField(default=False)
+    HasTransportation = BooleanField(default=False)
+    HasJob = BooleanField(default=False)
+    HasHousing = BooleanField(default=False)
+    HasInsurance = BooleanField(default=False)
+    HasIncome = BooleanField(default=False)
+    Notes = TextField(null=True)
 
 class Visit_Service(baseModel):
     RecordID = AutoField() 

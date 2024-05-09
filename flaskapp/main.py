@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, url_for, session, j
 from werkzeug.security import generate_password_hash, check_password_hash #Using for passwords 
 from flask_cors import CORS #to allow the front end to communicate with the back end
 from models import *
+from datetime import date
 
 
 app = Flask(__name__)
@@ -231,9 +232,44 @@ def get_neighbors():
 @app.route('/api/neighbors', methods=['POST'])
 def create_neighbor():
     data = request.get_json()
-    neighbor = Neighbor(**data)
+
+    # Handle DateOfBirth field
+    date_of_birth = data.get('DateOfBirth')
+    if date_of_birth:
+        try:
+            date_of_birth_value = date.fromisoformat(date_of_birth)
+        except ValueError:
+            # Handle invalid date format
+            return jsonify({'error': 'Invalid date format for DateOfBirth'}), 400
+    else:
+        date_of_birth_value = None
+
+    # Create a new Neighbor instance
+    neighbor_data = {
+        'FirstName': data.get('FirstName'),
+        'LastName': data.get('LastName'),
+        'DateOfBirth': date_of_birth_value,
+        'Phone': data.get('Phone'),
+        'Location': data.get('Location'),
+        'Email': data.get('Email'),
+        'Created_date': datetime.now(),
+        'HasStateID': data.get('HasStateID', False),
+        'HasPet': data.get('HasPet', False),
+        'HasChildren': data.get('HasChildren', False),
+        'HasMedication': data.get('HasMedication', False),
+        'HasFoodInsecurity': data.get('HasFoodInsecurity', False),
+        'HasTransportation': data.get('HasTransportation', False),
+        'HasJob': data.get('HasJob', False),
+        'HasHousing': data.get('HasHousing', False),
+        'HasInsurance': data.get('HasInsurance', False),
+        'HasIncome': data.get('HasIncome', False),
+        'Notes': data.get('Notes')
+    }
+
+    neighbor = Neighbor(**neighbor_data)
     neighbor.save()
-    return jsonify(neighbor.to_dict()), 201 #TODO needs testing
+
+    return jsonify(neighbor.to_dict()), 201
 
 # API endpoint to edit a neighbor
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['PUT'])
