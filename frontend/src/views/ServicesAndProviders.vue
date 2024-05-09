@@ -3,10 +3,10 @@
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <div>
-          <v-btn color="primary" @click="openAddServiceDialog">Add Service</v-btn>
+          <!---<v-btn color="primary" @click="openAddServiceDialog">Add Service</v-btn> -->
           <span class="text-h5 mx-4">Services and Providers</span>
         </div>
-        <v-btn color="primary" @click="openAddServiceProviderDialog">Add Service Provider</v-btn>
+        <!-- <v-btn color="primary" @click="openAddServiceProviderDialog">Add Service Provider</v-btn> -->
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -21,7 +21,7 @@
         </template>
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon>
+          <!-- <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon> -->
           <v-icon small @click="openDeleteDialog(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
@@ -42,7 +42,7 @@
 
 
 <!-- Edit Service Dialog -->
-<v-dialog v-model="editDialog" max-width="500px">
+<!-- <v-dialog v-model="editDialog" max-width="500px">
   <v-card>
     <v-card-title class="text-h5">Edit Service</v-card-title>
     <v-card-text>
@@ -57,10 +57,10 @@
       <v-btn color="blue darken-1" text @click="saveService">Save</v-btn>
     </v-card-actions>
   </v-card>
-</v-dialog>
+</v-dialog> -->
 
   <!-- Add Service Dialog -->
-  <v-dialog v-model="addServiceDialog" max-width="500px">
+  <!-- <v-dialog v-model="addServiceDialog" max-width="500px">
     <v-card>
       <v-card-title class="text-h5">Add Service</v-card-title>
       <v-card-text>
@@ -80,10 +80,10 @@
         <v-btn color="blue darken-1" text @click="addService">Add</v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </v-dialog> -->
 
 <!-- Add Service Provider Dialog -->
-<v-dialog v-model="addServiceProviderDialog" max-width="500px">
+<!-- <v-dialog v-model="addServiceProviderDialog" max-width="500px">
   <v-card>
     <v-card-title class="text-h5">Add Service Provider</v-card-title>
     <v-card-text>
@@ -100,7 +100,7 @@
     label="Service Provider"
   ></v-select>
       
-      <!-- Add the date picker component here -->
+      
       <v-menu
         v-model="dateMenu"
         :close-on-content-click="false"
@@ -132,7 +132,7 @@
       <v-btn color="blue darken-1" text @click="addServiceProvider">Add</v-btn>
     </v-card-actions>
   </v-card>
-</v-dialog>
+</v-dialog> -->
   </div>
 </template>
 
@@ -299,7 +299,7 @@ deleteService() {
 saveService() {
   const serviceID = this.editedItem.ServiceID;
   const organizationID = this.editedItem.OrganizationID;
-  console.log('Service ID:', serviceID);
+    console.log('Service ID:', serviceID);
   console.log('Organization ID:', organizationID);
 
   if (serviceID && organizationID) {
