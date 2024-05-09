@@ -1,7 +1,7 @@
 from datetime import datetime
 from models import *
 from peewee import *
-db = PostgresqlDatabase("db", host="localhost", user="postgres", password="postgres")
+db = PostgresqlDatabase("postgres", host="localhost", user="postgres", password="postgres")
 
 def generate_sample_data():
     # Sample data for Service_Providers table

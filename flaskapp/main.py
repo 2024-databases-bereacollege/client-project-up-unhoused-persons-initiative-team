@@ -544,13 +544,6 @@ def get_volunteers_with_record_access():
     volunteers = [volunteer.to_dict() for volunteer in query]
     return jsonify(volunteers)
 
-# 2. Find all the records of visits made to a particular neighbor #TODO ensure this works on individual neighbor pages! 
-@app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
-def get_visit_records_for_neighbor(neighbor_id):
-    query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
-
 
 # 3. Get a list of visit records along with the names of neighbors visited and the volunteer who made the visit
 #TODO NH i am removing date, if it makes sense to add, I will join visit service and add date
@@ -615,7 +608,7 @@ def get_neighbors_with_pets_count():
     return jsonify({'PetCount': pet_count})
 
 # 7. Find all visit records conducted on a specific date
-@app.route('/api/visit_records/date/<date:date_string>', methods=['GET'])
+@app.route('/api/visit_records/date/<date_string>', methods=['GET'])
 def get_visit_records_on_date(date_string):
     target_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()
     query = Visit_Record.select().where(Visit_Record.Date == target_date)
@@ -668,48 +661,6 @@ def get_visits_by_volunteer(volunteer_id):
     return jsonify(visits)
 
 
-
-#10 Get all visit records for a specific neighbor
-@app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
-def get_visit_records_for_neighbor(neighbor_id):
-    query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
-#11 Get neighbor details along with their visit records, services, and volunteers associated with those visit records.
-@app.route('/api/neighbor/<int:neighbor_id>', methods=['GET'])
-def get_neighbor_details(neighbor_id):
-    try:
-        neighbor = Neighbor.get_by_id(neighbor_id)
-        neighbor_info = {
-            'NeighborID': neighbor.NeighborID,
-            'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
-            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d')  # Format date of birth
-        }
-        visit_records_query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-        visit_records = []
-        for record in visit_records_query:
-            visit_info = {
-                'VisitID': record.VisitID,
-                'Date': record.Date.strftime('%Y-%m-%d'),  # Format visit date
-            }
-            services_query = Visit_Service.select().where(Visit_Service.RecordID == record.RecordID)
-            services_info = [service.ServiceType for service in services_query]
-            visit_info['Services'] = services_info
-            volunteers_query = Volunteer.select().join(Visit_Record).where(Visit_Record.RecordID == record.RecordID)
-            volunteers_info = [{
-                'VolunteerID': volunteer.VolunteerID,
-                'FullName': f"{volunteer.FirstName} {volunteer.LastName}"
-            } for volunteer in volunteers_query]
-            visit_info['Volunteers'] = volunteers_info
-            visit_records.append(visit_info)
-        return jsonify({
-            'NeighborInfo': neighbor_info,
-            'VisitRecords': visit_records
-        }), 200
-    except Neighbor.DoesNotExist:
-        return jsonify({'error': 'Neighbor not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 # 12. Get all visits conducted within a specified date range
 @app.route('/api/visit_records/range', methods=['GET'])
 def get_visits_in_date_range():
@@ -724,16 +675,7 @@ def get_neighbors_without_visits():
     query = Neighbor.select().where(~(Neighbor.neighbor_records.exists()))
     neighbors = [neighbor.to_dict() for neighbor in query]
     return jsonify(neighbors)
-# 14. Get list of organization providing service with the list of service they each provide
-@app.route('/api/providers/services', methods=['GET'])
-def get_providers_with_services():
-    query = Service_Providers.select()
-    providers_with_services = []
-    for provider in query:
-        provider_data = provider.to_dict()
-        provider_data['Services'] = [service.ServiceType for service in provider.services]
-        providers_with_services.append(provider_data)
-    return jsonify(providers_with_services)
+
 # 15.Get all volunteers who have provided a specific service
 @app.route('/api/services/<int:service_id>/volunteers', methods=['GET'])
 def get_volunteers_for_service(service_id):
@@ -744,15 +686,6 @@ def get_volunteers_for_service(service_id):
              .where(Visit_Service.ServiceID == service_id))
     volunteers = [volunteer.to_dict() for volunteer in query]
     return jsonify(volunteers)
-# 16. Get all visits conducted by a specific volunteer
-@app.route('/api/volunteers/<int:volunteer_id>/visits', methods=['GET'])
-def get_visits_by_volunteer(volunteer_id):
-    query = (Visit_Record
-             .select()
-             .join(Volunteer)
-             .where(Volunteer.VolunteerID == volunteer_id))
-    visits = [visit.to_dict() for visit in query]
-    return jsonify(visits)
 
 # @app.route('/api/services', methods=['GET'])
 # def get_services():
