@@ -14,6 +14,13 @@
         :loading="loading"
         class="elevation-1"
       >
+        <!-- Slot for the "Neighbor ID" column -->
+                <!-- eslint-disable-next-line vue/valid-v-slot -->
+  <template v-slot:item.NeighborID="{ item }">
+    <v-btn color="primary" small @click="openNeighborPage(item.NeighborID)">
+      {{ item.NeighborID }}
+    </v-btn>
+  </template>
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.actions="{ item }">
           <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon>
@@ -107,7 +114,7 @@ export default {
   data() {
   return {
     headers: [
-      { title: 'Neighbor ID', key: 'NeighborID', sortable: true },
+    { title: 'Neighbor ID', key: 'NeighborID', sortable: true, slot: 'item.NeighborID' },
       { title: 'First Name', key: 'FirstName' },
       { title: 'Last Name', key: 'LastName' },
       { title: 'Date of Birth', key: 'DateOfBirth' },
@@ -361,6 +368,14 @@ addNeighbor() {
       console.error('Error adding neighbor:', error);
     });
 },
+// This last section allows us to go to NeighborProfile with ID numbers
+
+renderNeighborIDButton(params) {
+    return `<v-btn color="primary" small @click="openNeighborPage(${params.value})">${params.value}</v-btn>`;
+  },
+  openNeighborPage(neighborID) {
+    this.$router.push({ name: 'NeighborProfile', params: { ID: neighborID } });
+  },
 },
 };
 </script>
