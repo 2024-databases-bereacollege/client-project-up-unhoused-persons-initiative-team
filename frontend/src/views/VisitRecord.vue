@@ -1,163 +1,242 @@
 <template>
   <div>
-    <data-table
-      tableTitle="Visit Records"
-      :edited-item="editedItem"
-      @update:edited-item="updateEditedItem"
-      @update:has-state-id="updateHasStateID"
-      @update:has-pet="updateHasPet"
-      @save="saveItem"
-      :headers="tableHeaders"
-      :items="neighbors"
-      :default-item="defaultItem"
-      :on-edit="editItem"
-      :on-delete="deleteItem"
-      @delete-item-confirm="deleteItemConfirm($event)"
-      @close="close"
-      @close-delete="closeDelete"
-      sort-by="NeighborID"
-      sort-order="asc"
-    ></data-table>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <div>
+          <v-btn color="primary" @click="openAddVolunteerDialog">Add Volunteer</v-btn>
+          <span class="text-h5 mx-4">Volunteers</span>
+        </div>
+      </v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="volunteers"
+        :items-per-page="100"
+        :loading="loading"
+        class="elevation-1"
+      >
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.actions="{ item }">
+          <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon>
+          <v-icon small @click="openDeleteDialog(item)">mdi-delete</v-icon>
+        </template>
+      </v-data-table>
+    </v-card>
+
+    <!-- Delete Volunteer Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Delete Volunteer</v-card-title>
+        <v-card-text>Are you sure you want to delete this volunteer?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeDeleteDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="deleteVolunteer">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Edit Volunteer Dialog -->
+    <v-dialog v-model="editDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Edit Volunteer</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="editedItem.FirstName" label="First Name"></v-text-field>
+          <v-text-field v-model="editedItem.LastName" label="Last Name"></v-text-field>
+          <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
+          <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
+          <v-checkbox v-model="editedItem.HasRecordAccess" label="Has Record Access"></v-checkbox>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="saveVolunteer">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Add Volunteer Dialog -->
+    <v-dialog v-model="addVolunteerDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Add Volunteer</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="newVolunteer.FirstName" label="First Name"></v-text-field>
+          <v-text-field v-model="newVolunteer.LastName" label="Last Name"></v-text-field>
+          <v-text-field v-model="newVolunteer.Email" label="Email"></v-text-field>
+          <v-text-field v-model="newVolunteer.Phone" label="Phone"></v-text-field>
+          <v-checkbox v-model="newVolunteer.HasRecordAccess" label="Has Record Access"></v-checkbox>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeAddVolunteerDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="addVolunteer">Add</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
+
 <script>
 import axios from 'axios';
-import DataTable from '@/components/NeighborDataTable.vue';
 
 export default {
-  components: {
-    DataTable,
-  },
-  data() {
-    return {
-      tableHeaders: [
-      {
-    title: 'Neighbor ID',
-    key: 'NeighborID',
-    sortable: true,
-    cellRenderer: this.renderNeighborIDLink,
-  },
-        { title: 'First Name', key: 'FirstName' },
-        { title: 'Last Name', key: 'LastName' },
-        { title: 'Date of Birth', key: 'DateOfBirth' },
-        { title: 'Phone', key: 'Phone' },
-        { title: 'Location', key: 'Location' },
-        { title: 'Email', key: 'Email' },
-        { title: 'Created Date', key: 'Created_date' },
-        { title: 'Has State ID', key: 'HasStateID' },
-        { title: 'Has Pet', key: 'HasPet' },
-        { title: 'Actions', key: 'actions', sortable: false },
+data() {
+  return {
+    headers: [
+      { title: 'First Name', key: 'FirstName' },
+      { title: 'Last Name', key: 'LastName' },
+      { title: 'Email', key: 'Email' },
+      { title: 'Phone', key: 'Phone' },
+      { title: 'Has Record Access', key: 'HasRecordAccess' },
+      { title: 'Actions', key: 'actions', sortable: false },
+    ],
+    volunteers: [],
+    loading: true,
+    deleteDialog: false,
+    editDialog: false,
+    addVolunteerDialog: false,
+    selectedItem: null,
+    editedIndex: -1,
+    editedItem: {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    },
+    defaultItem: {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    },
+    newVolunteer: {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    },
+  };
+},
 
-      ],
-      neighbors: [],
-      editedIndex: -1,
-      editedItem: {
-        NeighborID: '',
-        FirstName: '',
-        LastName: '',
-        DateOfBirth: '',
-        Phone: '',
-        Location: '',
-        Email: '',
-        Created_date: '',
-        HasStateID: false,
-        HasPet: false,
-      },
-      defaultItem: {
-        NeighborID: '',
-        FirstName: '',
-        LastName: '',
-        DateOfBirth: '',
-        Phone: '',
-        Location: '',
-        Email: '',
-        Created_date: '',
-        HasStateID: false,
-        HasPet: false,
-      },
+mounted() {
+  this.fetchVolunteers();
+},
+
+methods: {
+  // Fetching data
+  fetchVolunteers() {
+    fetch('http://127.0.0.1:5000/api/volunteers')
+      .then(response => response.json())
+      .then(data => {
+        this.volunteers = data;
+        console.log('Updated Volunteers:', this.volunteers);
+        this.loading = false;
+      })
+      .catch(error => {
+        console.error('Error fetching volunteers:', error);
+        this.loading = false;
+      });
+  },
+
+  // Dialog management
+  openEditDialog(item) {
+    this.selectedItem = item;
+    this.editedItem = {
+      VolunteerID: item.VolunteerID,
+      FirstName: item.FirstName,
+      LastName: item.LastName,
+      Email: item.Email,
+      Phone: item.Phone,
+      HasRecordAccess: item.HasRecordAccess,
     };
+    this.editDialog = true;
   },
-  created() {
-    this.fetchData();
+  closeEditDialog() {
+    this.selectedItem = null;
+    this.editedItem = {
+      VolunteerID: '',
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    };
+    this.editDialog = false;
+    console.log('Edit dialog closed');
   },
-  methods: {
-    fetchData() {
-      axios.get('http://127.0.0.1:5000/api/neighbors')
-        .then(response => {
-          this.neighbors = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        });
-    },
-    saveItem(item) {
-  if (this.editedIndex > -1) {
-    // Update an existing neighbor
-    const neighborID = this.neighbors[this.editedIndex].NeighborID;
-    axios.put(`http://127.0.0.1:5000/api/neighbors/${neighborID}`, item)
-      .then(response => {
-        Object.assign(this.neighbors[this.editedIndex], response.data);
-        this.close();
-      })
-      .catch(error => {
-        console.error('Error updating neighbor:', error);
-      });
-  } else {
-    // Create a new neighbor
-    // eslint-disable-next-line no-unused-vars
-    const { NeighborID, ...newNeighbor } = item; // Exclude NeighborID from the item object
-
-    newNeighbor.Created_date = new Date().toISOString();
-
-    axios.post('http://127.0.0.1:5000/api/neighbors', newNeighbor)
-      .then(response => {
-        this.neighbors.push(response.data);
-        this.close();
-      })
-      .catch(error => {
-        console.error('Error creating neighbor:', error);
-      });
-      }
-    },
-    deleteItemConfirm(index) {
-      const neighborID = this.neighbors[index].NeighborID;
-      axios.delete(`http://127.0.0.1:5000/api/neighbors/${neighborID}`)
-        .then(() => {
-          this.neighbors.splice(index, 1);
-          this.closeDelete();
-        })
-        .catch(error => {
-          console.error('Error deleting neighbor:', error);
-        });
-    },
-    editItem(item) {
-      this.editedIndex = this.neighbors.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-    },
-    renderNeighborIDLink(neighborID) {
-    return `<router-link to="/neighbors/${neighborID}">${neighborID}</router-link>`;
+  openDeleteDialog(item) {
+    this.selectedItem = item;
+    this.deleteDialog = true;
   },
-    deleteItem(item) {
-      this.editedIndex = this.neighbors.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-    },
-    updateHasStateID(value) {
-      this.editedItem.HasStateID = value;
-    },
-    updateHasPet(value) {
-      this.editedItem.HasPet = value;
-    },
-    close() {
-      this.editedIndex = -1;
-      this.editedItem = Object.assign({}, this.defaultItem);
-    },
-    closeDelete() {
-      this.editedIndex = -1;
-      this.editedItem = Object.assign({}, this.defaultItem);
-    },
-    updateEditedItem(item) {
-      this.editedItem = item;
-    },
+  closeDeleteDialog() {
+    this.selectedItem = null;
+    this.deleteDialog = false;
   },
+  openAddVolunteerDialog() {
+    this.addVolunteerDialog = true;
+  },
+  closeAddVolunteerDialog() {
+    this.newVolunteer = {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    };
+    this.addVolunteerDialog = false;
+  },
+// CRUD operations
+deleteVolunteer() {
+const volunteerID = this.selectedItem.VolunteerID;
+axios.delete(`http://127.0.0.1:5000/api/volunteers/${volunteerID}`)
+  .then(() => {
+    const index = this.volunteers.findIndex(volunteer => volunteer.VolunteerID === volunteerID);
+    if (index !== -1) {
+      this.volunteers.splice(index, 1);
+    }
+    this.closeDeleteDialog();
+  })
+  .catch(error => {
+    console.error('Error deleting volunteer:', error);
+  });
+},
+saveVolunteer() {
+const volunteerID = this.editedItem.VolunteerID;
+console.log('Edited Item:', this.editedItem);
+console.log('Volunteer ID:', volunteerID);
+if (volunteerID) {
+  // Update volunteer details
+  axios.put(`http://127.0.0.1:5000/api/volunteers/${volunteerID}`, {
+    FirstName: this.editedItem.FirstName,
+    LastName: this.editedItem.LastName,
+    Email: this.editedItem.Email,
+    Phone: this.editedItem.Phone,
+    HasRecordAccess: this.editedItem.HasRecordAccess,
+  })
+    .then(() => {
+      // Refresh the volunteers data after successful update
+      this.fetchVolunteers();
+      this.closeEditDialog();
+    })
+    .catch(error => {
+      console.error('Error updating volunteer:', error);
+    });
+} else {
+  console.error('Invalid volunteerID');
+}
+},
+addVolunteer() {
+axios.post('http://127.0.0.1:5000/api/volunteers', this.newVolunteer)
+  .then(response => {
+    this.volunteers.push(response.data);
+    this.closeAddVolunteerDialog();
+  })
+  .catch(error => {
+    console.error('Error adding volunteer:', error);
+  });
+},
+},
 };
 </script>

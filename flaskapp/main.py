@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, url_for, session, j
 from werkzeug.security import generate_password_hash, check_password_hash #Using for passwords 
 from flask_cors import CORS #to allow the front end to communicate with the back end
 from models import *
+from datetime import date
 
 
 app = Flask(__name__)
@@ -138,40 +139,7 @@ def individual_visit_log():
     # Return a success response
     return jsonify({'message': 'Data submitted successfully'})
 
-# # API endpoint to edit visit_log after adding a visit
-# @app.route('/api/IndividualVisitLog', methods=['PUT'])
-# def update_visit_log():
-#     data = request.get_json()
-#     inventory_data = data.get('inventory')
-#     visit_service_data = data.get('visit_service')
-#     volunteer_data = data.get('volunteer')
 
-#     response = {}
-#     # Update Inventory
-#     inventory_id = inventory_data.get('inventory_id')
-#     inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
-#     if inventory:
-#         for key, value in inventory_data.items():
-#             if key != 'inventory_id':  # Exclude the ID from the fields to update
-#                 setattr(inventory, key, value)
-#         inventory.save()
-#         response['inventory'] = inventory.to_dict()
-#     else:
-#         return jsonify({'error': 'Inventory not found'}), 404
-
-#     # Update Visit Service
-#     record_id = visit_service_data.get('record_id')
-#     visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
-#     if visit_service:
-#         for key, value in visit_service_data.items():
-#             if key != 'record_id':  # Exclude the ID from the fields to update
-#                 setattr(visit_service, key, value)
-#         visit_service.save()
-#         response['visit_service'] = visit_service.to_dict()
-#     else:
-#         return jsonify({'error': 'Visit service record not found'}), 404
-
-##############################################################
 
 ################ volunteers below ############################
 
@@ -239,11 +207,11 @@ def get_neighbors():
             'NeighborID': neighbor.NeighborID,
             'FirstName': neighbor.FirstName,
             'LastName': neighbor.LastName,
-            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d'),
+            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d') if neighbor.DateOfBirth else None,
             'Phone': neighbor.Phone,
             'Location': neighbor.Location,
             'Email': neighbor.Email,
-            'Created_date': neighbor.Created_date.strftime('%Y-%m-%d'),
+            'Created_date': neighbor.Created_date.strftime('%Y-%m-%d') if neighbor.Created_date else None,
             'HasStateID': neighbor.HasStateID,
             'HasPet': neighbor.HasPet,
             'HasChildren': neighbor.HasChildren,
@@ -264,9 +232,44 @@ def get_neighbors():
 @app.route('/api/neighbors', methods=['POST'])
 def create_neighbor():
     data = request.get_json()
-    neighbor = Neighbor(**data)
+
+    # Handle DateOfBirth field
+    date_of_birth = data.get('DateOfBirth')
+    if date_of_birth:
+        try:
+            date_of_birth_value = date.fromisoformat(date_of_birth)
+        except ValueError:
+            # Handle invalid date format
+            return jsonify({'error': 'Invalid date format for DateOfBirth'}), 400
+    else:
+        date_of_birth_value = None
+
+    # Create a new Neighbor instance
+    neighbor_data = {
+        'FirstName': data.get('FirstName'),
+        'LastName': data.get('LastName'),
+        'DateOfBirth': date_of_birth_value,
+        'Phone': data.get('Phone'),
+        'Location': data.get('Location'),
+        'Email': data.get('Email'),
+        'Created_date': datetime.now(),
+        'HasStateID': data.get('HasStateID', False),
+        'HasPet': data.get('HasPet', False),
+        'HasChildren': data.get('HasChildren', False),
+        'HasMedication': data.get('HasMedication', False),
+        'HasFoodInsecurity': data.get('HasFoodInsecurity', False),
+        'HasTransportation': data.get('HasTransportation', False),
+        'HasJob': data.get('HasJob', False),
+        'HasHousing': data.get('HasHousing', False),
+        'HasInsurance': data.get('HasInsurance', False),
+        'HasIncome': data.get('HasIncome', False),
+        'Notes': data.get('Notes')
+    }
+
+    neighbor = Neighbor(**neighbor_data)
     neighbor.save()
-    return jsonify(neighbor.to_dict()), 201 #TODO needs testing
+
+    return jsonify(neighbor.to_dict()), 201
 
 # API endpoint to edit a neighbor
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['PUT'])
@@ -293,50 +296,9 @@ def delete_neighbor(neighbor_id):
 
 ################ neighbors above ############################
 
-################ service providers below ############################
+################ services below - Along with editing service providers ############################
 
-# API endpoint to get service providers
-@app.route('/api/service_providers', methods=['GET'])
-def get_service_providers():
-    query = Service_Providers.select()
-    service_providers = [provider.to_dict() for provider in query]
-    return jsonify(service_providers)
-
-# API endpoint to create service providers
-@app.route('/api/service_providers', methods=['POST'])
-def create_service_provider():
-    data = request.get_json()
-    provider = Service_Providers(**data)
-    provider.save()
-    return jsonify(provider.to_dict()), 201
-
-# API endpoint to edit service providers
-@app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
-def update_service_provider(provider_id):
-    data = request.get_json()
-    provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
-    if provider:
-        for key, value in data.items():
-            setattr(provider, key, value)
-        provider.save()
-        return jsonify(provider.to_dict())
-    else:
-        return jsonify({'error': 'Service Provider not found'}), 404
-    
-# API endpoint to delete service providers
-@app.route('/api/service_providers/<int:provider_id>', methods=['DELETE'])
-def delete_service_provider(provider_id):
-    provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
-    if provider:
-        provider.delete_instance()
-        return '', 204
-    else:
-        return jsonify({'error': 'Service Provider not found'}), 404
-
-################ service providers above ############################
-    
-################ services below ############################
-    # API endpoint to get services for join table
+# API endpoint to get services for join table
 @app.route('/api/ServicesAndProviders', methods=['GET'])
 def get_services():
     query = (
@@ -360,13 +322,105 @@ def get_services():
         service_dict['TotalNeighbors'] = service.TotalNeighbors
         service_dict['ServiceDescription'] = service.ServiceDescription
         
-        #del service_dict['ServiceID'] adding this back so we can delete based on service ID
         del service_dict['OrganizationID']
         
         services.append(service_dict)
     
     return jsonify(services)
 
+# API endpoint to get service providers
+@app.route('/api/service_providers', methods=['GET'])
+def get_service_providers():
+    query = Service_Providers.select()
+    service_providers = [provider.to_dict() for provider in query]
+    return jsonify(service_providers)
+
+# API endpoint to edit a service
+@app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
+def update_service(service_id):
+    data = request.get_json()
+    print(f"Received data for updating service: {data}")  # Add logging statement
+    try:
+        service = Services.get(Services.ServiceID == service_id)
+        service.ServiceType = data.get('ServiceType', service.ServiceType)
+        service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
+        service.OrganizationID = data.get('OrganizationID', service.OrganizationID)
+        service.save()
+        print(f"Service updated successfully: {service.to_dict()}")  # Add logging statement
+        return jsonify({'message': 'Service updated successfully'})
+    except Services.DoesNotExist:
+        return jsonify({'error': 'Service not found'}), 404
+
+# API endpoint to edit a service provider
+@app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
+def update_service_provider(provider_id):
+    data = request.get_json()
+    print(f"Received data for updating service provider: {data}")  # Add logging statement
+    try:
+        provider = Service_Providers.get(Service_Providers.OrganizationID == provider_id)
+        provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
+        provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
+        provider.Email = data.get('Email', provider.Email)
+        provider.Phone = data.get('Phone', provider.Phone)
+        provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
+        provider.save()
+        print(f"Service provider updated successfully: {provider.to_dict()}")  # Add logging statement
+        return jsonify({'message': 'Service Provider updated successfully'})
+    except Service_Providers.DoesNotExist:
+        return jsonify({'error': 'Service Provider not found'}), 404
+
+
+
+
+
+
+
+
+
+
+# # API endpoint to edit a service and its associated service provider
+# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
+# def update_service_and_provider(service_id):
+#     data = request.get_json()
+    
+#     try:
+#         service = Services.get(Services.ServiceID == service_id)
+#         provider = Service_Providers.get(Service_Providers.OrganizationID == service.OrganizationID)
+        
+#         # Update service fields
+#         service.ServiceType = data.get('ServiceType', service.ServiceType)
+#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
+#         service.save()
+        
+#         # Update service provider fields
+#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
+#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
+#         provider.Email = data.get('Email', provider.Email)
+#         provider.Phone = data.get('Phone', provider.Phone)
+#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
+#         provider.save()
+        
+#         return jsonify({'message': 'Service and provider updated successfully'})
+#     except Services.DoesNotExist:
+#         return jsonify({'error': 'Service not found'}), 404
+#     except Service_Providers.DoesNotExist:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+
+
+
+# # API endpoint to edit a service provider
+# @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
+# def update_service_provider(provider_id):
+#     data = request.get_json()
+#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+#     if provider:
+#         for key, value in data.items():
+#             setattr(provider, key, value)
+#         provider.save()
+#         return jsonify(provider.to_dict())
+#     else:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+    
     # API endpoint to delete a service from join table
 @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['DELETE'])
 def delete_service(service_id):
@@ -378,55 +432,8 @@ def delete_service(service_id):
         return jsonify({'error': 'Service not found'}), 404
 
 
-# @app.route('/api/services', methods=['GET'])
-# def get_services():
-#     query = (Services
-#              .select(Services, fn.COUNT(fn.DISTINCT(Visit_Record.NeighborID)).alias('TotalNeighbors'))
-#              .join(Visit_Service)
-#              .join(Visit_Record)
-#              .group_by(Services))
 
-#     services = []
-#     for service in query:
-#         service_dict = service.to_dict()
-#         # Add the TotalNeighbors count to the dictionary that is being sent to frontend
-#         service_dict['TotalNeighbors'] = service.TotalNeighbors
-#         services.append(service_dict)
-
-#     return jsonify(services)
-
-# API endpoint to create services
-# @app.route('/api/services', methods=['POST'])
-# def create_service():
-#     data = request.get_json()
-#     service = Services(**data)
-#     service.save()
-#     return jsonify(service.to_dict()), 201
-
-# # API endpoint to edit services
-# @app.route('/api/services/<int:service_id>', methods=['PUT'])
-# def update_service(service_id):
-#     data = request.get_json()
-#     service = Services.get_or_none(Services.ServiceID == service_id)
-#     if service:
-#         for key, value in data.items():
-#             setattr(service, key, value)
-#         service.save()
-#         return jsonify(service.to_dict())
-#     else:
-#         return jsonify({'error': 'Service not found'}), 404
-
-# API endpoint to delete services
-# @app.route('/api/services/<int:service_id>', methods=['DELETE'])
-# def delete_service(service_id):
-#     service = Services.get_or_none(Services.ServiceID == service_id)
-#     if service:
-#         service.delete_instance()
-#         return '', 204
-#     else:
-#         return jsonify({'error': 'Service not found'}), 404
-    
-################ services above ############################
+################ services above - And service providers ############################
     
 ################ visit records below ############################
 # API endpoint to get visit records
@@ -509,7 +516,7 @@ def delete_inventory(inventory_id):
         return jsonify({'error': 'Inventory Item not found'}), 404
     
 ################ inventory above ############################
-#TODO everything below this is currently not in use, and needs to either be deleted or implemented. 
+#TODO everything below this needs editing. 
 ################ inventory usage below ############################
 
 
@@ -666,167 +673,167 @@ if __name__ == '__main__':
 
 
 
-# 4. Count the number of times each service has been provided
-@app.route('/api/services/count', methods=['GET'])
-def get_service_counts():
-    query = (Visit_Service
-             .select(Visit_Service.ServiceID, fn.Count(Visit_Service.ServiceOrder).alias('Count'))
-             .group_by(Visit_Service.ServiceID))
-    service_counts = [{
-        'ServiceID': service.ServiceID,
-        'Count': service.Count
-    } for service in query]
-    return jsonify(service_counts)
+# # 4. Count the number of times each service has been provided
+# @app.route('/api/services/count', methods=['GET'])
+# def get_service_counts():
+#     query = (Visit_Service
+#              .select(Visit_Service.ServiceID, fn.Count(Visit_Service.ServiceOrder).alias('Count'))
+#              .group_by(Visit_Service.ServiceID))
+#     service_counts = [{
+#         'ServiceID': service.ServiceID,
+#         'Count': service.Count
+#     } for service in query]
+#     return jsonify(service_counts)
 
-# 5. Get a list of items in the inventory that will expire within a specified period
-@app.route('/api/inventory/expiring', methods=['GET'])
-def get_expiring_inventory():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    query = Inventory.select().where((Inventory.ExpirationDate >= start_date) & (Inventory.ExpirationDate <= end_date))
-    expiring_inventory = [item.to_dict() for item in query]
-    return jsonify(expiring_inventory)
-
-
-# 7. Find all visit records conducted on a specific date
-@app.route('/api/visit_records/date/<date:date_string>', methods=['GET'])
-def get_visit_records_on_date(date_string):
-    target_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()
-    query = Visit_Record.select().where(Visit_Record.Date == target_date)
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
-
-# 8.Get list of services provided by a specific organization every year
-@app.route('/api/services/provider/<string:provider_id>/year/<int:year>', methods=['GET'])
-def get_services_by_provider_year(provider_id, year):
-    query = (Services
-             .select(Services, fn.COUNT(Visit_Record.RecordID).alias('ServiceCount'))
-             .join(Visit_Service)
-             .join(Visit_Record)
-             .where((Services.OrganizationID == provider_id) & (fn.EXTRACT('year', Visit_Record.Date) == year))
-             .group_by(Services))
-    services_by_year = [{
-        'ServiceID': service.ServiceID,
-        'ServiceType': service.ServiceType,
-        'ServiceCount': service.ServiceCount
-    } for service in query]
-    return jsonify(services_by_year)
-
-# 9. Get list of organization providing service with the list of service they each provide
-@app.route('/api/providers/services', methods=['GET'])
-def get_providers_with_services():
-    query = Service_Providers.select()
-    providers_with_services = []
-    for provider in query:
-        provider_data = provider.to_dict()
-        provider_data['Services'] = [service.ServiceType for service in provider.services]
-        providers_with_services.append(provider_data)
-    return jsonify(providers_with_services)
-
-#10 Get all visit records for a specific neighbor 
-@app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
-def get_visit_records_for_neighbor(neighbor_id):
-    query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
+# # 5. Get a list of items in the inventory that will expire within a specified period
+# @app.route('/api/inventory/expiring', methods=['GET'])
+# def get_expiring_inventory():
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+#     query = Inventory.select().where((Inventory.ExpirationDate >= start_date) & (Inventory.ExpirationDate <= end_date))
+#     expiring_inventory = [item.to_dict() for item in query]
+#     return jsonify(expiring_inventory)
 
 
-# 16. Get all visits conducted by a specific volunteer
-@app.route('/api/volunteers/<int:volunteer_id>/visits', methods=['GET'])
-def get_visits_by_volunteer(volunteer_id):
-    query = (Visit_Record
-             .select()
-             .join(Volunteer)
-             .where(Volunteer.VolunteerID == volunteer_id))
-    visits = [visit.to_dict() for visit in query]
-    return jsonify(visits)
+# # 7. Find all visit records conducted on a specific date
+# @app.route('/api/visit_records/date/<date:date_string>', methods=['GET'])
+# def get_visit_records_on_date(date_string):
+#     target_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()
+#     query = Visit_Record.select().where(Visit_Record.Date == target_date)
+#     visit_records = [record.to_dict() for record in query]
+#     return jsonify(visit_records)
+
+# # 8.Get list of services provided by a specific organization every year
+# @app.route('/api/services/provider/<string:provider_id>/year/<int:year>', methods=['GET'])
+# def get_services_by_provider_year(provider_id, year):
+#     query = (Services
+#              .select(Services, fn.COUNT(Visit_Record.RecordID).alias('ServiceCount'))
+#              .join(Visit_Service)
+#              .join(Visit_Record)
+#              .where((Services.OrganizationID == provider_id) & (fn.EXTRACT('year', Visit_Record.Date) == year))
+#              .group_by(Services))
+#     services_by_year = [{
+#         'ServiceID': service.ServiceID,
+#         'ServiceType': service.ServiceType,
+#         'ServiceCount': service.ServiceCount
+#     } for service in query]
+#     return jsonify(services_by_year)
+
+# # 9. Get list of organization providing service with the list of service they each provide
+# @app.route('/api/providers/services', methods=['GET'])
+# def get_providers_with_services():
+#     query = Service_Providers.select()
+#     providers_with_services = []
+#     for provider in query:
+#         provider_data = provider.to_dict()
+#         provider_data['Services'] = [service.ServiceType for service in provider.services]
+#         providers_with_services.append(provider_data)
+#     return jsonify(providers_with_services)
+
+# #10 Get all visit records for a specific neighbor 
+# @app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
+# def get_visit_records_for_neighbor(neighbor_id):
+#     query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
+#     visit_records = [record.to_dict() for record in query]
+#     return jsonify(visit_records)
+
+
+# # 16. Get all visits conducted by a specific volunteer
+# @app.route('/api/volunteers/<int:volunteer_id>/visits', methods=['GET'])
+# def get_visits_by_volunteer(volunteer_id):
+#     query = (Visit_Record
+#              .select()
+#              .join(Volunteer)
+#              .where(Volunteer.VolunteerID == volunteer_id))
+#     visits = [visit.to_dict() for visit in query]
+#     return jsonify(visits)
 
 
 
-#10 Get all visit records for a specific neighbor
-@app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
-def get_visit_records_for_neighbor(neighbor_id):
-    query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-    visit_records = [record.to_dict() for record in query]
-    return jsonify(visit_records)
-#11 Get neighbor details along with their visit records, services, and volunteers associated with those visit records.
-@app.route('/api/neighbor/<int:neighbor_id>', methods=['GET'])
-def get_neighbor_details(neighbor_id):
-    try:
-        neighbor = Neighbor.get_by_id(neighbor_id)
-        neighbor_info = {
-            'NeighborID': neighbor.NeighborID,
-            'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
-            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d')  # Format date of birth
-        }
-        visit_records_query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
-        visit_records = []
-        for record in visit_records_query:
-            visit_info = {
-                'VisitID': record.VisitID,
-                'Date': record.Date.strftime('%Y-%m-%d'),  # Format visit date
-            }
-            services_query = Visit_Service.select().where(Visit_Service.RecordID == record.RecordID)
-            services_info = [service.ServiceType for service in services_query]
-            visit_info['Services'] = services_info
-            volunteers_query = Volunteer.select().join(Visit_Record).where(Visit_Record.RecordID == record.RecordID)
-            volunteers_info = [{
-                'VolunteerID': volunteer.VolunteerID,
-                'FullName': f"{volunteer.FirstName} {volunteer.LastName}"
-            } for volunteer in volunteers_query]
-            visit_info['Volunteers'] = volunteers_info
-            visit_records.append(visit_info)
-        return jsonify({
-            'NeighborInfo': neighbor_info,
-            'VisitRecords': visit_records
-        }), 200
-    except Neighbor.DoesNotExist:
-        return jsonify({'error': 'Neighbor not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-# 12. Get all visits conducted within a specified date range
-@app.route('/api/visit_records/range', methods=['GET'])
-def get_visits_in_date_range():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    query = Visit_Record.select().where((Visit_Record.Date >= start_date) & (Visit_Record.Date <= end_date))
-    visits = [visit.to_dict() for visit in query]
-    return jsonify(visits)
-# 13. Get all neighbors who have not received any visits
-@app.route('/api/neighbors/no_visits', methods=['GET'])
-def get_neighbors_without_visits():
-    query = Neighbor.select().where(~(Neighbor.neighbor_records.exists()))
-    neighbors = [neighbor.to_dict() for neighbor in query]
-    return jsonify(neighbors)
-# 14. Get list of organization providing service with the list of service they each provide
-@app.route('/api/providers/services', methods=['GET'])
-def get_providers_with_services():
-    query = Service_Providers.select()
-    providers_with_services = []
-    for provider in query:
-        provider_data = provider.to_dict()
-        provider_data['Services'] = [service.ServiceType for service in provider.services]
-        providers_with_services.append(provider_data)
-    return jsonify(providers_with_services)
-# 15.Get all volunteers who have provided a specific service
-@app.route('/api/services/<int:service_id>/volunteers', methods=['GET'])
-def get_volunteers_for_service(service_id):
-    query = (Volunteer
-             .select(Volunteer)
-             .join(Visit_Record)
-             .join(Visit_Service)
-             .where(Visit_Service.ServiceID == service_id))
-    volunteers = [volunteer.to_dict() for volunteer in query]
-    return jsonify(volunteers)
-# 16. Get all visits conducted by a specific volunteer
-@app.route('/api/volunteers/<int:volunteer_id>/visits', methods=['GET'])
-def get_visits_by_volunteer(volunteer_id):
-    query = (Visit_Record
-             .select()
-             .join(Volunteer)
-             .where(Volunteer.VolunteerID == volunteer_id))
-    visits = [visit.to_dict() for visit in query]
-    return jsonify(visits)
+# #10 Get all visit records for a specific neighbor
+# @app.route('/api/visit_records/<int:neighbor_id>', methods=['GET'])
+# def get_visit_records_for_neighbor(neighbor_id):
+#     query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
+#     visit_records = [record.to_dict() for record in query]
+#     return jsonify(visit_records)
+# #11 Get neighbor details along with their visit records, services, and volunteers associated with those visit records.
+# @app.route('/api/neighbor/<int:neighbor_id>', methods=['GET'])
+# def get_neighbor_details(neighbor_id):
+#     try:
+#         neighbor = Neighbor.get_by_id(neighbor_id)
+#         neighbor_info = {
+#             'NeighborID': neighbor.NeighborID,
+#             'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
+#             'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d')  # Format date of birth
+#         }
+#         visit_records_query = Visit_Record.select().where(Visit_Record.NeighborID == neighbor_id)
+#         visit_records = []
+#         for record in visit_records_query:
+#             visit_info = {
+#                 'VisitID': record.VisitID,
+#                 'Date': record.Date.strftime('%Y-%m-%d'),  # Format visit date
+#             }
+#             services_query = Visit_Service.select().where(Visit_Service.RecordID == record.RecordID)
+#             services_info = [service.ServiceType for service in services_query]
+#             visit_info['Services'] = services_info
+#             volunteers_query = Volunteer.select().join(Visit_Record).where(Visit_Record.RecordID == record.RecordID)
+#             volunteers_info = [{
+#                 'VolunteerID': volunteer.VolunteerID,
+#                 'FullName': f"{volunteer.FirstName} {volunteer.LastName}"
+#             } for volunteer in volunteers_query]
+#             visit_info['Volunteers'] = volunteers_info
+#             visit_records.append(visit_info)
+#         return jsonify({
+#             'NeighborInfo': neighbor_info,
+#             'VisitRecords': visit_records
+#         }), 200
+#     except Neighbor.DoesNotExist:
+#         return jsonify({'error': 'Neighbor not found'}), 404
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+# # 12. Get all visits conducted within a specified date range
+# @app.route('/api/visit_records/range', methods=['GET'])
+# def get_visits_in_date_range():
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+#     query = Visit_Record.select().where((Visit_Record.Date >= start_date) & (Visit_Record.Date <= end_date))
+#     visits = [visit.to_dict() for visit in query]
+#     return jsonify(visits)
+# # 13. Get all neighbors who have not received any visits
+# @app.route('/api/neighbors/no_visits', methods=['GET'])
+# def get_neighbors_without_visits():
+#     query = Neighbor.select().where(~(Neighbor.neighbor_records.exists()))
+#     neighbors = [neighbor.to_dict() for neighbor in query]
+#     return jsonify(neighbors)
+# # 14. Get list of organization providing service with the list of service they each provide
+# @app.route('/api/providers/services', methods=['GET'])
+# def get_providers_with_services():
+#     query = Service_Providers.select()
+#     providers_with_services = []
+#     for provider in query:
+#         provider_data = provider.to_dict()
+#         provider_data['Services'] = [service.ServiceType for service in provider.services]
+#         providers_with_services.append(provider_data)
+#     return jsonify(providers_with_services)
+# # 15.Get all volunteers who have provided a specific service
+# @app.route('/api/services/<int:service_id>/volunteers', methods=['GET'])
+# def get_volunteers_for_service(service_id):
+#     query = (Volunteer
+#              .select(Volunteer)
+#              .join(Visit_Record)
+#              .join(Visit_Service)
+#              .where(Visit_Service.ServiceID == service_id))
+#     volunteers = [volunteer.to_dict() for volunteer in query]
+#     return jsonify(volunteers)
+# # 16. Get all visits conducted by a specific volunteer
+# @app.route('/api/volunteers/<int:volunteer_id>/visits', methods=['GET'])
+# def get_visits_by_volunteer(volunteer_id):
+#     query = (Visit_Record
+#              .select()
+#              .join(Volunteer)
+#              .where(Volunteer.VolunteerID == volunteer_id))
+#     visits = [visit.to_dict() for visit in query]
+#     return jsonify(visits)
 
 
     # # Update Volunteer
@@ -842,3 +849,129 @@ def get_visits_by_volunteer(volunteer_id):
     #     return jsonify({'error': 'Volunteer not found'}), 404
 
     # return jsonify(response)
+
+
+# # API endpoint to edit visit_log after adding a visit
+# @app.route('/api/IndividualVisitLog', methods=['PUT'])
+# def update_visit_log():
+#     data = request.get_json()
+#     inventory_data = data.get('inventory')
+#     visit_service_data = data.get('visit_service')
+#     volunteer_data = data.get('volunteer')
+
+#     response = {}
+#     # Update Inventory
+#     inventory_id = inventory_data.get('inventory_id')
+#     inventory = Inventory.get_or_none(Inventory.InventoryID == inventory_id)
+#     if inventory:
+#         for key, value in inventory_data.items():
+#             if key != 'inventory_id':  # Exclude the ID from the fields to update
+#                 setattr(inventory, key, value)
+#         inventory.save()
+#         response['inventory'] = inventory.to_dict()
+#     else:
+#         return jsonify({'error': 'Inventory not found'}), 404
+
+#     # Update Visit Service
+#     record_id = visit_service_data.get('record_id')
+#     visit_service = Visit_Service.get_or_none(Visit_Service.RecordID == record_id)
+#     if visit_service:
+#         for key, value in visit_service_data.items():
+#             if key != 'record_id':  # Exclude the ID from the fields to update
+#                 setattr(visit_service, key, value)
+#         visit_service.save()
+#         response['visit_service'] = visit_service.to_dict()
+#     else:
+#         return jsonify({'error': 'Visit service record not found'}), 404
+
+##############################################################
+
+# @app.route('/api/services', methods=['GET'])
+# def get_services():
+#     query = (Services
+#              .select(Services, fn.COUNT(fn.DISTINCT(Visit_Record.NeighborID)).alias('TotalNeighbors'))
+#              .join(Visit_Service)
+#              .join(Visit_Record)
+#              .group_by(Services))
+
+#     services = []
+#     for service in query:
+#         service_dict = service.to_dict()
+#         # Add the TotalNeighbors count to the dictionary that is being sent to frontend
+#         service_dict['TotalNeighbors'] = service.TotalNeighbors
+#         services.append(service_dict)
+
+#     return jsonify(services)
+
+# API endpoint to create services
+# @app.route('/api/services', methods=['POST'])
+# def create_service():
+#     data = request.get_json()
+#     service = Services(**data)
+#     service.save()
+#     return jsonify(service.to_dict()), 201
+
+# # API endpoint to edit services
+# @app.route('/api/services/<int:service_id>', methods=['PUT'])
+# def update_service(service_id):
+#     data = request.get_json()
+#     service = Services.get_or_none(Services.ServiceID == service_id)
+#     if service:
+#         for key, value in data.items():
+#             setattr(service, key, value)
+#         service.save()
+#         return jsonify(service.to_dict())
+#     else:
+#         return jsonify({'error': 'Service not found'}), 404
+
+# API endpoint to delete services
+# @app.route('/api/services/<int:service_id>', methods=['DELETE'])
+# def delete_service(service_id):
+#     service = Services.get_or_none(Services.ServiceID == service_id)
+#     if service:
+#         service.delete_instance()
+#         return '', 204
+#     else:
+#         return jsonify({'error': 'Service not found'}), 404
+    
+################ service providers below ############################
+
+# # API endpoint to get service providers
+# @app.route('/api/service_providers', methods=['GET'])
+# def get_service_providers():
+#     query = Service_Providers.select()
+#     service_providers = [provider.to_dict() for provider in query]
+#     return jsonify(service_providers)
+
+# # API endpoint to create service providers
+# @app.route('/api/service_providers', methods=['POST'])
+# def create_service_provider():
+#     data = request.get_json()
+#     provider = Service_Providers(**data)
+#     provider.save()
+#     return jsonify(provider.to_dict()), 201
+
+# # API endpoint to edit service providers
+# @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
+# def update_service_provider(provider_id):
+#     data = request.get_json()
+#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+#     if provider:
+#         for key, value in data.items():
+#             setattr(provider, key, value)
+#         provider.save()
+#         return jsonify(provider.to_dict())
+#     else:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+    
+# # API endpoint to delete service providers
+# @app.route('/api/service_providers/<int:provider_id>', methods=['DELETE'])
+# def delete_service_provider(provider_id):
+#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+#     if provider:
+#         provider.delete_instance()
+#         return '', 204
+#     else:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+
+################ service providers above ############################
