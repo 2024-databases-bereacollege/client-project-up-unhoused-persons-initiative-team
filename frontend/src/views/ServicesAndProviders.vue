@@ -42,27 +42,26 @@
 
 
   <!-- Edit Service Dialog -->
-  <v-dialog v-model="editDialog" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">Edit Service</v-card-title>
-      <v-card-text>
-        <v-text-field v-model="editedItem.ServiceType" label="Service Type"></v-text-field>
-        <v-text-field v-model="editedItem.ServiceDescription" label="Service Description"></v-text-field>
-        <v-select
-          v-model="editedItem.OrganizationID"
-          :items="serviceProviders"
-          item-text="Organization_Name"
-          item-value="OrganizationID"
-          label="Service Provider"
-        ></v-select>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
-        <v-btn color="blue darken-1" text @click="saveService">Save</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+<!-- Edit Service Dialog -->
+<v-dialog v-model="editDialog" max-width="500px">
+  <v-card>
+    <v-card-title class="text-h5">Edit Service</v-card-title>
+    <v-card-text>
+      <v-text-field v-model="editedItem.ServiceType" label="Service Type"></v-text-field>
+      <v-text-field v-model="editedItem.ServiceDescription" label="Service Description"></v-text-field>
+      <v-text-field v-model="editedItem.Organization_Name" label="Organization Name"></v-text-field>
+      <v-text-field v-model="editedItem.ContactPerson" label="Contact Person"></v-text-field>
+      <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
+      <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
+      <v-text-field v-model="editedItem.DateOfStart" label="Date of Start"></v-text-field>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
+      <v-btn color="blue darken-1" text @click="saveService">Save</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
   <!-- Add Service Dialog -->
   <v-dialog v-model="addServiceDialog" max-width="500px">
@@ -218,6 +217,7 @@ export default {
       .then(response => response.json())
       .then(data => {
         this.services = data;
+        console.log('Updated Services:', this.services);
         this.loading = false;
       })
       .catch(error => {
@@ -239,18 +239,36 @@ export default {
 
   // Dialog management
   openEditDialog(item) {
-    this.selectedItem = item;
-    this.editedItem = Object.assign({}, item);
-    this.editDialog = true;
-  },
+  this.selectedItem = item;
+  this.editedItem = {
+    ServiceID: item.ServiceID,
+    ServiceType: item.ServiceType,
+    ServiceDescription: item.ServiceDescription,
+    OrganizationID: item.OrganizationID,
+    Organization_Name: item.Organization_Name,
+    ContactPerson: item.ContactPerson,
+    Email: item.Email,
+    Phone: item.Phone,
+    DateOfStart: item.DateOfStart,
+  };
+  this.editDialog = true;
+},
   closeEditDialog() {
     this.selectedItem = null;
     this.editedItem = {
+      ServiceID: '',
       ServiceType: '',
       ServiceDescription: '',
-      // Reset other properties as needed
+      OrganizationID: null,
+      Organization_Name: '',
+      ContactPerson: '',
+      Email: '',
+      Phone: '',
+      DateOfStart: '',
     };
     this.editDialog = false;
+    console.log('Edit dialog closed'); 
+
   },
   openDeleteDialog(item) {
     this.selectedItem = item;
@@ -286,20 +304,7 @@ export default {
   },
 
   // CRUD operations
-  saveItem() {
-    // Make an API call to update the service
-    axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${this.selectedItem.ServiceID}`, this.editedItem)
-      .then(() => {
-        const index = this.services.findIndex(service => service.ServiceID === this.selectedItem.ServiceID);
-        if (index !== -1) {
-          this.services.splice(index, 1, this.editedItem);
-        }
-        this.closeEditDialog();
-      })
-      .catch(error => {
-        console.error('Error updating service:', error);
-      });
-  },
+
   deleteService() {
     const serviceID = this.selectedItem.ServiceID;
     axios.delete(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`)
@@ -315,18 +320,45 @@ export default {
       });
   },
   saveService() {
-    axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${this.editedItem.ServiceID}`, this.editedItem)
+  const serviceID = this.editedItem.ServiceID;
+  const organizationID = this.editedItem.OrganizationID;
+  console.log('Edited Item:', this.editedItem); 
+  console.log('Service ID:', serviceID);  
+  console.log('Organization ID:', organizationID);   
+
+
+  if (serviceID && organizationID) {
+    // Update service details
+    axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`, {
+      ServiceType: this.editedItem.ServiceType,
+      ServiceDescription: this.editedItem.ServiceDescription,
+      OrganizationID: organizationID,
+    })
       .then(() => {
-        const index = this.services.findIndex(service => service.ServiceID === this.editedItem.ServiceID);
-        if (index !== -1) {
-          this.services.splice(index, 1, this.editedItem);
-        }
-        this.closeEditDialog();
+        // Update service provider details
+        axios.put(`http://127.0.0.1:5000/api/Service_providers/${organizationID}`, {
+          Organization_Name: this.editedItem.Organization_Name,
+          ContactPerson: this.editedItem.ContactPerson,
+          Email: this.editedItem.Email,
+          Phone: this.editedItem.Phone,
+          DateOfStart: this.editedItem.DateOfStart,
+        })
+          .then(() => {
+            // Refresh the services data after successful update
+            this.fetchServices();
+            this.closeEditDialog();
+          })
+          .catch(error => {
+            console.error('Error updating service provider:', error);
+          });
       })
       .catch(error => {
         console.error('Error updating service:', error);
       });
-  },
+  } else {
+    console.error('Invalid serviceID or organizationID');
+  }
+},
   addService() {
     axios.post('http://127.0.0.1:5000/api/ServicesAndProviders', this.newService)
       .then(response => {
@@ -355,3 +387,17 @@ export default {
 },
 };
 </script>
+<!-- // saveItem() {
+  //   // Make an API call to update the service
+  //   axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${this.selectedItem.ServiceID}`, this.editedItem)
+  //     .then(() => {
+  //       const index = this.services.findIndex(service => service.ServiceID === this.selectedItem.ServiceID);
+  //       if (index !== -1) {
+  //         this.services.splice(index, 1, this.editedItem);
+  //       }
+  //       this.closeEditDialog();
+  //     })
+  //     .catch(error => {
+  //       console.error('Error updating service:', error);
+  //     });
+  // }, -->
