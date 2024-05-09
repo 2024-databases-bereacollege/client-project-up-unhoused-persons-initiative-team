@@ -5,9 +5,10 @@
       <h2>{{ neighbor.FullName }}</h2>
       <table>
         <tr>
-          <th><font-awesome-icon :icon="['fas', 'birthday-cake']" /> Date of Birth</th>
-          <td>{{ formatDate(neighbor.DateOfBirth) }}</td>
-        </tr>
+  <th><font-awesome-icon :icon="['fas', 'birthday-cake']" /> Date of Birth</th>
+  <td v-if="neighbor.DateOfBirth">{{ formatDate(neighbor.DateOfBirth) }}</td>
+  <td v-else>N/A</td>
+</tr>
         <tr>
           <th><font-awesome-icon :icon="['fas', 'phone']" /> Phone</th>
           <td>{{ neighbor.Phone }}</td>

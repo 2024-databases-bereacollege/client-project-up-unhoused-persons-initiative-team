@@ -278,12 +278,21 @@ def update_neighbor(neighbor_id):
     neighbor = Neighbor.get_or_none(Neighbor.NeighborID == neighbor_id)
     if neighbor:
         for key, value in data.items():
-            setattr(neighbor, key, value)
+            if key == 'DateOfBirth':
+                if value:
+                    try:
+                        date_value = date.fromisoformat(value)
+                    except ValueError:
+                        return jsonify({'error': 'Invalid date format for DateOfBirth'}), 400
+                else:
+                    date_value = None
+                setattr(neighbor, key, date_value)
+            else:
+                setattr(neighbor, key, value)
         neighbor.save()
         return jsonify(neighbor.to_dict())
     else:
         return jsonify({'error': 'Neighbor not found'}), 404
-
 # API endpoint to delete a neighbor
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['DELETE'])
 def delete_neighbor(neighbor_id):
