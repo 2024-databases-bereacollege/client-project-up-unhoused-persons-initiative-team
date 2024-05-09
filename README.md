@@ -27,11 +27,11 @@ Michel Moncada-Rabassa
 To use the application database, follow these steps:
 ###  How to use database:
 Step 1 -> download all required files: package.json, pipfile.lock, Requirements.md
-Step 2 -> setup a backend server: on the terminal, open "flaskapp directory", start the "pipenv shell" virtual environment, run app.py "python app.py" (send API calls to frontend)
+Step 2 -> setup a backend server: on the terminal, open "flaskapp directory", start the "pipenv shell" virtual environment, run main.py "python main.py" (send API calls to frontend)
 ### For backend, on the terminal, type
 cd flaskapp
 pipenv shell
-python app.py
+python main.py
 Step 3 -> setup a frontend server: directory ""frontend" and start node.js. The below commands run a local environment, but creating the site will need npm to build.
 ### For frontend, on the terminal, type:
 cd frontend

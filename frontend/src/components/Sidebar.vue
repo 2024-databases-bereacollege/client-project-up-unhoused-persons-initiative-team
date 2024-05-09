@@ -40,10 +40,10 @@
     <font-awesome-icon :icon="faBuilding" />
     <span>Service Providers</span> -->
   </router-link>
-  <router-link to="/Inventory" class="sidebar-link">
+  <!-- <router-link to="/Inventory" class="sidebar-link"> TODO need to add inventory back
     <font-awesome-icon :icon="faBox" />
     <span>Inventory</span>
-  </router-link>
+  </router-link> -->
   <router-link to="/Queries" class="sidebar-link">
     <font-awesome-icon :icon="faClipboardList" />
     <span>Queries</span>

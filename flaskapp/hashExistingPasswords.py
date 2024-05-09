@@ -1,6 +1,7 @@
 from werkzeug.security import generate_password_hash
 from models import Volunteer
 
+# This is for a case like adding sample data to the database.
 
 # Retrieve all volunteers from the database
 volunteers = Volunteer.select()
