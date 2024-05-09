@@ -11,7 +11,7 @@
   <v-data-table
     :headers="headers"
     :items="currentTabItems"
-    :items-per-page="100"
+    :items-per-page="10"
     class="elevation-1"
   ></v-data-table>
 </v-card-text>
