@@ -41,19 +41,15 @@
 </v-dialog>
 
 
-  <!-- Edit Service Dialog -->
 <!-- Edit Service Dialog -->
 <v-dialog v-model="editDialog" max-width="500px">
   <v-card>
     <v-card-title class="text-h5">Edit Service</v-card-title>
     <v-card-text>
-      <v-text-field v-model="editedItem.ServiceType" label="Service Type"></v-text-field>
       <v-text-field v-model="editedItem.ServiceDescription" label="Service Description"></v-text-field>
-      <v-text-field v-model="editedItem.Organization_Name" label="Organization Name"></v-text-field>
       <v-text-field v-model="editedItem.ContactPerson" label="Contact Person"></v-text-field>
       <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
       <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
-      <v-text-field v-model="editedItem.DateOfStart" label="Date of Start"></v-text-field>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -157,6 +153,7 @@ export default {
         { title: 'Total Neighbors', key: 'TotalNeighbors' },
         { title: 'Actions', key: 'actions', sortable: false },
       ],
+
       services: [],
       loading: true,
       deleteDialog: false,
@@ -166,186 +163,161 @@ export default {
       selectedItem: null,
       editedIndex: -1,
       editedItem: {
-        ServiceType: '',
+        ServiceID: '',
         ServiceDescription: '',
-        Organization_Name: '',
+        OrganizationID: '',
         ContactPerson: '',
         Email: '',
         Phone: '',
-        DateOfStart: '',
-        TotalNeighbors: 0,
-        serviceProviders: [],
-        serviceProvidersLoaded: false,
       },
-      
       defaultItem: {
-        ServiceType: '',
-        ServiceDescription: '',
-        Organization_Name: '',
-        ContactPerson: '',
-        Email: '',
-        Phone: '',
-        DateOfStart: '',
-        TotalNeighbors: 0,
-      },
-      newService: {
-        ServiceType: '',
-        ServiceDescription: '',
-        OrganizationID: null,
-      },
-      newServiceProvider: {
-        Organization_Name: '',
-        ContactPerson: '',
-        Email: '',
-        Phone: '',
-        DateOfStart: '',
-      },
-      serviceProviders: [],
-      dateMenu: false,
-    };
+    ServiceID: '',
+    ServiceDescription: '',
+    OrganizationID: '',
+    ContactPerson: '',
+    Email: '',
+    Phone: '',
   },
-
-  mounted() {
-    this.fetchServices();
-    this.fetchServiceProviders();
-
+  newService: {
+    ServiceType: '',
+    ServiceDescription: '',
+    OrganizationID: null,
   },
-  methods: {
-  // Fetching data
-  fetchServices() {
-    fetch('http://127.0.0.1:5000/api/ServicesAndProviders')
-      .then(response => response.json())
-      .then(data => {
-        this.services = data;
-        console.log('Updated Services:', this.services);
-        this.loading = false;
-      })
-      .catch(error => {
-        console.error('Error fetching services:', error);
-        this.loading = false;
-      });
+  newServiceProvider: {
+    Organization_Name: '',
+    ContactPerson: '',
+    Email: '',
+    Phone: '',
+    DateOfStart: '',
   },
-  fetchServiceProviders() {
-    axios.get('http://127.0.0.1:5000/api/service_providers')
-      .then(response => {
-        this.serviceProviders = response.data;
-        this.serviceProvidersLoaded = true;
-
-      })
-      .catch(error => {
-        console.error('Error fetching service providers:', error);
-      });
-  },
-
-  // Dialog management
-  openEditDialog(item) {
+  serviceProviders: [],
+};
+},
+mounted() {
+this.fetchServices();
+this.fetchServiceProviders();
+},
+methods: {
+// Fetching data
+fetchServices() {
+fetch('http://127.0.0.1:5000/api/ServicesAndProviders')
+.then(response => response.json())
+.then(data => {
+this.services = data;
+console.log('Updated Services:', this.services);
+this.loading = false;
+})
+.catch(error => {
+console.error('Error fetching services:', error);
+this.loading = false;
+});
+},
+fetchServiceProviders() {
+axios.get('http://127.0.0.1:5000/api/service_providers')
+.then(response => {
+this.serviceProviders = response.data;
+})
+.catch(error => {
+console.error('Error fetching service providers:', error);
+});
+},
+// Dialog management
+openEditDialog(item) {
   this.selectedItem = item;
   this.editedItem = {
     ServiceID: item.ServiceID,
-    ServiceType: item.ServiceType,
     ServiceDescription: item.ServiceDescription,
     OrganizationID: item.OrganizationID,
-    Organization_Name: item.Organization_Name,
     ContactPerson: item.ContactPerson,
     Email: item.Email,
     Phone: item.Phone,
-    DateOfStart: item.DateOfStart,
   };
+  console.log('Edited Item:', this.editedItem);
   this.editDialog = true;
 },
-  closeEditDialog() {
-    this.selectedItem = null;
-    this.editedItem = {
-      ServiceID: '',
-      ServiceType: '',
-      ServiceDescription: '',
-      OrganizationID: null,
-      Organization_Name: '',
-      ContactPerson: '',
-      Email: '',
-      Phone: '',
-      DateOfStart: '',
-    };
-    this.editDialog = false;
-    console.log('Edit dialog closed'); 
+closeEditDialog() {
+  this.selectedItem = null;
+  this.editedItem = {
+    ServiceID: '',
+    ServiceDescription: '',
+    OrganizationID: '',
+    ContactPerson: '',
+    Email: '',
+    Phone: '',
+  };
+  this.editDialog = false;
+  console.log('Edit dialog closed'); 
+},
+openDeleteDialog(item) {
+  this.selectedItem = item;
+  this.deleteDialog = true;
+},
+closeDeleteDialog() {
+  this.selectedItem = null;
+  this.deleteDialog = false;
+},
+openAddServiceDialog() {
+  this.addServiceDialog = true;
+},
+closeAddServiceDialog() {
+  this.newService = {
+    ServiceType: '',
+    ServiceDescription: '',
+    OrganizationID: null,
+  };
+  this.addServiceDialog = false;
+},
+openAddServiceProviderDialog() {
+  this.addServiceProviderDialog = true;
+},
+closeAddServiceProviderDialog() {
+  this.newServiceProvider = {
+    OrganizationName: '',
+    ContactPerson: '',
+    Email: '',
+    Phone: '',
+    DateOfStart: '',
+  };
+  this.addServiceProviderDialog = false;
+},
 
-  },
-  openDeleteDialog(item) {
-    this.selectedItem = item;
-    this.deleteDialog = true;
-  },
-  closeDeleteDialog() {
-    this.selectedItem = null;
-    this.deleteDialog = false;
-  },
-  openAddServiceDialog() {
-    this.addServiceDialog = true;
-  },
-  closeAddServiceDialog() {
-    this.newService = {
-      ServiceType: '',
-      ServiceDescription: '',
-      //OrganizationID here?
-    };
-    this.addServiceDialog = false;
-  },
-  openAddServiceProviderDialog() {
-    this.addServiceProviderDialog = true;
-  },
-  closeAddServiceProviderDialog() {
-    this.newServiceProvider = {
-      OrganizationName: '',
-      ContactPerson: '',
-      Email: '',
-      Phone: '',
-      DateOfStart: '',
-    };
-    this.addServiceProviderDialog = false;
-  },
-
-  // CRUD operations
-
-  deleteService() {
-    const serviceID = this.selectedItem.ServiceID;
-    axios.delete(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`)
-      .then(() => {
-        const index = this.services.findIndex(service => service.ServiceID === serviceID);
-        if (index !== -1) {
-          this.services.splice(index, 1);
-        }
-        this.closeDeleteDialog();
-      })
-      .catch(error => {
-        console.error('Error deleting service:', error);
-      });
-  },
-  saveService() {
+// CRUD operations
+deleteService() {
+  const serviceID = this.selectedItem.ServiceID;
+  axios.delete(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`)
+    .then(() => {
+      const index = this.services.findIndex(service => service.ServiceID === serviceID);
+      if (index !== -1) {
+        this.services.splice(index, 1);
+      }
+      this.closeDeleteDialog();
+    })
+    .catch(error => {
+      console.error('Error deleting service:', error);
+    });
+},
+saveService() {
   const serviceID = this.editedItem.ServiceID;
   const organizationID = this.editedItem.OrganizationID;
-  console.log('Edited Item:', this.editedItem); 
-  console.log('Service ID:', serviceID);  
-  console.log('Organization ID:', organizationID);   
-
+  console.log('Service ID:', serviceID);
+  console.log('Organization ID:', organizationID);
 
   if (serviceID && organizationID) {
     // Update service details
     axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`, {
-      ServiceType: this.editedItem.ServiceType,
       ServiceDescription: this.editedItem.ServiceDescription,
-      OrganizationID: organizationID,
     })
       .then(() => {
         // Update service provider details
         axios.put(`http://127.0.0.1:5000/api/Service_providers/${organizationID}`, {
-          Organization_Name: this.editedItem.Organization_Name,
           ContactPerson: this.editedItem.ContactPerson,
           Email: this.editedItem.Email,
           Phone: this.editedItem.Phone,
-          DateOfStart: this.editedItem.DateOfStart,
         })
           .then(() => {
             // Refresh the services data after successful update
             this.fetchServices();
+            this.fetchServiceProviders();
             this.closeEditDialog();
           })
           .catch(error => {
@@ -359,10 +331,11 @@ export default {
     console.error('Invalid serviceID or organizationID');
   }
 },
+
   addService() {
     axios.post('http://127.0.0.1:5000/api/ServicesAndProviders', this.newService)
       .then(response => {
-        this.services.push(response.data);
+        this.fetchServices();  //this.services.push(response.data);
         this.closeAddServiceDialog();
       })
       .catch(error => {

@@ -28,9 +28,13 @@
     <font-awesome-icon :icon="faUsers" />
     <span>Neighbors</span>
   </router-link>
-  <router-link to="/Visit_Records" class="sidebar-link">
+  <!-- <router-link to="/Visit_Records" class="sidebar-link">
     <font-awesome-icon :icon="faClipboardList" />
     <span>Visit Record</span>
+  </router-link> -->
+  <router-link to="/Visit_Logs" class="sidebar-link">
+    <font-awesome-icon :icon="faClipboardList" />
+    <span>All Visit Logs</span>
   </router-link>
   <router-link to="/ServicesAndProviders" class="sidebar-link">
     <font-awesome-icon :icon="faHandHoldingHeart" />
@@ -52,10 +56,10 @@
     <font-awesome-icon :icon="faUsers" />
     <span>Individual Neighbor Records Links</span>
   </router-link> -->
-  <router-link to="/Neighbors/#ID" class="sidebar-link">
+  <!-- <router-link to="/Neighbors/#ID" class="sidebar-link">
     <font-awesome-icon :icon="faUsers" />
     <span>Individual Neighbor Records</span>
-  </router-link>
+  </router-link> -->
   
 </div>
 </template>

@@ -330,8 +330,7 @@ def get_services():
         service_dict['DateOfStart'] = service.OrganizationID.DateOfStart
         service_dict['TotalNeighbors'] = service.TotalNeighbors
         service_dict['ServiceDescription'] = service.ServiceDescription
-        
-        del service_dict['OrganizationID']
+        service_dict['OrganizationID']
         
         services.append(service_dict)
     
@@ -361,12 +360,12 @@ def update_service(service_id):
         return jsonify({'error': 'Service not found'}), 404
 
 # API endpoint to edit a service provider
-@app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
-def update_service_provider(provider_id):
+@app.route('/api/ServicesAndProviders/<int:organization_id>', methods=['PUT'])
+def update_service_provider(organization_id):
     data = request.get_json()
     print(f"Received data for updating service provider: {data}")  # Add logging statement
     try:
-        provider = Service_Providers.get(Service_Providers.OrganizationID == provider_id)
+        provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
         provider.Email = data.get('Email', provider.Email)
@@ -443,6 +442,168 @@ def delete_service(service_id):
 
 
 ################ services above - And service providers ############################
+
+
+################ Visit Logs Below ##################################
+    
+# API endpoint to get visit logs
+@app.route('/api/visit_logs', methods=['GET'])
+def get_visit_logs():
+    query = (
+        Visit_Record.select(
+            Visit_Record.ServiceOrder,
+            Visit_Service.Date
+        )
+        .join(Visit_Service)
+        .order_by(Visit_Service.Date.desc())
+    )
+
+    visit_logs = [
+        {
+            'ServiceOrder': record.ServiceOrder,
+            'VisitDate': record.Date.strftime('%Y-%m-%d')
+        }
+        for record in query.dicts()
+    ]
+
+    return jsonify(visit_logs)
+
+
+# @app.route('/api/visit_logs', methods=['GET'])
+# def get_visit_logs():
+#     query = (
+#         Visit_Record.select(
+#             Visit_Service.Date,
+#             Neighbor.FirstName.alias('NeighborFirstName'),
+#             Neighbor.NeighborID,
+#             Neighbor.LastName.alias('NeighborLastName'),
+#             Services.ServiceType.alias('ServiceName'),
+#             Service_Providers.Organization_Name.alias('ServiceProvider'),
+#             Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
+#             Visit_Service.Description
+#         )
+#         .join(Neighbor)
+#         .switch(Visit_Record)
+#         .join(Volunteer)
+#         .switch(Visit_Record)
+#         .join(Visit_Service)
+#         .join(Services)
+#         .join(Service_Providers)
+#         .order_by(Visit_Service.Date.desc())
+#     )
+
+#     visit_logs = [
+#         {
+#             'VisitDate': record.visit_service.Date.strftime('%Y-%m-%d'),
+#             'NeighborFirstName': record.NeighborFirstName,
+#             'NeighborID': record.NeighborID,
+#             'NeighborLastName': record.NeighborLastName,
+#             'ServiceName': record.ServiceName,
+#             'ServiceProvider': record.ServiceProvider,
+#             'VolunteerName': record.VolunteerName,
+#             'Description': record.visit_service.Description
+#         }
+#         for record in query
+#     ]
+
+#     return jsonify(visit_logs)
+
+
+
+################ visit Logs above ############################
+
+############### Individual Visit logs and neighbor profiles below ###################
+
+
+# The below queries allow the neighbor profiles to work. ###############
+@app.route('/api/visit_records/details', methods=['GET'])
+def get_visit_records_details():
+    query = (Visit_Record
+             .select(Visit_Record, Neighbor, Volunteer)
+             .join(Neighbor)
+             .join(Volunteer))
+    visit_records = [{
+        'Neighbor': f"{record.neighbor.FirstName} {record.neighbor.LastName}",
+        'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
+    } for record in query]
+    return jsonify(visit_records)
+@app.route('/api/neighbors/<int:neighbor_id>', methods=['GET'])
+def get_neighbor_details(neighbor_id):
+    try:
+        neighbor = Neighbor.get_by_id(neighbor_id)
+        neighbor_info = {
+            'NeighborID': neighbor.NeighborID,
+            'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
+            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d') if neighbor.DateOfBirth else None
+        }
+        return jsonify(neighbor_info), 200
+    except Neighbor.DoesNotExist:
+        return jsonify({'error': 'Neighbor not found'}), 404
+
+
+@app.route('/api/IndividualVisitLog', methods=['GET'])
+def get_IndividualVisitLog():
+    query = (Visit_Service
+             .select(
+                 Visit_Service.Date.alias('VisitDate'), 
+                 Services.ServiceType.alias('ServiceName'), 
+                 Visit_Service.Description, 
+                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName')
+             )
+             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
+             .switch(Visit_Service)  # Return to Visit_Service to join another table
+             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
+             .join(Volunteer)  # This joins Visit_Record to Volunteer
+             .order_by(Visit_Service.Date.desc()))  
+    result = [item for item in query.dicts()]
+    return jsonify(result)  
+
+############### Individual Visit logs and neighbor profiles above ###################
+
+#####################################################################################
+#TODO everything underneath this line can be added, but is currently not in use. 
+#TODO
+#TODO
+################ visit services below ############################
+# API endpoint to get visit services
+@app.route('/api/visit_services', methods=['GET'])
+def get_visit_services():
+    query = Visit_Service.select()
+    visit_services = [service.to_dict() for service in query]
+    return jsonify(visit_services)
+
+# API endpoint to create visit services
+@app.route('/api/visit_services', methods=['POST'])
+def create_visit_service():
+    data = request.get_json()
+    visit_service = Visit_Service(**data)
+    visit_service.save()
+    return jsonify(visit_service.to_dict()), 201
+
+# API endpoint to edit visit services
+@app.route('/api/visit_services/<int:service_id>', methods=['PUT'])
+def update_visit_service(service_id):
+    data = request.get_json()
+    visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
+    if visit_service:
+        for key, value in data.items():
+            setattr(visit_service, key, value)
+        visit_service.save()
+        return jsonify(visit_service.to_dict())
+    else:
+        return jsonify({'error': 'Visit Service not found'}), 404
+    
+# API endpoint to delete visit services
+@app.route('/api/visit_services/<int:service_id>', methods=['DELETE'])
+def delete_visit_service(service_id):
+    visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
+    if visit_service:
+        visit_service.delete_instance()
+        return '', 204
+    else:
+        return jsonify({'error': 'Visit Service not found'}), 404
+    
+################ visit services above ############################
     
 ################ visit records below ############################
 # API endpoint to get visit records
@@ -525,26 +686,9 @@ def delete_inventory(inventory_id):
         return jsonify({'error': 'Inventory Item not found'}), 404
     
 ################ inventory above ############################
-#TODO everything below this needs editing. 
+ 
 ################ inventory usage below ############################
 
-
-@app.route('/api/IndividualVisitLog', methods=['GET'])
-def get_IndividualVisitLog():
-    query = (Visit_Service
-             .select(
-                 Visit_Service.Date.alias('VisitDate'), 
-                 Services.ServiceType.alias('ServiceName'), 
-                 Visit_Service.Description, 
-                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName')
-             )
-             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
-             .switch(Visit_Service)  # Return to Visit_Service to join another table
-             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
-             .join(Volunteer)  # This joins Visit_Record to Volunteer
-             .order_by(Visit_Service.Date.desc()))  
-    result = [item for item in query.dicts()]
-    return jsonify(result)  
 
 
 @app.route('/api/inventory_usageAD', methods=['GET'])
@@ -601,78 +745,9 @@ def delete_inventory_usage(usage_id):
         return jsonify({'error': 'Inventory Usage not found'}), 404
     
 ################ inventory usage above ############################
-    
 
-    
-################ visit services below ############################
-# API endpoint to get visit services
-@app.route('/api/visit_services', methods=['GET'])
-def get_visit_services():
-    query = Visit_Service.select()
-    visit_services = [service.to_dict() for service in query]
-    return jsonify(visit_services)
 
-# API endpoint to create visit services
-@app.route('/api/visit_services', methods=['POST'])
-def create_visit_service():
-    data = request.get_json()
-    visit_service = Visit_Service(**data)
-    visit_service.save()
-    return jsonify(visit_service.to_dict()), 201
 
-# API endpoint to edit visit services
-@app.route('/api/visit_services/<int:service_id>', methods=['PUT'])
-def update_visit_service(service_id):
-    data = request.get_json()
-    visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
-    if visit_service:
-        for key, value in data.items():
-            setattr(visit_service, key, value)
-        visit_service.save()
-        return jsonify(visit_service.to_dict())
-    else:
-        return jsonify({'error': 'Visit Service not found'}), 404
-    
-# API endpoint to delete visit services
-@app.route('/api/visit_services/<int:service_id>', methods=['DELETE'])
-def delete_visit_service(service_id):
-    visit_service = Visit_Service.get_or_none(Visit_Service.ServiceID == service_id)
-    if visit_service:
-        visit_service.delete_instance()
-        return '', 204
-    else:
-        return jsonify({'error': 'Visit Service not found'}), 404
-    
-################ visit services above ############################
-
-# The below queries allow the neighbor profiles to work. ###############
-# 3. Get a list of visit records along with the names of neighbors visited and the volunteer who made the visit
-#  i am removing date, if it makes sense to add, I will join visit service and add date
-@app.route('/api/visit_records/details', methods=['GET'])
-def get_visit_records_details():
-    query = (Visit_Record
-             .select(Visit_Record, Neighbor, Volunteer)
-             .join(Neighbor)
-             .join(Volunteer))
-    visit_records = [{
-        'Neighbor': f"{record.neighbor.FirstName} {record.neighbor.LastName}",
-        'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
-    } for record in query]
-    return jsonify(visit_records)
-@app.route('/api/neighbors/<int:neighbor_id>', methods=['GET'])
-def get_neighbor_details(neighbor_id):
-    try:
-        neighbor = Neighbor.get_by_id(neighbor_id)
-        neighbor_info = {
-            'NeighborID': neighbor.NeighborID,
-            'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
-            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d') if neighbor.DateOfBirth else None
-        }
-        return jsonify(neighbor_info), 200
-    except Neighbor.DoesNotExist:
-        return jsonify({'error': 'Neighbor not found'}), 404
-
-#####################################################################################
 
 if __name__ == '__main__':
     app.run(debug=True)

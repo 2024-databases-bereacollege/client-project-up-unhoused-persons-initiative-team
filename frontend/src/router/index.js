@@ -8,8 +8,10 @@ import LoginPage from "@/views/LoginPage.vue";
 import ServicesAndProviders from '@/views/ServicesAndProviders.vue';
 import VolunteerTable from '@/views/VolunteerTable.vue';
 import NeighborTable from '@/views/NeighborTable.vue';
-import VisitRecord from '@/views/VisitRecord.vue';
-import Inventory from '@/views/Inventory.vue';
+//import VisitLogs from '@/views/VisitLogs.vue';
+import VisitLogs from '@/views/VisitLogs.vue';
+//import VisitRecord from '@/views/VisitRecord.vue';
+//import Inventory from '@/views/Inventory.vue';
 import AddVisit from '@/views/AddVisit.vue';
 import Instructions from '@/views/Instructions.vue';
 import NeighborProfile from '@/components/NeighborProfile.vue';
@@ -25,8 +27,9 @@ const routes = [
   { path: '/ServicesAndProviders', component: ServicesAndProviders, meta: { requiresAuth: true } }, //TODO lighter access
   { path: '/Volunteers', component: VolunteerTable, meta: { requiresAuth: true } },
   { path: '/Neighbors', component: NeighborTable, meta: { requiresAuth: true } },
-  { path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },
-  { path: '/Inventory', component: Inventory, meta: { requiresAuth: true } },
+  { path: '/Visit_Logs', component: VisitLogs, meta: { requiresAuth: true } },
+  //{ path: '/Visit_Records', component: VisitRecord, meta: { requiresAuth: true } },
+  //{ path: '/Inventory', component: Inventory, meta: { requiresAuth: true } },
   { path: '/Neighbors/:ID', name: 'NeighborProfile', component: NeighborProfile, props: true, meta: { requiresAuth: true } },
   { path: '/Queries', component: Queries, meta: { requiresAuth: true } },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
