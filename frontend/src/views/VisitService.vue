@@ -1,329 +1,242 @@
 <template>
-    <v-data-table
-      :headers="headers"
-      :items="desserts"
-      :sort-by="[{ key: 'calories', order: 'asc' }]"
-    >
-      <template v-slot:top>
-        <v-toolbar
-          flat
-        >
-          <v-toolbar-title>Neigbors</v-toolbar-title>
-          <v-divider
-            class="mx-4"
-            inset
-            vertical
-          ></v-divider>
+  <div>
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center">
+        <div>
+          <v-btn color="primary" @click="openAddVolunteerDialog">Add Volunteer</v-btn>
+          <span class="text-h5 mx-4">Volunteers</span>
+        </div>
+      </v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="volunteers"
+        :items-per-page="100"
+        :loading="loading"
+        class="elevation-1"
+      >
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.actions="{ item }">
+          <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon>
+          <v-icon small @click="openDeleteDialog(item)">mdi-delete</v-icon>
+        </template>
+      </v-data-table>
+    </v-card>
+
+    <!-- Delete Volunteer Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Delete Volunteer</v-card-title>
+        <v-card-text>Are you sure you want to delete this volunteer?</v-card-text>
+        <v-card-actions>
           <v-spacer></v-spacer>
-          <v-dialog
-            v-model="dialog"
-            max-width="500px"
-          >
-            <template v-slot:activator="{ props }">
-              <v-btn
-                class="mb-2"
-                color="primary"
-                dark
-                v-bind="props"
-              >
-                New Item
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="text-h5">{{ formTitle }}</span>
-              </v-card-title>
-  
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      md="4"
-                      sm="6"
-                    >
-                      <v-text-field
-                        v-model="editedItem.name"
-                        label="Dessert name"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="4"
-                      sm="6"
-                    >
-                      <v-text-field
-                        v-model="editedItem.calories"
-                        label="Calories"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="4"
-                      sm="6"
-                    >
-                      <v-text-field
-                        v-model="editedItem.fat"
-                        label="Fat (g)"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="4"
-                      sm="6"
-                    >
-                      <v-text-field
-                        v-model="editedItem.carbs"
-                        label="Carbs (g)"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="4"
-                      sm="6"
-                    >
-                      <v-text-field
-                        v-model="editedItem.protein"
-                        label="Protein (g)"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-  
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="close"
-                >
-                  Cancel
-                </v-btn>
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="save"
-                >
-                  Save
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-          <v-dialog v-model="dialogDelete" max-width="500px">
-            <v-card>
-              <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
-      </template>
-  <!-- eslint-disable-next-line vue/valid-v-slot -->
-  <template v-slot:item.actions="{ item }">
-        <v-icon
-          class="me-2"
-          size="small"
-          @click="editItem(item)"
-        >
-          mdi-pencil
-        </v-icon>
-        <v-icon
-          size="small"
-          @click="deleteItem(item)"
-        >
-          mdi-delete
-        </v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn
-          color="primary"
-          @click="initialize"
-        >
-          Reset
-        </v-btn>
-      </template>
-    </v-data-table>
-  </template>
-  
-  
-  <script>
-    export default {
-      data: () => ({
-        dialog: false,
-        dialogDelete: false,
-        headers: [
-          {
-            title: 'Dessert (100g serving)',
-            align: 'start',
-            sortable: false,
-            key: 'name',
-          },
-          { title: 'Calories', key: 'calories' },
-          { title: 'Fat (g)', key: 'fat' },
-          { title: 'Carbs (g)', key: 'carbs' },
-          { title: 'Protein (g)', key: 'protein' },
-          { title: 'Actions', key: 'actions', sortable: false },
-        ],
-        desserts: [],
-        editedIndex: -1,
-        editedItem: {
-          name: '',
-          calories: 0,
-          fat: 0,
-          carbs: 0,
-          protein: 0,
-        },
-        defaultItem: {
-          name: '',
-          calories: 0,
-          fat: 0,
-          carbs: 0,
-          protein: 0,
-        },
-      }),
-  
-      computed: {
-        formTitle () {
-          return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-        },
-      },
-  
-      watch: {
-        dialog (val) {
-          val || this.close()
-        },
-        dialogDelete (val) {
-          val || this.closeDelete()
-        },
-      },
-  
-      created () {
-        this.initialize()
-      },
-  
-      methods: {
-        initialize () {
-          this.desserts = [
-            {
-              name: 'Frozen Yogurt',
-              calories: 159,
-              fat: 6.0,
-              carbs: 24,
-              protein: 4.0,
-            },
-            {
-              name: 'Ice cream sandwich',
-              calories: 237,
-              fat: 9.0,
-              carbs: 37,
-              protein: 4.3,
-            },
-            {
-              name: 'Eclair',
-              calories: 262,
-              fat: 16.0,
-              carbs: 23,
-              protein: 6.0,
-            },
-            {
-              name: 'Cupcake',
-              calories: 305,
-              fat: 3.7,
-              carbs: 67,
-              protein: 4.3,
-            },
-            {
-              name: 'Gingerbread',
-              calories: 356,
-              fat: 16.0,
-              carbs: 49,
-              protein: 3.9,
-            },
-            {
-              name: 'Jelly bean',
-              calories: 375,
-              fat: 0.0,
-              carbs: 94,
-              protein: 0.0,
-            },
-            {
-              name: 'Lollipop',
-              calories: 392,
-              fat: 0.2,
-              carbs: 98,
-              protein: 0,
-            },
-            {
-              name: 'Honeycomb',
-              calories: 408,
-              fat: 3.2,
-              carbs: 87,
-              protein: 6.5,
-            },
-            {
-              name: 'Donut',
-              calories: 452,
-              fat: 25.0,
-              carbs: 51,
-              protein: 4.9,
-            },
-            {
-              name: 'KitKat',
-              calories: 518,
-              fat: 26.0,
-              carbs: 65,
-              protein: 7,
-            },
-          ]
-        },
-  
-        editItem (item) {
-          this.editedIndex = this.desserts.indexOf(item)
-          this.editedItem = Object.assign({}, item)
-          this.dialog = true
-        },
-  
-        deleteItem (item) {
-          this.editedIndex = this.desserts.indexOf(item)
-          this.editedItem = Object.assign({}, item)
-          this.dialogDelete = true
-        },
-  
-        deleteItemConfirm () {
-          this.desserts.splice(this.editedIndex, 1)
-          this.closeDelete()
-        },
-  
-        close () {
-          this.dialog = false
-          this.$nextTick(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-          })
-        },
-  
-        closeDelete () {
-          this.dialogDelete = false
-          this.$nextTick(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-          })
-        },
-  
-        save () {
-          if (this.editedIndex > -1) {
-            Object.assign(this.desserts[this.editedIndex], this.editedItem)
-          } else {
-            this.desserts.push(this.editedItem)
-          }
-          this.close()
-        },
-      },
+          <v-btn color="blue darken-1" text @click="closeDeleteDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="deleteVolunteer">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Edit Volunteer Dialog -->
+    <v-dialog v-model="editDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Edit Volunteer</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="editedItem.FirstName" label="First Name"></v-text-field>
+          <v-text-field v-model="editedItem.LastName" label="Last Name"></v-text-field>
+          <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
+          <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
+          <v-checkbox v-model="editedItem.HasRecordAccess" label="Has Record Access"></v-checkbox>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="saveVolunteer">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Add Volunteer Dialog -->
+    <v-dialog v-model="addVolunteerDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Add Volunteer</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="newVolunteer.FirstName" label="First Name"></v-text-field>
+          <v-text-field v-model="newVolunteer.LastName" label="Last Name"></v-text-field>
+          <v-text-field v-model="newVolunteer.Email" label="Email"></v-text-field>
+          <v-text-field v-model="newVolunteer.Phone" label="Phone"></v-text-field>
+          <v-checkbox v-model="newVolunteer.HasRecordAccess" label="Has Record Access"></v-checkbox>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeAddVolunteerDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="addVolunteer">Add</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+data() {
+  return {
+    headers: [
+      { title: 'First Name', key: 'FirstName' },
+      { title: 'Last Name', key: 'LastName' },
+      { title: 'Email', key: 'Email' },
+      { title: 'Phone', key: 'Phone' },
+      { title: 'Has Record Access', key: 'HasRecordAccess' },
+      { title: 'Actions', key: 'actions', sortable: false },
+    ],
+    volunteers: [],
+    loading: true,
+    deleteDialog: false,
+    editDialog: false,
+    addVolunteerDialog: false,
+    selectedItem: null,
+    editedIndex: -1,
+    editedItem: {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    },
+    defaultItem: {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    },
+    newVolunteer: {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    },
+  };
+},
+
+mounted() {
+  this.fetchVolunteers();
+},
+
+methods: {
+  // Fetching data
+  fetchVolunteers() {
+    fetch('http://127.0.0.1:5000/api/volunteers')
+      .then(response => response.json())
+      .then(data => {
+        this.volunteers = data;
+        console.log('Updated Volunteers:', this.volunteers);
+        this.loading = false;
+      })
+      .catch(error => {
+        console.error('Error fetching volunteers:', error);
+        this.loading = false;
+      });
+  },
+
+  // Dialog management
+  openEditDialog(item) {
+    this.selectedItem = item;
+    this.editedItem = {
+      VolunteerID: item.VolunteerID,
+      FirstName: item.FirstName,
+      LastName: item.LastName,
+      Email: item.Email,
+      Phone: item.Phone,
+      HasRecordAccess: item.HasRecordAccess,
+    };
+    this.editDialog = true;
+  },
+  closeEditDialog() {
+    this.selectedItem = null;
+    this.editedItem = {
+      VolunteerID: '',
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    };
+    this.editDialog = false;
+    console.log('Edit dialog closed');
+  },
+  openDeleteDialog(item) {
+    this.selectedItem = item;
+    this.deleteDialog = true;
+  },
+  closeDeleteDialog() {
+    this.selectedItem = null;
+    this.deleteDialog = false;
+  },
+  openAddVolunteerDialog() {
+    this.addVolunteerDialog = true;
+  },
+  closeAddVolunteerDialog() {
+    this.newVolunteer = {
+      FirstName: '',
+      LastName: '',
+      Email: '',
+      Phone: '',
+      HasRecordAccess: false,
+    };
+    this.addVolunteerDialog = false;
+  },
+// CRUD operations
+deleteVolunteer() {
+const volunteerID = this.selectedItem.VolunteerID;
+axios.delete(`http://127.0.0.1:5000/api/volunteers/${volunteerID}`)
+  .then(() => {
+    const index = this.volunteers.findIndex(volunteer => volunteer.VolunteerID === volunteerID);
+    if (index !== -1) {
+      this.volunteers.splice(index, 1);
     }
-  </script>
-  
+    this.closeDeleteDialog();
+  })
+  .catch(error => {
+    console.error('Error deleting volunteer:', error);
+  });
+},
+saveVolunteer() {
+const volunteerID = this.editedItem.VolunteerID;
+console.log('Edited Item:', this.editedItem);
+console.log('Volunteer ID:', volunteerID);
+if (volunteerID) {
+  // Update volunteer details
+  axios.put(`http://127.0.0.1:5000/api/volunteers/${volunteerID}`, {
+    FirstName: this.editedItem.FirstName,
+    LastName: this.editedItem.LastName,
+    Email: this.editedItem.Email,
+    Phone: this.editedItem.Phone,
+    HasRecordAccess: this.editedItem.HasRecordAccess,
+  })
+    .then(() => {
+      // Refresh the volunteers data after successful update
+      this.fetchVolunteers();
+      this.closeEditDialog();
+    })
+    .catch(error => {
+      console.error('Error updating volunteer:', error);
+    });
+} else {
+  console.error('Invalid volunteerID');
+}
+},
+addVolunteer() {
+axios.post('http://127.0.0.1:5000/api/volunteers', this.newVolunteer)
+  .then(response => {
+    this.volunteers.push(response.data);
+    this.closeAddVolunteerDialog();
+  })
+  .catch(error => {
+    console.error('Error adding volunteer:', error);
+  });
+},
+},
+};
+</script>
