@@ -330,35 +330,30 @@ def generate_sample_data():
         return [
             {
                 'NameOfItem': 'Cleaning Supplies',
-                'VolunteerID': 1,
                 'Description_of_Item': 'Mop and bucket',
                 'ExpirationDate': '2024-12-31',
                 'Number_Of_Item': 10
             },
             {
                 'NameOfItem': 'Food Items',
-                'VolunteerID': 2,
                 'Description_of_Item': 'Canned goods',
                 'ExpirationDate': '2023-09-30',
                 'Number_Of_Item': 50
             },
             {
                 'NameOfItem': 'Clothing',
-                'VolunteerID': 3,
                 'Description_of_Item': 'T-shirts and jeans',
                 'ExpirationDate': '2023-09-30', #TODO listed as cannot be NULL?
                 'Number_Of_Item': 20
             },
             {
                 'NameOfItem': 'Medical Supplies',
-                'VolunteerID': 4,
                 'Description_of_Item': 'Bandages and antiseptic',
                 'ExpirationDate': '2025-06-30',
                 'Number_Of_Item': 15
             },
             {
                 'NameOfItem': 'Stationery',
-                'VolunteerID': 5,
                 'Description_of_Item': 'Pens and notebooks',
                 'ExpirationDate': '2025-06-30',
                 'Number_Of_Item': 30

@@ -72,7 +72,7 @@ class Inventory_Usage(baseModel):
 class Inventory(baseModel):
     InventoryID = AutoField()
     NameOfItem = CharField(max_length=255)
-    VolunteerID = ForeignKeyField(Volunteer, backref='inventory')  
+    #VolunteerID = ForeignKeyField(Volunteer, backref='inventory')  #Taking this out, As we do not need to know what volunteer removed an item.
     Description_of_Item = CharField(max_length=255)
     ExpirationDate = DateField()
     Number_Of_Item = IntegerField()

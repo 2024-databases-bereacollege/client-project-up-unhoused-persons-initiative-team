@@ -35,36 +35,36 @@
       </v-card>
     </v-dialog>
 
-    <!-- Edit Neighbor Dialog -->
-    <v-dialog v-model="editDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5">Edit Neighbor</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="newNeighbor.FirstName" label="First Name"></v-text-field>
-      <v-text-field v-model="newNeighbor.LastName" label="Last Name"></v-text-field>
-      <v-text-field v-model="newNeighbor.DateOfBirth" label="Date of Birth" type="date"></v-text-field>
-      <v-text-field v-model="newNeighbor.Phone" label="Phone"></v-text-field>
-      <v-text-field v-model="newNeighbor.Location" label="Location"></v-text-field>
-      <v-text-field v-model="newNeighbor.Email" label="Email"></v-text-field>
-      <v-checkbox v-model="newNeighbor.HasStateID" label="Has State ID"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasPet" label="Has Pet"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasChildren" label="Has Children"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasMedication" label="Has Medication"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasFoodInsecurity" label="Has Food Insecurity"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasTransportation" label="Has Transportation"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasJob" label="Has Job"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasHousing" label="Has Housing"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasInsurance" label="Has Insurance"></v-checkbox>
-      <v-checkbox v-model="newNeighbor.HasIncome" label="Has Income"></v-checkbox>
-      <v-text-field v-model="newNeighbor.Notes" label="Notes"></v-text-field>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="saveNeighbor">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+<!-- Edit Neighbor Dialog -->
+<v-dialog v-model="editDialog" max-width="500px">
+  <v-card>
+    <v-card-title class="text-h5">Edit Neighbor</v-card-title>
+    <v-card-text>
+      <v-text-field v-model="editedItem.FirstName" label="First Name"></v-text-field>
+      <v-text-field v-model="editedItem.LastName" label="Last Name"></v-text-field>
+      <v-text-field v-model="editedItem.DateOfBirth" label="Date of Birth" type="date"></v-text-field>
+      <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
+      <v-text-field v-model="editedItem.Location" label="Location"></v-text-field>
+      <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
+      <v-checkbox v-model="editedItem.HasStateID" label="Has State ID"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasPet" label="Has Pet"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasChildren" label="Has Children"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasMedication" label="Has Medication"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasFoodInsecurity" label="Has Food Insecurity"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasTransportation" label="Has Transportation"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasJob" label="Has Job"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasHousing" label="Has Housing"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasInsurance" label="Has Insurance"></v-checkbox>
+      <v-checkbox v-model="editedItem.HasIncome" label="Has Income"></v-checkbox>
+      <v-text-field v-model="editedItem.Notes" label="Notes"></v-text-field>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
+      <v-btn color="blue darken-1" text @click="saveNeighbor">Save</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
     <!-- Add Neighbor Dialog -->
     <v-dialog v-model="addNeighborDialog" max-width="500px">
@@ -135,6 +135,7 @@ export default {
     selectedItem: null,
     editedIndex: -1,
     editedItem: {
+      NeighborID: '',
       FirstName: '',
       LastName: '',
       DateOfBirth: '',
@@ -154,6 +155,7 @@ export default {
       Notes: '',
     },
     defaultItem: {
+      NeighborID: '',
       FirstName: '',
       LastName: '',
       DateOfBirth: '',
