@@ -322,7 +322,7 @@ def get_services_alone():
 ################ Services only above ##################
     
 
-################ services below - Along with editing service providers ############################
+################ ServicesAndProviders Table below ############################
 
 # API endpoint to get services for join table
 @app.route('/api/ServicesAndProviders', methods=['GET'])
@@ -422,7 +422,39 @@ def create_service_on_ServicesAndProvidersPage():
 
     return jsonify(service_data), 201
 
+# API endpoint to create service providers on ServicesAndProviders page
+@app.route('/api/service_providers', methods=['POST'])
+def create_service_provider():
+    data = request.get_json()
+    print('Received request data:', data)
 
+    organization_name = data.get('Organization_Name')
+    contact_person = data.get('ContactPerson')
+    email = data.get('Email')
+    phone = data.get('Phone')
+    date_of_start_str = data.get('DateOfStart')
+    date_of_start = datetime.strptime(date_of_start_str, '%Y-%m-%d').date()
+
+    # Create a new Service_Providers record
+    service_provider = Service_Providers.create(
+        Organization_Name=organization_name,
+        ContactPerson=contact_person,
+        Email=email,
+        Phone=phone,
+        DateOfStart=date_of_start
+    )
+    print('Created Service_Providers record:', service_provider)
+
+    service_provider_data = {
+        'OrganizationID': service_provider.OrganizationID,
+        'Organization_Name': service_provider.Organization_Name,
+        'ContactPerson': service_provider.ContactPerson,
+        'Email': service_provider.Email,
+        'Phone': service_provider.Phone,
+        'DateOfStart': service_provider.DateOfStart.isoformat()
+    }
+
+    return jsonify(service_provider_data), 201
 
 
 
@@ -483,7 +515,7 @@ def delete_service(service_id):
 
 
 
-################ services above - And service providers ############################
+################ ServicesAndProviders Table above  ############################
 
 
 ################ Visit Logs Below ##################################

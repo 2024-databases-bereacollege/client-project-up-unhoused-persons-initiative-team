@@ -89,7 +89,7 @@
     </v-dialog>
 
 <!-- Add Service Provider Dialog -->
-<!-- <v-dialog v-model="addServiceProviderDialog" max-width="500px">
+<v-dialog v-model="addServiceProviderDialog" max-width="500px">
   <v-card>
     <v-card-title class="text-h5">Add Service Provider</v-card-title>
     <v-card-text>
@@ -97,40 +97,7 @@
       <v-text-field v-model="newServiceProvider.ContactPerson" label="Contact Person"></v-text-field>
       <v-text-field v-model="newServiceProvider.Email" label="Email"></v-text-field>
       <v-text-field v-model="newServiceProvider.Phone" label="Phone"></v-text-field>
-      <v-select
-    v-if="serviceProvidersLoaded"
-    v-model="newService.OrganizationID"
-    :items="serviceProviders"
-    item-text="Organization_Name"
-    item-value="OrganizationID"
-    label="Service Provider"
-  ></v-select>
-      
-      
-      <v-menu
-        v-model="dateMenu"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        min-width="auto"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-model="newServiceProvider.DateOfStart"
-            label="Date of Start"
-            prepend-icon="mdi-calendar"
-            readonly
-            v-bind="attrs"
-            v-on="on"
-          ></v-text-field>
-        </template>
-        <v-date-picker
-          v-model="newServiceProvider.DateOfStart"
-          @input="dateMenu = false"
-        ></v-date-picker>
-      </v-menu>
-      
+      <v-text-field v-model="newServiceProvider.DateOfStart" label="Date Of Start" type="date"></v-text-field>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -138,7 +105,7 @@
       <v-btn color="blue darken-1" text @click="addServiceProvider">Add</v-btn>
     </v-card-actions>
   </v-card>
-</v-dialog> -->
+</v-dialog>
   </div>
 </template>
 
@@ -361,17 +328,27 @@ async addService() {
     // Handle error
   }
 },
-  addServiceProvider() {
-    axios.post('http://127.0.0.1:5000/api/service_providers', this.newServiceProvider)
-      .then(() => {
-        this.fetchServiceProviders();
-        this.closeAddServiceProviderDialog();
-        window.dispatchEvent(new Event('refreshData'));
-      })
-      .catch(error => {
-        console.error('Error adding service provider:', error);
-      });
-  },
+async addServiceProvider() {
+  try {
+    const requestData = {
+      Organization_Name: this.newServiceProvider.Organization_Name,
+      ContactPerson: this.newServiceProvider.ContactPerson,
+      Email: this.newServiceProvider.Email,
+      Phone: this.newServiceProvider.Phone,
+      DateOfStart: this.newServiceProvider.DateOfStart,
+    };
+    console.log('Request Data:', requestData);
+    const response = await axios.post('http://127.0.0.1:5000/api/service_providers', requestData);
+    console.log('Service provider added successfully:', response.data);
+    // Handle success response
+    this.fetchServiceProviders();
+    this.closeAddServiceProviderDialog();
+    window.dispatchEvent(new Event('refreshData'));
+  } catch (error) {
+    console.error('Error adding service provider:', error);
+    // Handle error
+  }
+},
 
   // Utility functions
   formatDate(date) {
