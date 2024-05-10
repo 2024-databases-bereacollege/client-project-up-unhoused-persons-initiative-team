@@ -5,7 +5,8 @@
       <Sidebar />
     </div>
     <div class="main-content">
-      <router-view @reloadApp="reloadApp" />
+      <!-- Main content goes here -->
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -19,17 +20,12 @@ export default {
   name: 'MainLayout',
   components: {
     TopBar,
-    Sidebar,
+    Sidebar
   },
   computed: {
-    ...mapGetters('auth', ['isAuthenticated']),
-  },
-  methods: {
-    reloadApp() {
-      window.location.reload();
-    },
-  },
-};
+  ...mapGetters('auth', ['isAuthenticated'])
+}
+}
 </script>
 
 <style>

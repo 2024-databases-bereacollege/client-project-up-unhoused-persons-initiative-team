@@ -15,7 +15,7 @@ class Service_Providers(baseModel):
     ContactPerson = CharField(max_length=255)
     Email = CharField(max_length=255)
     Phone = CharField(max_length=20)
-    DateOfStart = DateField(null=True, default=None)
+    DateOfStart = DateField()
 
 class Services(baseModel):
     ServiceID = AutoField() 
