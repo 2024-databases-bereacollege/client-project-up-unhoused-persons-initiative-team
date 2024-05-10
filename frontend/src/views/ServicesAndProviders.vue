@@ -114,6 +114,7 @@
 
 
 <script>
+ /* eslint-disable */
 import ServiceProviderSelect from '../components/ServiceProviderSelect.vue';
 import axios from 'axios';
 export default {
@@ -396,6 +397,7 @@ async addServiceProvider() {
 },
 };
 </script>
+
 <!-- // saveItem() {
   //   // Make an API call to update the service
   //   axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${this.selectedItem.ServiceID}`, this.editedItem)
