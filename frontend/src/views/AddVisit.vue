@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h2>Add visit information</h2>
+    <h2>Add Visit Log</h2>
     <div v-for="(items, category) in apiData" :key="category">
       <ComboboxSelect
-        :items="Object.values(items)"
+        :items="items"
         :label="`Select ${category}`"
         @update:model-value="selectedValues[category] = $event"
       />
@@ -36,12 +36,25 @@ export default {
   },
   mounted() {
     this.fetchData();
+    window.addEventListener('refreshData', this.fetchData);
+  },
+  beforeUnmount() {
+    window.removeEventListener('refreshData', this.fetchData);
   },
   methods: {
     async fetchData() {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/Add_Visit');
-        this.apiData = response.data;
+        const [neighborsResponse, servicesResponse, volunteersResponse] = await Promise.all([
+          axios.get('http://127.0.0.1:5000/api/neighbors'),
+          axios.get('http://127.0.0.1:5000/api/services'),
+          axios.get('http://127.0.0.1:5000/api/volunteers'),
+        ]);
+
+        this.apiData = {
+          Neighbors: neighborsResponse.data,
+          Services: servicesResponse.data,
+          Volunteers: volunteersResponse.data,
+        };
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -49,14 +62,16 @@ export default {
     async submitData() {
       try {
         const requestData = {
-          selectedValues: this.selectedValues,
-          visitDescription: this.visitDescription,
+          ...this.selectedValues,
+          Description: this.visitDescription,
         };
-        const response = await axios.post('http://127.0.0.1:5000/api/IndividualVisitLog', requestData);
-        console.log('Data submitted successfully:', response.data);
+
+        const response = await axios.post('http://127.0.0.1:5000/api/visit_logs', requestData);
+
+        console.log('Visit log submitted successfully:', response.data);
         // Handle success response
       } catch (error) {
-        console.error('Error submitting data:', error);
+        console.error('Error submitting visit log:', error);
         // Handle error
       }
     },

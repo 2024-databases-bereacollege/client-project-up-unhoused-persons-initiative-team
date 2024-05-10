@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash #Using
 from flask_cors import CORS #to allow the front end to communicate with the back end
 from models import *
 from datetime import date
+from playhouse.shortcuts import model_to_dict, dict_to_model
 
 
 app = Flask(__name__)
@@ -105,39 +106,80 @@ def get_visit():
     return jsonify(data)
 
 # API endpoint to add a visit
-@app.route('/api/IndividualVisitLog', methods=['POST'])
-def individual_visit_log():
+@app.route('/api/visit_logs', methods=['POST'])
+def create_visit_log():
     data = request.get_json()
-    selected_values = data.get('selectedValues')
-    visit_description = data.get('visitDescription')
 
-    # Process the selected values and visit description
-    # Update the respective tables based on the received data
+    # Extract the important data from the request
+    service_id = data.get('ServiceID')
+    description = data.get('Description')
+    visit_date = data.get('Date')
+    neighbor_id = data.get('NeighborID')
+    volunteer_id = data.get('VolunteerID')
 
-    # Example: Update Visit_Service table
+    # Create a new Visit_Service record
     visit_service = Visit_Service.create(
-        ServiceID=selected_values.get('Services'),
-        Description=visit_description,
-        Date=datetime.date.today()
+        ServiceID=service_id,
+        Description=description,
+        Date=visit_date
     )
 
-    # Example: Update Visit_Record table
+    # Create a new Visit_Record record
     visit_record = Visit_Record.create(
-        NeighborID=selected_values.get('Neighbor'),
-        VolunteerID=selected_values.get('Volunteer'),
-        RecordID=visit_service
+        NeighborID=neighbor_id,
+        VolunteerID=volunteer_id,
+        RecordID=visit_service.RecordID
     )
 
-    # Example: Update Inventory_Usage table
-    inventory_usage = Inventory_Usage.create(
-        NameOfItem=selected_values.get('Inventory'),
-        RecordID=visit_record,
-        Description_of_Item='',  # Add appropriate description
-        Number_Of_Item_Used=1   # Add appropriate quantity
-    )
+    # Prepare the response data
+    response_data = {
+        'VisitDate': visit_service.Date.isoformat(),
+        'ServiceName': visit_service.service.ServiceType,
+        'Description': visit_service.Description,
+        'VolunteerName': f"{visit_record.volunteer.FirstName} {visit_record.volunteer.LastName}",
+        'NeighborFirstName': visit_record.neighbor.FirstName,
+        'NeighborLastName': visit_record.neighbor.LastName,
+        'NeighborID': visit_record.neighbor.NeighborID,
+        'ServiceProvider': visit_service.service.service_providers.Organization_Name
+    }
 
-    # Return a success response
-    return jsonify({'message': 'Data submitted successfully'})
+    return jsonify(response_data)
+
+
+#Below is first attempt - including dictionary
+# @app.route('/api/IndividualVisitLog', methods=['POST'])
+# def individual_visit_log():
+#     data = request.get_json()
+#     selected_values = data.get('selectedValues')
+#     visit_description = data.get('visitDescription')
+
+#     # Process the selected values and visit description
+#     # Update the respective tables based on the received data
+
+#     # Example: Update Visit_Service table
+#     visit_service = Visit_Service.create(
+#         ServiceID=selected_values.get('Services'),
+#         Description=visit_description,
+#         Date=datetime.date.today()
+#     )
+
+#     # Example: Update Visit_Record table
+#     visit_record = Visit_Record.create(
+#         NeighborID=selected_values.get('Neighbor'),
+#         VolunteerID=selected_values.get('Volunteer'),
+#         RecordID=visit_service
+#     )
+
+#     # Example: Update Inventory_Usage table
+#     inventory_usage = Inventory_Usage.create(
+#         NameOfItem=selected_values.get('Inventory'),
+#         RecordID=visit_record,
+#         Description_of_Item='',  # Add appropriate description
+#         Number_Of_Item_Used=1   # Add appropriate quantity
+#     )
+
+#     # Return a success response
+#     return jsonify({'message': 'Data submitted successfully'})
 
 
 
@@ -304,6 +346,17 @@ def delete_neighbor(neighbor_id):
         return jsonify({'error': 'Neighbor not found'}), 404
 
 ################ neighbors above ############################
+
+################ Services only below ##################
+# API endpoint to get services
+@app.route('/api/services', methods=['GET'])
+def get_services_alone():
+    query = Services.select()
+    services = [service.to_dict() for service in query]
+    return jsonify(services)
+
+################ Services only above ##################
+    
 
 ################ services below - Along with editing service providers ############################
 

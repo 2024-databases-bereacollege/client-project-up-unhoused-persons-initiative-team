@@ -336,6 +336,8 @@ saveService() {
 
         this.fetchServices();  //this.services.push(response.data);
         this.closeAddServiceDialog();
+        window.dispatchEvent(new Event('refreshData'));
+
       })
       .catch(error => {
         console.error('Error adding service:', error);
@@ -346,6 +348,7 @@ saveService() {
       .then(() => {
         this.fetchServiceProviders();
         this.closeAddServiceProviderDialog();
+        window.dispatchEvent(new Event('refreshData'));
       })
       .catch(error => {
         console.error('Error adding service provider:', error);

@@ -5,7 +5,7 @@
     :label="label"
     item-title="text"
     item-value="value"
-    @update:modelValue="$emit('update:model-value', $event)"
+    @update:model-value="$emit('update:model-value', $event)"
     chips
     multiple
     variant="outlined"
@@ -31,9 +31,9 @@ export default {
   emits: ['update:model-value'],
   computed: {
     formattedItems() {
-      return this.items.map(item => ({
-        text: item.FullName || item.ServiceType || item.NameOfItem,
-        value: item.NeighborID || item.VolunteerID || item.ServiceID || item.InventoryID,
+      return this.items.map((item) => ({
+        text: this.getFullName(item),
+        value: item.NeighborID || item.ServiceID || item.VolunteerID,
       }));
     },
   },
@@ -41,6 +41,17 @@ export default {
     return {
       selectedItem: this.modelValue,
     };
+  },
+  methods: {
+    getFullName(item) {
+      if (item.FirstName && item.LastName) {
+        return `${item.FirstName} ${item.LastName}`;
+      } else if (item.ServiceType) {
+        return item.ServiceType;
+      } else {
+        return '';
+      }
+    },
   },
 };
 </script>
