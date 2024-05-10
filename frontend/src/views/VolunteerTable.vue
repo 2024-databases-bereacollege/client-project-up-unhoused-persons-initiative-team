@@ -220,8 +220,6 @@ saveVolunteer() {
         // Refresh the volunteers data after successful update
         this.fetchVolunteers();
         this.closeEditDialog();
-        window.dispatchEvent(new Event('refreshData'));
-
       })
       .catch(error => {
         console.error('Error updating volunteer:', error);
@@ -238,7 +236,6 @@ addVolunteer() {
       .then(response => {
       this.volunteers.push(response.data);
       this.closeAddVolunteerDialog();
-      window.dispatchEvent(new Event('refreshData'));
     })
     .catch(error => {
       console.error('Error adding volunteer:', error);

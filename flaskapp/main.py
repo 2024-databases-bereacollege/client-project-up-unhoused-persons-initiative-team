@@ -2,8 +2,7 @@ from flask import Flask, request, redirect, render_template, url_for, session, j
 from werkzeug.security import generate_password_hash, check_password_hash #Using for passwords 
 from flask_cors import CORS #to allow the front end to communicate with the back end
 from models import *
-from datetime import date, datetime
-from playhouse.shortcuts import model_to_dict, dict_to_model
+from datetime import date
 
 
 app = Flask(__name__)
@@ -106,46 +105,41 @@ def get_visit():
     return jsonify(data)
 
 # API endpoint to add a visit
-@app.route('/api/visit_logs', methods=['POST'])
-def create_visit_log():
+@app.route('/api/IndividualVisitLog', methods=['POST'])
+def individual_visit_log():
     data = request.get_json()
-    print('Received request data:', data)
+    selected_values = data.get('selectedValues')
+    visit_description = data.get('visitDescription')
 
-    neighbor_id = data.get('NeighborID')
-    volunteer_id = data.get('VolunteerID')
-    service_id = data.get('ServiceID')
-    description = data.get('Description')
-    visit_date_str = data.get('Date')
-    visit_date = datetime.strptime(visit_date_str, '%Y-%m-%d').date() # Convert visit_date_str to a date object
+    # Process the selected values and visit description
+    # Update the respective tables based on the received data
 
-    # Create a new Visit_Service record
+    # Example: Update Visit_Service table
     visit_service = Visit_Service.create(
-        ServiceID=service_id,
-        Description=description,
-        Date=visit_date
+        ServiceID=selected_values.get('Services'),
+        Description=visit_description,
+        Date=datetime.date.today()
     )
-    print('Created Visit_Service record:', visit_service)
 
-    # Create a new Visit_Record record
+    # Example: Update Visit_Record table
     visit_record = Visit_Record.create(
-        NeighborID=neighbor_id,
-        VolunteerID=volunteer_id,
-        RecordID=visit_service.RecordID
+        NeighborID=selected_values.get('Neighbor'),
+        VolunteerID=selected_values.get('Volunteer'),
+        RecordID=visit_service
     )
-    print('Created Visit_Record record:', visit_record)
 
-    visit_log = {
-        'VisitDate': visit_service.Date.isoformat(),
-        'ServiceName': visit_service.ServiceID.ServiceType,
-        'Description': visit_service.Description,
-        'VolunteerName': f"{visit_record.VolunteerID.FirstName} {visit_record.VolunteerID.LastName}",
-        'NeighborFirstName': visit_record.NeighborID.FirstName,
-        'NeighborLastName': visit_record.NeighborID.LastName,
-        'NeighborID': visit_record.NeighborID.NeighborID,
-        #'ServiceProvider': visit_service.ServiceID.service_providers.Organization_Name
-    }
+    # Example: Update Inventory_Usage table
+    inventory_usage = Inventory_Usage.create(
+        NameOfItem=selected_values.get('Inventory'),
+        RecordID=visit_record,
+        Description_of_Item='',  # Add appropriate description
+        Number_Of_Item_Used=1   # Add appropriate quantity
+    )
 
-    return jsonify(visit_log)
+    # Return a success response
+    return jsonify({'message': 'Data submitted successfully'})
+
+
 
 ################ volunteers below ############################
 
@@ -202,7 +196,7 @@ def delete_volunteer(volunteer_id):
     return '', 204
 
 ################ volunteers above ############################
-
+    
 ################ neighbors below ############################ 
 
 # API endpoint to get all neighbors   
@@ -311,18 +305,7 @@ def delete_neighbor(neighbor_id):
 
 ################ neighbors above ############################
 
-################ Services only below ##################
-# API endpoint to get services
-@app.route('/api/services', methods=['GET'])
-def get_services_alone():
-    query = Services.select()
-    services = [service.to_dict() for service in query]
-    return jsonify(services)
-
-################ Services only above ##################
-    
-
-################ ServicesAndProviders Table below ############################
+################ services below - Along with editing service providers ############################
 
 # API endpoint to get services for join table
 @app.route('/api/ServicesAndProviders', methods=['GET'])
@@ -353,140 +336,98 @@ def get_services():
     
     return jsonify(services)
 
-# API endpoint to get service providers - This is to display them in the buttons!
+# API endpoint to get service providers
 @app.route('/api/service_providers', methods=['GET'])
 def get_service_providers():
     query = Service_Providers.select()
     service_providers = [provider.to_dict() for provider in query]
     return jsonify(service_providers)
 
-# API endpoint to create services on ServicesAndProviders page
-@app.route('/api/services', methods=['POST'])
-def create_service_on_ServicesAndProvidersPage():
-    data = request.get_json()
-    print('Received request data:', data)
-
-    service_type = data.get('ServiceType')
-    organization_id = data.get('OrganizationID')
-    service_description = data.get('ServiceDescription')
-
-    # Create a new Services record
-    service = Services.create(
-        ServiceType=service_type,
-        OrganizationID=organization_id,
-        ServiceDescription=service_description
-    )
-    print('Created Services record:', service)
-
-    service_data = {
-        'ServiceID': service.ServiceID,
-        'ServiceType': service.ServiceType,
-        'ServiceDescription': service.ServiceDescription,
-        'OrganizationName': service.OrganizationID.Organization_Name
-    }
-
-    return jsonify(service_data), 201
-
-# API endpoint to create service providers on ServicesAndProviders page
-@app.route('/api/service_providers', methods=['POST'])
-def create_service_provider():
-    data = request.get_json()
-    print('Received request data:', data)
-
-    organization_name = data.get('Organization_Name')
-    contact_person = data.get('ContactPerson')
-    email = data.get('Email')
-    phone = data.get('Phone')
-    date_of_start_str = data.get('DateOfStart')
-    date_of_start = datetime.strptime(date_of_start_str, '%Y-%m-%d').date()
-
-    # Create a new Service_Providers record
-    service_provider = Service_Providers.create(
-        Organization_Name=organization_name,
-        ContactPerson=contact_person,
-        Email=email,
-        Phone=phone,
-        DateOfStart=date_of_start
-    )
-    print('Created Service_Providers record:', service_provider)
-
-    service_provider_data = {
-        'OrganizationID': service_provider.OrganizationID,
-        'Organization_Name': service_provider.Organization_Name,
-        'ContactPerson': service_provider.ContactPerson,
-        'Email': service_provider.Email,
-        'Phone': service_provider.Phone,
-        'DateOfStart': service_provider.DateOfStart.isoformat()
-    }
-
-    return jsonify(service_provider_data), 201
-
-# API endpoint to edit services on ServicesAndProviders page
-@app.route('/api/services/<int:service_id>', methods=['PUT'])
+# API endpoint to edit a service
+@app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
 def update_service(service_id):
     data = request.get_json()
-    print('Received request data:', data)
-
-    service_type = data.get('ServiceType')
-    organization_id = data.get('OrganizationID')
-    service_description = data.get('ServiceDescription')
-
+    print(f"Received data for updating service: {data}")  # Add logging statement
     try:
         service = Services.get(Services.ServiceID == service_id)
-        service.ServiceType = service_type
-        service.OrganizationID = organization_id
-        service.ServiceDescription = service_description
+        service.ServiceType = data.get('ServiceType', service.ServiceType)
+        service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
+        service.OrganizationID = data.get('OrganizationID', service.OrganizationID)
         service.save()
-
-        updated_service_data = {
-            'ServiceID': service.ServiceID,
-            'ServiceType': service.ServiceType,
-            'ServiceDescription': service.ServiceDescription,
-            'OrganizationName': service.OrganizationID.Organization_Name
-        }
-
-        return jsonify(updated_service_data), 200
+        print(f"Service updated successfully: {service.to_dict()}")  # Add logging statement
+        return jsonify({'message': 'Service updated successfully'})
     except Services.DoesNotExist:
         return jsonify({'error': 'Service not found'}), 404
 
-# API endpoint to edit service providers on ServicesAndProviders page
-@app.route('/api/service_providers/<int:organization_id>', methods=['PUT'])
+# API endpoint to edit a service provider
+@app.route('/api/ServicesAndProviders/<int:organization_id>', methods=['PUT'])
 def update_service_provider(organization_id):
     data = request.get_json()
-    print('Received request data:', data)
-
-    organization_name = data.get('Organization_Name')
-    contact_person = data.get('ContactPerson')
-    email = data.get('Email')
-    phone = data.get('Phone')
-    date_of_start_str = data.get('DateOfStart')
-    if date_of_start_str:
-        date_of_start = datetime.strptime(date_of_start_str, '%Y-%m-%d').date()
-    else:
-        date_of_start = datetime(2024, 1, 1).date()  
-
+    print(f"Received data for updating service provider: {data}")  # Add logging statement
     try:
-        service_provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
-        service_provider.Organization_Name = organization_name
-        service_provider.ContactPerson = contact_person
-        service_provider.Email = email
-        service_provider.Phone = phone
-        service_provider.DateOfStart = date_of_start
-        service_provider.save()
-
-        updated_service_provider_data = {
-            'OrganizationID': service_provider.OrganizationID,
-            'Organization_Name': service_provider.Organization_Name,
-            'ContactPerson': service_provider.ContactPerson,
-            'Email': service_provider.Email,
-            'Phone': service_provider.Phone,
-            'DateOfStart': service_provider.DateOfStart.isoformat()
-        }
-
-        return jsonify(updated_service_provider_data), 200
+        provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
+        provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
+        provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
+        provider.Email = data.get('Email', provider.Email)
+        provider.Phone = data.get('Phone', provider.Phone)
+        provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
+        provider.save()
+        print(f"Service provider updated successfully: {provider.to_dict()}")  # Add logging statement
+        return jsonify({'message': 'Service Provider updated successfully'})
     except Service_Providers.DoesNotExist:
-        return jsonify({'error': 'Service provider not found'}), 404
+        return jsonify({'error': 'Service Provider not found'}), 404
 
+
+
+
+
+
+
+
+
+
+# # API endpoint to edit a service and its associated service provider
+# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
+# def update_service_and_provider(service_id):
+#     data = request.get_json()
+    
+#     try:
+#         service = Services.get(Services.ServiceID == service_id)
+#         provider = Service_Providers.get(Service_Providers.OrganizationID == service.OrganizationID)
+        
+#         # Update service fields
+#         service.ServiceType = data.get('ServiceType', service.ServiceType)
+#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
+#         service.save()
+        
+#         # Update service provider fields
+#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
+#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
+#         provider.Email = data.get('Email', provider.Email)
+#         provider.Phone = data.get('Phone', provider.Phone)
+#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
+#         provider.save()
+        
+#         return jsonify({'message': 'Service and provider updated successfully'})
+#     except Services.DoesNotExist:
+#         return jsonify({'error': 'Service not found'}), 404
+#     except Service_Providers.DoesNotExist:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+
+
+
+# # API endpoint to edit a service provider
+# @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
+# def update_service_provider(provider_id):
+#     data = request.get_json()
+#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+#     if provider:
+#         for key, value in data.items():
+#             setattr(provider, key, value)
+#         provider.save()
+#         return jsonify(provider.to_dict())
+#     else:
+#         return jsonify({'error': 'Service Provider not found'}), 404
     
     # API endpoint to delete a service from join table
 @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['DELETE'])
@@ -500,7 +441,7 @@ def delete_service(service_id):
 
 
 
-################ ServicesAndProviders Table above  ############################
+################ services above - And service providers ############################
 
 
 ################ Visit Logs Below ##################################
@@ -508,35 +449,84 @@ def delete_service(service_id):
 # API endpoint to get visit logs
 @app.route('/api/visit_logs', methods=['GET'])
 def get_visit_logs():
-    query = (Visit_Service
-             .select(
-                 Visit_Service.Date.alias('VisitDate'),
-                 Services.ServiceType.alias('ServiceName'),
-                 Visit_Service.Description,
-                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
-                 Neighbor.FirstName.alias('NeighborFirstName'),
-                 Neighbor.LastName.alias('NeighborLastName'),
-                 Neighbor.NeighborID.alias('NeighborID'),
-                 Service_Providers.Organization_Name.alias('ServiceProvider')
+    query = (
+        Visit_Record.select(
+            Visit_Record.ServiceOrder,
+            Visit_Service.Date
+        )
+        .join(Visit_Service)
+        .order_by(Visit_Service.Date.desc())
+    )
 
-             )
-             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
-             .join(Service_Providers)  # This joins Services to Service_Providers
-             .switch(Visit_Service)  # Return to Visit_Service to join another table
-             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
-             .join(Volunteer)  # This joins Visit_Record to Volunteer
-             .join(Neighbor, on=(Visit_Record.NeighborID == Neighbor.NeighborID))  # This joins Visit_Record to Neighbor with an explicit join condition
-             .order_by(Visit_Service.Date.desc()))
+    visit_logs = [
+        {
+            'ServiceOrder': record.ServiceOrder,
+            'VisitDate': record.Date.strftime('%Y-%m-%d')
+        }
+        for record in query.dicts()
+    ]
 
-    result = [item for item in query.dicts()]
-    return jsonify(result)
+    return jsonify(visit_logs)
+
+
+# @app.route('/api/visit_logs', methods=['GET'])
+# def get_visit_logs():
+#     query = (
+#         Visit_Record.select(
+#             Visit_Service.Date,
+#             Neighbor.FirstName.alias('NeighborFirstName'),
+#             Neighbor.NeighborID,
+#             Neighbor.LastName.alias('NeighborLastName'),
+#             Services.ServiceType.alias('ServiceName'),
+#             Service_Providers.Organization_Name.alias('ServiceProvider'),
+#             Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
+#             Visit_Service.Description
+#         )
+#         .join(Neighbor)
+#         .switch(Visit_Record)
+#         .join(Volunteer)
+#         .switch(Visit_Record)
+#         .join(Visit_Service)
+#         .join(Services)
+#         .join(Service_Providers)
+#         .order_by(Visit_Service.Date.desc())
+#     )
+
+#     visit_logs = [
+#         {
+#             'VisitDate': record.visit_service.Date.strftime('%Y-%m-%d'),
+#             'NeighborFirstName': record.NeighborFirstName,
+#             'NeighborID': record.NeighborID,
+#             'NeighborLastName': record.NeighborLastName,
+#             'ServiceName': record.ServiceName,
+#             'ServiceProvider': record.ServiceProvider,
+#             'VolunteerName': record.VolunteerName,
+#             'Description': record.visit_service.Description
+#         }
+#         for record in query
+#     ]
+
+#     return jsonify(visit_logs)
+
 
 
 ################ visit Logs above ############################
 
 ############### Individual Visit logs and neighbor profiles below ###################
 
-# This query gets the neighbor details for the neighbor profile page
+
+# The below queries allow the neighbor profiles to work. ###############
+@app.route('/api/visit_records/details', methods=['GET'])
+def get_visit_records_details():
+    query = (Visit_Record
+             .select(Visit_Record, Neighbor, Volunteer)
+             .join(Neighbor)
+             .join(Volunteer))
+    visit_records = [{
+        'Neighbor': f"{record.neighbor.FirstName} {record.neighbor.LastName}",
+        'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
+    } for record in query]
+    return jsonify(visit_records)
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['GET'])
 def get_neighbor_details(neighbor_id):
     try:
@@ -550,24 +540,21 @@ def get_neighbor_details(neighbor_id):
     except Neighbor.DoesNotExist:
         return jsonify({'error': 'Neighbor not found'}), 404
 
-#This query gets the visit records for the neighbor profile page
+
 @app.route('/api/IndividualVisitLog', methods=['GET'])
 def get_IndividualVisitLog():
     query = (Visit_Service
              .select(
-                 Visit_Service.Date.alias('VisitDate'),
-                 Services.ServiceType.alias('ServiceName'),
-                 Visit_Service.Description,
-                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
-                 Service_Providers.Organization_Name.alias('ServiceProvider')
-
+                 Visit_Service.Date.alias('VisitDate'), 
+                 Services.ServiceType.alias('ServiceName'), 
+                 Visit_Service.Description, 
+                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName')
              )
              .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
-             .join(Service_Providers)  # This joins Services to Service_Providers
              .switch(Visit_Service)  # Return to Visit_Service to join another table
              .join(Visit_Record)  # This joins Visit_Service to Visit_Record
              .join(Volunteer)  # This joins Visit_Record to Volunteer
-             .order_by(Visit_Service.Date.desc()))
+             .order_by(Visit_Service.Date.desc()))  
     result = [item for item in query.dicts()]
     return jsonify(result)  
 
@@ -1072,95 +1059,3 @@ if __name__ == '__main__':
 #         return jsonify({'error': 'Service Provider not found'}), 404
 
 ################ service providers above ############################
-
-
-# @app.route('/api/visit_records/details', methods=['GET'])
-# def get_visit_records_details():
-#     query = (Visit_Record
-#              .select(Visit_Record, Neighbor, Volunteer)
-#              .join(Neighbor)
-#              .join(Volunteer))
-#     visit_records = [{
-#         'Neighbor': f"{record.neighbor.FirstName} {record.neighbor.LastName}",
-#         'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
-#     } for record in query]
-#     return jsonify(visit_records)
-
-
-
-# API endpoint to edit a service
-# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
-# def update_service(service_id):
-#     data = request.get_json()
-#     print(f"Received data for updating service: {data}")  # Add logging statement
-#     try:
-#         service = Services.get(Services.ServiceID == service_id)
-#         service.ServiceType = data.get('ServiceType', service.ServiceType)
-#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
-#         service.OrganizationID = data.get('OrganizationID', service.OrganizationID)
-#         service.save()
-#         print(f"Service updated successfully: {service.to_dict()}")  # Add logging statement
-#         return jsonify({'message': 'Service updated successfully'})
-#     except Services.DoesNotExist:
-#         return jsonify({'error': 'Service not found'}), 404
-
-# # API endpoint to edit a service provider
-# @app.route('/api/ServicesAndProviders/<int:organization_id>', methods=['PUT'])
-# def update_service_provider(organization_id):
-#     data = request.get_json()
-#     print(f"Received data for updating service provider: {data}")  # Add logging statement
-#     try:
-#         provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
-#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
-#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
-#         provider.Email = data.get('Email', provider.Email)
-#         provider.Phone = data.get('Phone', provider.Phone)
-#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
-#         provider.save()
-#         print(f"Service provider updated successfully: {provider.to_dict()}")  # Add logging statement
-#         return jsonify({'message': 'Service Provider updated successfully'})
-#     except Service_Providers.DoesNotExist:
-#         return jsonify({'error': 'Service Provider not found'}), 404
-
-# # API endpoint to edit a service and its associated service provider
-# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
-# def update_service_and_provider(service_id):
-#     data = request.get_json()
-    
-#     try:
-#         service = Services.get(Services.ServiceID == service_id)
-#         provider = Service_Providers.get(Service_Providers.OrganizationID == service.OrganizationID)
-        
-#         # Update service fields
-#         service.ServiceType = data.get('ServiceType', service.ServiceType)
-#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
-#         service.save()
-        
-#         # Update service provider fields
-#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
-#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
-#         provider.Email = data.get('Email', provider.Email)
-#         provider.Phone = data.get('Phone', provider.Phone)
-#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
-#         provider.save()
-        
-#         return jsonify({'message': 'Service and provider updated successfully'})
-#     except Services.DoesNotExist:
-#         return jsonify({'error': 'Service not found'}), 404
-#     except Service_Providers.DoesNotExist:
-#         return jsonify({'error': 'Service Provider not found'}), 404
-
-
-
-# # API endpoint to edit a service provider
-# @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
-# def update_service_provider(provider_id):
-#     data = request.get_json()
-#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
-#     if provider:
-#         for key, value in data.items():
-#             setattr(provider, key, value)
-#         provider.save()
-#         return jsonify(provider.to_dict())
-#     else:
-#         return jsonify({'error': 'Service Provider not found'}), 404
