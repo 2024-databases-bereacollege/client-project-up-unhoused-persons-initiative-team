@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <div>
-          <v-btn color="primary" @click="openAddVisitLogDialog">Add Visit Log</v-btn>
+          <!-- <v-btn color="primary" @click="openAddVisitLogDialog">Add Visit Log</v-btn> -->
           <span class="text-h5 mx-4">Visit Logs</span>
         </div>
       </v-card-title>

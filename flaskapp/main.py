@@ -2,7 +2,7 @@ from flask import Flask, request, redirect, render_template, url_for, session, j
 from werkzeug.security import generate_password_hash, check_password_hash #Using for passwords 
 from flask_cors import CORS #to allow the front end to communicate with the back end
 from models import *
-from datetime import date
+from datetime import date, datetime
 from playhouse.shortcuts import model_to_dict, dict_to_model
 
 
@@ -109,13 +109,14 @@ def get_visit():
 @app.route('/api/visit_logs', methods=['POST'])
 def create_visit_log():
     data = request.get_json()
+    print('Received request data:', data)
 
-    # Extract the important data from the request
-    service_id = data.get('ServiceID')
-    description = data.get('Description')
-    visit_date = data.get('Date')
     neighbor_id = data.get('NeighborID')
     volunteer_id = data.get('VolunteerID')
+    service_id = data.get('ServiceID')
+    description = data.get('Description')
+    visit_date_str = data.get('Date')
+    visit_date = datetime.strptime(visit_date_str, '%Y-%m-%d').date() # Convert visit_date_str to a date object
 
     # Create a new Visit_Service record
     visit_service = Visit_Service.create(
@@ -123,6 +124,7 @@ def create_visit_log():
         Description=description,
         Date=visit_date
     )
+    print('Created Visit_Service record:', visit_service)
 
     # Create a new Visit_Record record
     visit_record = Visit_Record.create(
@@ -130,21 +132,20 @@ def create_visit_log():
         VolunteerID=volunteer_id,
         RecordID=visit_service.RecordID
     )
+    print('Created Visit_Record record:', visit_record)
 
-    # Prepare the response data
-    response_data = {
+    visit_log = {
         'VisitDate': visit_service.Date.isoformat(),
-        'ServiceName': visit_service.service.ServiceType,
+        'ServiceName': visit_service.ServiceID.ServiceType,
         'Description': visit_service.Description,
-        'VolunteerName': f"{visit_record.volunteer.FirstName} {visit_record.volunteer.LastName}",
-        'NeighborFirstName': visit_record.neighbor.FirstName,
-        'NeighborLastName': visit_record.neighbor.LastName,
-        'NeighborID': visit_record.neighbor.NeighborID,
-        'ServiceProvider': visit_service.service.service_providers.Organization_Name
+        'VolunteerName': f"{visit_record.VolunteerID.FirstName} {visit_record.VolunteerID.LastName}",
+        'NeighborFirstName': visit_record.NeighborID.FirstName,
+        'NeighborLastName': visit_record.NeighborID.LastName,
+        'NeighborID': visit_record.NeighborID.NeighborID,
+        #'ServiceProvider': visit_service.ServiceID.service_providers.Organization_Name
     }
 
-    return jsonify(response_data)
-
+    return jsonify(visit_log)
 
 #Below is first attempt - including dictionary
 # @app.route('/api/IndividualVisitLog', methods=['POST'])

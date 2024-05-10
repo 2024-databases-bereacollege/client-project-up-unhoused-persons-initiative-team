@@ -6,8 +6,7 @@
     item-title="text"
     item-value="value"
     @update:model-value="$emit('update:model-value', $event)"
-    chips
-    multiple
+    :multiple="multiple"
     variant="outlined"
   ></v-combobox>
 </template>
@@ -26,6 +25,10 @@ export default {
     modelValue: {
       type: [String, Number, Object, Array],
       default: null,
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ['update:model-value'],
