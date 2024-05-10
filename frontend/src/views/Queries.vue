@@ -1,6 +1,11 @@
 <template>
-    <div><h3>On this page we can find two rows of tabs. One displaying a set of tables with different attributes, <br> and the other displaying tables without those attributes.</h3></div>
-    <v-card>
+  <div class="title-section">
+    <h3 class="title">
+      On this page we can find two rows of tabs. One displaying a set of tables with different attributes,<br>
+      and the other displaying tables without those attributes.
+    </h3>
+  </div>
+      <v-card>
       <v-tabs v-model="activeTab" bg-color="deep-purple-darken-4" center-active>
         <v-tab v-for="(tab, index) in tabs" :key="index">{{ tab.title }}</v-tab>
       </v-tabs>
@@ -122,4 +127,17 @@ export default {
   .v-data-table {
     margin-top: 16px;
   }
+  .title-section {
+  background-color: #f5f5f5;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.5;
+}
   </style>
