@@ -73,23 +73,25 @@
       <h3>Visit Log</h3>
       <div class="visit-log">
         <table>
-          <thead>
-            <tr>
-              <th>Visit Date</th>
-              <th>Service Name</th>
-              <th>Volunteer Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(visit, index) in visitLogData" :key="index">
-              <td>{{ formatDate(visit.VisitDate) }}</td>
-              <td>{{ visit.ServiceName }}</td>
-              <td>{{ visit.VolunteerName }}</td>
-              <td>{{ visit.Description }}</td>
-            </tr>
-          </tbody>
-        </table>
+  <thead>
+    <tr>
+      <th>Visit Date</th>
+      <th>Service Name</th>
+      <th>Description</th>
+      <th>Volunteer Name</th>
+      <th>Service Provider</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="(visit, index) in visitLogData" :key="index">
+      <td>{{ formatDate(visit.VisitDate) }}</td>
+      <td>{{ visit.ServiceName }}</td>
+      <td>{{ visit.Description }}</td>
+      <td>{{ visit.VolunteerName }}</td>
+      <td>{{ visit.ServiceProvider }}</td>
+    </tr>
+  </tbody>
+</table>
       </div>
     </template>
     <template v-else>
