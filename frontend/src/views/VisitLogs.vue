@@ -15,6 +15,7 @@
         class="elevation-1"
       >
         <!-- Add additional slot templates for displaying data if needed -->
+                        <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.ServiceProvider="{ item }">
           {{ item.ServiceProvider }}
         </template>
@@ -187,6 +188,8 @@ export default {
       axios
         .post('http://127.0.0.1:5000/api/visit_logs', this.newVisitLog)
         .then((response) => {
+          console.log(response.data);
+
           // Refresh the visit logs after successful addition
           this.fetchVisitLogs();
           this.closeAddVisitLogDialog();
@@ -215,11 +218,11 @@ export default {
           :loading="loading"
           class="elevation-1"
         >
-          <!-- Add additional slot templates for displaying data if needed --
+          <-- Add additional slot templates for displaying data if needed --
         </v-data-table>
       </v-card>
   
-      <!-- Add Visit Log Dialog --
+      <-- Add Visit Log Dialog --
       <v-dialog v-model="addVisitLogDialog" max-width="500px">
         <v-card>
           <v-card-title class="text-h5">Add Visit Log</v-card-title>

@@ -332,6 +332,8 @@ saveService() {
   addService() {
     axios.post('http://127.0.0.1:5000/api/ServicesAndProviders', this.newService)
       .then(response => {
+        console.log(response.data);
+
         this.fetchServices();  //this.services.push(response.data);
         this.closeAddServiceDialog();
       })
