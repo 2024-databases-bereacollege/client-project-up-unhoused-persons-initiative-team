@@ -39,16 +39,14 @@ export default {
   margin-top: 50px;
 }
 
-/* Styles from Main.vue, adjusted if necessary */
 .Main .content {
   margin-left: 16rem; /* Push content to the right of the sidebar */
   padding: 1rem; /* Padding around content */
-  flex-grow: 1; /* Allow the content area to fill the remaining space */
-  background-color: #e7e7e7; /* Background color for the content */
-  height: auto; /* Adjust height as needed */
+  flex-grow: 1; 
+  background-color: #e7e7e7;
+  height: auto; 
 }
 
-/* Additional styles from Main.vue */
 .about {
   display: flex; /* Keep this to align items horizontally */
 }
@@ -56,12 +54,12 @@ export default {
 .links {
   display: flex;
   flex-direction: column; /* Stack links vertically */
-  padding: 0; /* Adjust padding as needed */
-  margin-right: 2rem; /* Space between links and content */
+  padding: 0; 
+  margin-right: 2rem; 
 }
 
 .links a {
-  padding: 0.5rem; /* Adjust padding to your liking */
+  padding: 0.5rem; 
   text-decoration: none;
   background-color: #e7e7e7;
   color: #000000;

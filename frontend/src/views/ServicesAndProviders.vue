@@ -283,21 +283,6 @@ deleteService() {
       console.error('Error deleting service:', error);
     });
 },
-// async saveService() { //this does both service and provider
-//     try {
-//       // Update service
-//       await axios.put(`http://127.0.0.1:5000/api/services/${this.editedService.ServiceID}`, this.editedService);
-      
-//       // Update service provider
-//       await axios.put(`http://127.0.0.1:5000/api/service_providers/${this.editedServiceProvider.OrganizationID}`, this.editedServiceProvider);
-      
-//       // Refresh data and close the dialog
-//       this.fetchServices();
-//       this.closeEditDialog();
-//     } catch (error) {
-//       console.error('Error updating service and service provider:', error);
-//     }
-//   },
 
 async saveService() {
   try {
@@ -398,17 +383,3 @@ async addServiceProvider() {
 };
 </script>
 
-<!-- // saveItem() {
-  //   // Make an API call to update the service
-  //   axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${this.selectedItem.ServiceID}`, this.editedItem)
-  //     .then(() => {
-  //       const index = this.services.findIndex(service => service.ServiceID === this.selectedItem.ServiceID);
-  //       if (index !== -1) {
-  //         this.services.splice(index, 1, this.editedItem);
-  //       }
-  //       this.closeEditDialog();
-  //     })
-  //     .catch(error => {
-  //       console.error('Error updating service:', error);
-  //     });
-  // }, -->
