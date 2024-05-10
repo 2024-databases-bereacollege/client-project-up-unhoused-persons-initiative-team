@@ -1,6 +1,8 @@
 <template>
-  <div>
-    <h2>Add Visit Log</h2>
+  <div class="title-section">
+    <h3 class="title">
+      Add Visit Log
+    </h3>
     <div>
       <ComboboxSelect
         :items="neighbors"
@@ -106,3 +108,20 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+
+.title-section {
+  background-color: #f5f5f5;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.5;
+}
+</style>
