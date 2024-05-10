@@ -350,8 +350,6 @@ saveNeighbor() {
         // Refresh the neighbors data after successful update
         this.fetchNeighbors();
         this.closeEditDialog();
-        window.dispatchEvent(new Event('refreshData'));
-
       })
       .catch(error => {
         console.error('Error updating neighbor:', error);
@@ -365,8 +363,6 @@ addNeighbor() {
     .then(response => {
       this.neighbors.push(response.data);
       this.closeAddNeighborDialog();
-      // After successfully adding a new neighbor - This refreshes the Add visit page
-      window.dispatchEvent(new Event('refreshData'));
     })
     .catch(error => {
       console.error('Error adding neighbor:', error);

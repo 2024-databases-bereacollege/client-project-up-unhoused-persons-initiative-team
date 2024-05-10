@@ -46,10 +46,7 @@
   <v-card>
     <v-card-title class="text-h5">Edit Service</v-card-title>
     <v-card-text>
-      <!--Service attributes-->
-      <v-text-field v-model="editedItem.ServiceType" label="Service Type"></v-text-field>
       <v-text-field v-model="editedItem.ServiceDescription" label="Service Description"></v-text-field>
-      <!--Service provider attributes-->
       <v-text-field v-model="editedItem.ContactPerson" label="Contact Person"></v-text-field>
       <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
       <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
@@ -62,34 +59,28 @@
   </v-card>
 </v-dialog>
 
-
-    <!-- Add Service Dialog -->
-
-    <v-dialog v-model="addServiceDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5">Add Service</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="newService.ServiceType" label="Service Type"></v-text-field>
-          <v-textarea
-            v-model="newService.ServiceDescription"
-            label="Service Description"
-            variant="solo-filled"
-            rows="3"
-            auto-grow
-          ></v-textarea>
-          <ServiceProviderSelect
-            :items="serviceProviders"
-            label="Select Service Provider"
-            @update:model-value="newService.OrganizationID = $event"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeAddServiceDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="addService">Add</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  <!-- Add Service Dialog -->
+  <v-dialog v-model="addServiceDialog" max-width="500px">
+    <v-card>
+      <v-card-title class="text-h5">Add Service</v-card-title>
+      <v-card-text>
+        <v-text-field v-model="newService.ServiceType" label="Service Type"></v-text-field>
+        <v-text-field v-model="newService.ServiceDescription" label="Service Description"></v-text-field>
+        <v-select
+          v-model="newService.OrganizationID"
+          :items="serviceProviders"
+          item-text="Organization_Name"
+          item-value="OrganizationID"
+          label="Service Provider"
+        ></v-select>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="closeAddServiceDialog">Cancel</v-btn>
+        <v-btn color="blue darken-1" text @click="addService">Add</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
 <!-- Add Service Provider Dialog -->
 <v-dialog v-model="addServiceProviderDialog" max-width="500px">
@@ -100,7 +91,40 @@
       <v-text-field v-model="newServiceProvider.ContactPerson" label="Contact Person"></v-text-field>
       <v-text-field v-model="newServiceProvider.Email" label="Email"></v-text-field>
       <v-text-field v-model="newServiceProvider.Phone" label="Phone"></v-text-field>
-      <v-text-field v-model="newServiceProvider.DateOfStart" label="Date Of Start" type="date"></v-text-field>
+      <v-select
+    v-if="serviceProvidersLoaded"
+    v-model="newService.OrganizationID"
+    :items="serviceProviders"
+    item-text="Organization_Name"
+    item-value="OrganizationID"
+    label="Service Provider"
+  ></v-select>
+      
+      <!-- Add the date picker component here -->
+      <v-menu
+        v-model="dateMenu"
+        :close-on-content-click="false"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        min-width="auto"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            v-model="newServiceProvider.DateOfStart"
+            label="Date of Start"
+            prepend-icon="mdi-calendar"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="newServiceProvider.DateOfStart"
+          @input="dateMenu = false"
+        ></v-date-picker>
+      </v-menu>
+      
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -116,11 +140,9 @@
 <script>
  /* eslint-disable */
 import ServiceProviderSelect from '../components/ServiceProviderSelect.vue';
+
 import axios from 'axios';
 export default {
-  components: {
-    ServiceProviderSelect,
-  },
   data() {
     return {
       headers: [
@@ -136,7 +158,6 @@ export default {
       ],
 
       services: [],
-      serviceProviders: [],
       loading: true,
       deleteDialog: false,
       editDialog: false,
@@ -146,7 +167,6 @@ export default {
       editedIndex: -1,
       editedItem: {
         ServiceID: '',
-        ServiceType: '',
         ServiceDescription: '',
         OrganizationID: '',
         ContactPerson: '',
@@ -155,7 +175,6 @@ export default {
       },
       defaultItem: {
     ServiceID: '',
-    ServiceType: '',
     ServiceDescription: '',
     OrganizationID: '',
     ContactPerson: '',
@@ -174,6 +193,7 @@ export default {
     Phone: '',
     DateOfStart: '',
   },
+  serviceProviders: [],
 };
 },
 mounted() {
@@ -209,10 +229,8 @@ openEditDialog(item) {
   this.selectedItem = item;
   this.editedItem = {
     ServiceID: item.ServiceID,
-    ServiceType: item.ServiceType,
     ServiceDescription: item.ServiceDescription,
-    OrganizationID: item.OrganizationID ? item.OrganizationID.OrganizationID : '',
-    Organization_Name: item.OrganizationID ? item.OrganizationID.Organization_Name : '',
+    OrganizationID: item.OrganizationID,
     ContactPerson: item.ContactPerson,
     Email: item.Email,
     Phone: item.Phone,
@@ -224,10 +242,8 @@ closeEditDialog() {
   this.selectedItem = null;
   this.editedItem = {
     ServiceID: '',
-    ServiceType: '',
     ServiceDescription: '',
     OrganizationID: '',
-    Organization_Name: '',
     ContactPerson: '',
     Email: '',
     Phone: '',
@@ -283,117 +299,67 @@ deleteService() {
       console.error('Error deleting service:', error);
     });
 },
-// async saveService() { //this does both service and provider
-//     try {
-//       // Update service
-//       await axios.put(`http://127.0.0.1:5000/api/services/${this.editedService.ServiceID}`, this.editedService);
-      
-//       // Update service provider
-//       await axios.put(`http://127.0.0.1:5000/api/service_providers/${this.editedServiceProvider.OrganizationID}`, this.editedServiceProvider);
-      
-//       // Refresh data and close the dialog
-//       this.fetchServices();
-//       this.closeEditDialog();
-//     } catch (error) {
-//       console.error('Error updating service and service provider:', error);
-//     }
-//   },
+saveService() {
+  const serviceID = this.editedItem.ServiceID;
+  const organizationID = this.editedItem.OrganizationID;
+  console.log('Service ID:', serviceID);
+  console.log('Organization ID:', organizationID);
 
-async saveService() {
-  try {
-    const serviceRequestData = {
-  ServiceID: this.editedItem.ServiceID,
-  ServiceType: this.editedItem.ServiceType,
-  OrganizationID: this.editedItem.OrganizationID,
-  ServiceDescription: this.editedItem.ServiceDescription,
-};
-
-const serviceProviderRequestData = {
-  OrganizationID: this.editedItem.OrganizationID,
-  Organization_Name: this.editedItem.Organization_Name,
-  ContactPerson: this.editedItem.ContactPerson,
-  Email: this.editedItem.Email,
-  Phone: this.editedItem.Phone,
-  DateOfStart: this.editedItem.DateOfStart,
-};
-
-
-    console.log('Service Request Data:', serviceRequestData);
-    console.log('Service Provider Request Data:', serviceProviderRequestData);
-
-    // Update service
-    const serviceResponse = await axios.put(
-      `http://127.0.0.1:5000/api/services/${serviceRequestData.ServiceID}`,
-      serviceRequestData
-    );
-    console.log('Service updated successfully:', serviceResponse.data);
-
-    // Update service provider
-    const serviceProviderResponse = await axios.put(
-      `http://127.0.0.1:5000/api/service_providers/${serviceProviderRequestData.OrganizationID}`,
-      serviceProviderRequestData
-    );
-    console.log('Service provider updated successfully:', serviceProviderResponse.data);
-
-    // Handle success response
-    this.fetchServices();
-    this.fetchServiceProviders();
-    this.closeEditDialog();
-    window.dispatchEvent(new Event('refreshData'));
-  } catch (error) {
-    console.error('Error updating service or service provider:', error);
-    // Handle error
+  if (serviceID && organizationID) {
+    // Update service details
+    axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`, {
+      ServiceDescription: this.editedItem.ServiceDescription,
+    })
+      .then(() => {
+        // Update service provider details
+        axios.put(`http://127.0.0.1:5000/api/Service_providers/${organizationID}`, {
+          ContactPerson: this.editedItem.ContactPerson,
+          Email: this.editedItem.Email,
+          Phone: this.editedItem.Phone,
+        })
+          .then(() => {
+            // Refresh the services data after successful update
+            this.fetchServices();
+            this.fetchServiceProviders();
+            this.closeEditDialog();
+          })
+          .catch(error => {
+            console.error('Error updating service provider:', error);
+          });
+      })
+      .catch(error => {
+        console.error('Error updating service:', error);
+      });
+  } else {
+    console.error('Invalid serviceID or organizationID');
   }
 },
 
-async addService() {
-  try {
-    const requestData = {
-      ServiceType: this.newService.ServiceType,
-      OrganizationID: this.newService.OrganizationID ? this.newService.OrganizationID.value : null,
-      ServiceDescription: this.newService.ServiceDescription,
-    };
-    console.log('Request Data:', requestData);
-    const response = await axios.post('http://127.0.0.1:5000/api/services', requestData);
-    console.log('Service added successfully:', response.data);
-    // Handle success response
-    this.fetchServices();
-    this.closeAddServiceDialog();
-    window.dispatchEvent(new Event('refreshData'));
-  } catch (error) {
-    console.error('Error adding service:', error);
-    // Handle error
-  }
-},
-async addServiceProvider() {
-  try {
-    const requestData = {
-      Organization_Name: this.newServiceProvider.Organization_Name,
-      ContactPerson: this.newServiceProvider.ContactPerson,
-      Email: this.newServiceProvider.Email,
-      Phone: this.newServiceProvider.Phone,
-      DateOfStart: this.newServiceProvider.DateOfStart,
-    };
-    console.log('Request Data:', requestData);
-    const response = await axios.post('http://127.0.0.1:5000/api/service_providers', requestData);
-    console.log('Service provider added successfully:', response.data);
-    // Handle success response
-    this.fetchServiceProviders();
-    this.closeAddServiceProviderDialog();
-    window.dispatchEvent(new Event('refreshData'));
-  } catch (error) {
-    console.error('Error adding service provider:', error);
-    // Handle error
-  }
-},
+  addService() {
+    axios.post('http://127.0.0.1:5000/api/ServicesAndProviders', this.newService)
+      .then(response => {
+        this.fetchServices();  //this.services.push(response.data);
+        this.closeAddServiceDialog();
+      })
+      .catch(error => {
+        console.error('Error adding service:', error);
+      });
+  },
+  addServiceProvider() {
+    axios.post('http://127.0.0.1:5000/api/service_providers', this.newServiceProvider)
+      .then(() => {
+        this.fetchServiceProviders();
+        this.closeAddServiceProviderDialog();
+      })
+      .catch(error => {
+        console.error('Error adding service provider:', error);
+      });
+  },
 
   // Utility functions
   formatDate(date) {
     return new Date(date).toLocaleDateString();
   },
-  onProviderSelected(providerId) {
-      this.newService.OrganizationID = providerId;
-},
 },
 };
 </script>
