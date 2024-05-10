@@ -6,7 +6,7 @@
           <v-btn color="primary" @click="openAddServiceDialog">Add Service</v-btn>
           <span class="text-h5 mx-4">Services and Providers</span>
         </div>
-        <!-- <v-btn color="primary" @click="openAddServiceProviderDialog">Add Service Provider</v-btn> -->
+        <v-btn color="primary" @click="openAddServiceProviderDialog">Add Service Provider</v-btn>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -21,7 +21,7 @@
         </template>
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.actions="{ item }">
-          <!-- <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon> -->
+          <v-icon small class="mr-2" @click="openEditDialog(item)">mdi-pencil</v-icon>
           <v-icon small @click="openDeleteDialog(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
@@ -58,14 +58,27 @@
     </v-card-actions>
   </v-card>
 </v-dialog> -->
+
+
     <!-- Add Service Dialog -->
+
     <v-dialog v-model="addServiceDialog" max-width="500px">
       <v-card>
         <v-card-title class="text-h5">Add Service</v-card-title>
         <v-card-text>
           <v-text-field v-model="newService.ServiceType" label="Service Type"></v-text-field>
-          <v-text-field v-model="newService.ServiceDescription" label="Service Description"></v-text-field>
-          <service-provider-select @provider-selected="onProviderSelected"></service-provider-select>
+          <v-textarea
+            v-model="newService.ServiceDescription"
+            label="Service Description"
+            variant="solo-filled"
+            rows="3"
+            auto-grow
+          ></v-textarea>
+          <ServiceProviderSelect
+            :items="serviceProviders"
+            label="Select Service Provider"
+            @update:model-value="newService.OrganizationID = $event"
+          />
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -329,20 +342,25 @@ saveService() {
   }
 },
 
-  addService() {
-    axios.post('http://127.0.0.1:5000/api/ServicesAndProviders', this.newService)
-      .then(response => {
-        console.log(response.data);
-
-        this.fetchServices();  //this.services.push(response.data);
-        this.closeAddServiceDialog();
-        window.dispatchEvent(new Event('refreshData'));
-
-      })
-      .catch(error => {
-        console.error('Error adding service:', error);
-      });
-  },
+async addService() {
+  try {
+    const requestData = {
+      ServiceType: this.newService.ServiceType,
+      OrganizationID: this.newService.OrganizationID ? this.newService.OrganizationID.value : null,
+      ServiceDescription: this.newService.ServiceDescription,
+    };
+    console.log('Request Data:', requestData);
+    const response = await axios.post('http://127.0.0.1:5000/api/services', requestData);
+    console.log('Service added successfully:', response.data);
+    // Handle success response
+    this.fetchServices();
+    this.closeAddServiceDialog();
+    window.dispatchEvent(new Event('refreshData'));
+  } catch (error) {
+    console.error('Error adding service:', error);
+    // Handle error
+  }
+},
   addServiceProvider() {
     axios.post('http://127.0.0.1:5000/api/service_providers', this.newServiceProvider)
       .then(() => {

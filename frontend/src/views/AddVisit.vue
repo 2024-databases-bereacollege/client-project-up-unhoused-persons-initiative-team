@@ -81,7 +81,7 @@ export default {
         console.error('Error fetching data:', error);
       }
     },
-    async submitData() {
+async submitData() {
   try {
     const requestData = {
       NeighborID: this.selectedValues.Neighbors ? this.selectedValues.Neighbors.value : null,

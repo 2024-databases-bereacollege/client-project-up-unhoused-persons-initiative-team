@@ -147,43 +147,6 @@ def create_visit_log():
 
     return jsonify(visit_log)
 
-#Below is first attempt - including dictionary
-# @app.route('/api/IndividualVisitLog', methods=['POST'])
-# def individual_visit_log():
-#     data = request.get_json()
-#     selected_values = data.get('selectedValues')
-#     visit_description = data.get('visitDescription')
-
-#     # Process the selected values and visit description
-#     # Update the respective tables based on the received data
-
-#     # Example: Update Visit_Service table
-#     visit_service = Visit_Service.create(
-#         ServiceID=selected_values.get('Services'),
-#         Description=visit_description,
-#         Date=datetime.date.today()
-#     )
-
-#     # Example: Update Visit_Record table
-#     visit_record = Visit_Record.create(
-#         NeighborID=selected_values.get('Neighbor'),
-#         VolunteerID=selected_values.get('Volunteer'),
-#         RecordID=visit_service
-#     )
-
-#     # Example: Update Inventory_Usage table
-#     inventory_usage = Inventory_Usage.create(
-#         NameOfItem=selected_values.get('Inventory'),
-#         RecordID=visit_record,
-#         Description_of_Item='',  # Add appropriate description
-#         Number_Of_Item_Used=1   # Add appropriate quantity
-#     )
-
-#     # Return a success response
-#     return jsonify({'message': 'Data submitted successfully'})
-
-
-
 ################ volunteers below ############################
 
 
@@ -239,7 +202,7 @@ def delete_volunteer(volunteer_id):
     return '', 204
 
 ################ volunteers above ############################
-    
+
 ################ neighbors below ############################ 
 
 # API endpoint to get all neighbors   
@@ -390,7 +353,7 @@ def get_services():
     
     return jsonify(services)
 
-# API endpoint to get service providers
+# API endpoint to get service providers - This is to display them in the buttons!
 @app.route('/api/service_providers', methods=['GET'])
 def get_service_providers():
     query = Service_Providers.select()
@@ -432,7 +395,32 @@ def update_service_provider(organization_id):
         return jsonify({'error': 'Service Provider not found'}), 404
 
 
+# API endpoint to create services on ServicesAndProviders page
+@app.route('/api/services', methods=['POST'])
+def create_service_on_ServicesAndProvidersPage():
+    data = request.get_json()
+    print('Received request data:', data)
 
+    service_type = data.get('ServiceType')
+    organization_id = data.get('OrganizationID')
+    service_description = data.get('ServiceDescription')
+
+    # Create a new Services record
+    service = Services.create(
+        ServiceType=service_type,
+        OrganizationID=organization_id,
+        ServiceDescription=service_description
+    )
+    print('Created Services record:', service)
+
+    service_data = {
+        'ServiceID': service.ServiceID,
+        'ServiceType': service.ServiceType,
+        'ServiceDescription': service.ServiceDescription,
+        'OrganizationName': service.OrganizationID.Organization_Name
+    }
+
+    return jsonify(service_data), 201
 
 
 
