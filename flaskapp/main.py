@@ -449,64 +449,86 @@ def delete_service(service_id):
 # API endpoint to get visit logs
 @app.route('/api/visit_logs', methods=['GET'])
 def get_visit_logs():
-    query = (
-        Visit_Record.select(
-            Visit_Record.ServiceOrder,
-            Visit_Service.Date
-        )
-        .join(Visit_Service)
-        .order_by(Visit_Service.Date.desc())
-    )
+    query = (Visit_Service
+             .select(
+                 Visit_Service.Date.alias('VisitDate'),
+                 Services.ServiceType.alias('ServiceName'),
+                 Visit_Service.Description,
+                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
+                 Neighbor.FirstName.alias('NeighborFirstName'),
+                 Neighbor.LastName.alias('NeighborLastName'),
+                 Neighbor.NeighborID.alias('NeighborID'),
+                 Service_Providers.Organization_Name.alias('ServiceProvider')
 
-    visit_logs = [
-        {
-            'ServiceOrder': record.ServiceOrder,
-            'VisitDate': record.Date.strftime('%Y-%m-%d')
-        }
-        for record in query.dicts()
-    ]
+             )
+             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
+             .join(Service_Providers)  # This joins Services to Service_Providers
+             .switch(Visit_Service)  # Return to Visit_Service to join another table
+             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
+             .join(Volunteer)  # This joins Visit_Record to Volunteer
+             .join(Neighbor, on=(Visit_Record.NeighborID == Neighbor.NeighborID))  # This joins Visit_Record to Neighbor with an explicit join condition
+             .order_by(Visit_Service.Date.desc()))
 
-    return jsonify(visit_logs)
-
+    result = [item for item in query.dicts()]
+    return jsonify(result)
 
 # @app.route('/api/visit_logs', methods=['GET'])
 # def get_visit_logs():
-#     query = (
-#         Visit_Record.select(
-#             Visit_Service.Date,
-#             Neighbor.FirstName.alias('NeighborFirstName'),
-#             Neighbor.NeighborID,
-#             Neighbor.LastName.alias('NeighborLastName'),
-#             Services.ServiceType.alias('ServiceName'),
-#             Service_Providers.Organization_Name.alias('ServiceProvider'),
-#             Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
-#             Visit_Service.Description
-#         )
-#         .join(Neighbor)
-#         .switch(Visit_Record)
-#         .join(Volunteer)
-#         .switch(Visit_Record)
-#         .join(Visit_Service)
-#         .join(Services)
-#         .join(Service_Providers)
-#         .order_by(Visit_Service.Date.desc())
-#     )
+#     visit_record_subquery = (Visit_Record
+#                              .select(Visit_Record.RecordID,
+#                                      Neighbor.FirstName.alias('NeighborFirstName'),
+#                                      Neighbor.NeighborID.alias('NeighborID'),
+#                                      Neighbor.LastName.alias('NeighborLastName'),
+#                                      Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'))
+#                              .join(Neighbor)
+#                              .switch(Visit_Record)
+#                              .join(Volunteer))
 
-#     visit_logs = [
-#         {
-#             'VisitDate': record.visit_service.Date.strftime('%Y-%m-%d'),
-#             'NeighborFirstName': record.NeighborFirstName,
-#             'NeighborID': record.NeighborID,
-#             'NeighborLastName': record.NeighborLastName,
-#             'ServiceName': record.ServiceName,
-#             'ServiceProvider': record.ServiceProvider,
-#             'VolunteerName': record.VolunteerName,
-#             'Description': record.visit_service.Description
-#         }
-#         for record in query
-#     ]
+#     query = (Visit_Service
+#              .select(
+#                  Visit_Service.Date.alias('VisitDate'),
+#                  visit_record_subquery.c.NeighborFirstName,
+#                  visit_record_subquery.c.NeighborID,
+#                  visit_record_subquery.c.NeighborLastName,
+#                  Services.ServiceType.alias('ServiceName'),
+#                  Service_Providers.Organization_Name.alias('ServiceProvider'),
+#                  visit_record_subquery.c.VolunteerName,
+#                  Visit_Service.Description
+#              )
+#              .join(visit_record_subquery, on=(Visit_Service.RecordID == visit_record_subquery.c.RecordID))
+#              .join(Services)
+#              .join(Service_Providers)
+#              .order_by(Visit_Service.Date.desc()))
 
-#     return jsonify(visit_logs)
+#     result = [item for item in query.dicts()]
+#     return jsonify(result)
+#TODO this below gives duplicate t6 table error
+# @app.route('/api/visit_logs', methods=['GET'])
+# def get_visit_logs():
+#     query = (Visit_Service
+#              .select(
+#                  Visit_Service.Date.alias('VisitDate'),
+#                  Neighbor.FirstName.alias('NeighborFirstName'),
+#                  Neighbor.NeighborID.alias('NeighborID'),
+#                  Neighbor.LastName.alias('NeighborLastName'),
+#                  Services.ServiceType.alias('ServiceName'),
+#                  Service_Providers.Organization_Name.alias('ServiceProvider'),
+#                  Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
+#                  Visit_Service.Description
+#              )
+#              .join(Visit_Record, on=(Visit_Service.RecordID == Visit_Record.RecordID).alias('vr1'))  # Join Visit_Service to Visit_Record with alias 'vr1'
+#              .join(Neighbor, on=(Visit_Record.NeighborID == Neighbor.NeighborID).alias('n'))  # Join Visit_Record to Neighbor with alias 'n'
+#              .switch(Visit_Service)  # Return to Visit_Service to join another table
+#              .join(Services, on=(Visit_Service.ServiceID == Services.ServiceID).alias('s'))  # Join Visit_Service to Services with alias 's'
+#              .join(Service_Providers, on=(Services.OrganizationID == Service_Providers.OrganizationID).alias('sp'))  # Join Services to Service_Providers with alias 'sp'
+#              .switch(Visit_Service)  # Return to Visit_Service to join another table
+#              .join(Visit_Record, on=(Visit_Service.RecordID == Visit_Record.RecordID).alias('vr2'))  # Join Visit_Service to Visit_Record again with alias 'vr2'
+#              .join(Volunteer, on=(Visit_Record.VolunteerID == Volunteer.VolunteerID).alias('v'))  # Join Visit_Record to Volunteer with alias 'v'
+#              .order_by(Visit_Service.Date.desc()))
+
+#     result = [item for item in query.dicts()]
+#     return jsonify(result)
+
 
 
 
@@ -514,19 +536,7 @@ def get_visit_logs():
 
 ############### Individual Visit logs and neighbor profiles below ###################
 
-
-# The below queries allow the neighbor profiles to work. ###############
-@app.route('/api/visit_records/details', methods=['GET'])
-def get_visit_records_details():
-    query = (Visit_Record
-             .select(Visit_Record, Neighbor, Volunteer)
-             .join(Neighbor)
-             .join(Volunteer))
-    visit_records = [{
-        'Neighbor': f"{record.neighbor.FirstName} {record.neighbor.LastName}",
-        'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
-    } for record in query]
-    return jsonify(visit_records)
+# This query gets the neighbor details for the neighbor profile page
 @app.route('/api/neighbors/<int:neighbor_id>', methods=['GET'])
 def get_neighbor_details(neighbor_id):
     try:
@@ -540,23 +550,23 @@ def get_neighbor_details(neighbor_id):
     except Neighbor.DoesNotExist:
         return jsonify({'error': 'Neighbor not found'}), 404
 
-
-@app.route('/api/IndividualVisitLog', methods=['GET'])
-def get_IndividualVisitLog():
-    query = (Visit_Service
-             .select(
-                 Visit_Service.Date.alias('VisitDate'), 
-                 Services.ServiceType.alias('ServiceName'), 
-                 Visit_Service.Description, 
-                 Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName')
-             )
-             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
-             .switch(Visit_Service)  # Return to Visit_Service to join another table
-             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
-             .join(Volunteer)  # This joins Visit_Record to Volunteer
-             .order_by(Visit_Service.Date.desc()))  
-    result = [item for item in query.dicts()]
-    return jsonify(result)  
+# This query gets the visit records for the neighbor profile page
+# @app.route('/api/IndividualVisitLog', methods=['GET'])
+# def get_IndividualVisitLog():
+#     query = (Visit_Service
+#              .select(
+#                  Visit_Service.Date.alias('VisitDate'), 
+#                  Services.ServiceType.alias('ServiceName'), 
+#                  Visit_Service.Description, 
+#                  Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName')
+#              )
+#              .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
+#              .switch(Visit_Service)  # Return to Visit_Service to join another table
+#              .join(Visit_Record)  # This joins Visit_Service to Visit_Record
+#              .join(Volunteer)  # This joins Visit_Record to Volunteer
+#              .order_by(Visit_Service.Date.desc()))  
+#     result = [item for item in query.dicts()]
+#     return jsonify(result)  
 
 ############### Individual Visit logs and neighbor profiles above ###################
 
@@ -1059,3 +1069,16 @@ if __name__ == '__main__':
 #         return jsonify({'error': 'Service Provider not found'}), 404
 
 ################ service providers above ############################
+
+
+# @app.route('/api/visit_records/details', methods=['GET'])
+# def get_visit_records_details():
+#     query = (Visit_Record
+#              .select(Visit_Record, Neighbor, Volunteer)
+#              .join(Neighbor)
+#              .join(Volunteer))
+#     visit_records = [{
+#         'Neighbor': f"{record.neighbor.FirstName} {record.neighbor.LastName}",
+#         'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
+#     } for record in query]
+#     return jsonify(visit_records)
