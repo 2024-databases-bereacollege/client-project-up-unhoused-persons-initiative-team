@@ -35,7 +35,7 @@ export default {
   computed: {
     formattedItems() {
       return this.items.map((item) => ({
-        text: this.getFullName(item),
+        text: this.getDisplayName(item),
         value: item.NeighborID || item.ServiceID || item.VolunteerID,
       }));
     },
@@ -46,9 +46,11 @@ export default {
     };
   },
   methods: {
-    getFullName(item) {
+    getDisplayName(item) {
       if (item.FirstName && item.LastName) {
         return `${item.FirstName} ${item.LastName}`;
+      } else if (item.FirstName) {
+        return item.FirstName;
       } else if (item.ServiceType) {
         return item.ServiceType;
       } else {
