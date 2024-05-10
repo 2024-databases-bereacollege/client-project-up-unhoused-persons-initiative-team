@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <div>
-          <!---<v-btn color="primary" @click="openAddServiceDialog">Add Service</v-btn> -->
+          <v-btn color="primary" @click="openAddServiceDialog">Add Service</v-btn>
           <span class="text-h5 mx-4">Services and Providers</span>
         </div>
         <!-- <v-btn color="primary" @click="openAddServiceProviderDialog">Add Service Provider</v-btn> -->
@@ -58,29 +58,22 @@
     </v-card-actions>
   </v-card>
 </v-dialog> -->
-
-  <!-- Add Service Dialog -->
-  <!-- <v-dialog v-model="addServiceDialog" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">Add Service</v-card-title>
-      <v-card-text>
-        <v-text-field v-model="newService.ServiceType" label="Service Type"></v-text-field>
-        <v-text-field v-model="newService.ServiceDescription" label="Service Description"></v-text-field>
-        <v-select
-          v-model="newService.OrganizationID"
-          :items="serviceProviders"
-          item-text="Organization_Name"
-          item-value="OrganizationID"
-          label="Service Provider"
-        ></v-select>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="closeAddServiceDialog">Cancel</v-btn>
-        <v-btn color="blue darken-1" text @click="addService">Add</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog> -->
+    <!-- Add Service Dialog -->
+    <v-dialog v-model="addServiceDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Add Service</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="newService.ServiceType" label="Service Type"></v-text-field>
+          <v-text-field v-model="newService.ServiceDescription" label="Service Description"></v-text-field>
+          <service-provider-select @provider-selected="onProviderSelected"></service-provider-select>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeAddServiceDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="addService">Add</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
 <!-- Add Service Provider Dialog -->
 <!-- <v-dialog v-model="addServiceProviderDialog" max-width="500px">
@@ -138,8 +131,12 @@
 
 
 <script>
+import ServiceProviderSelect from '../components/ServiceProviderSelect.vue';
 import axios from 'axios';
 export default {
+  components: {
+    ServiceProviderSelect,
+  },
   data() {
     return {
       headers: [
@@ -155,6 +152,7 @@ export default {
       ],
 
       services: [],
+      serviceProviders: [],
       loading: true,
       deleteDialog: false,
       editDialog: false,
@@ -190,7 +188,6 @@ export default {
     Phone: '',
     DateOfStart: '',
   },
-  serviceProviders: [],
 };
 },
 mounted() {
@@ -357,6 +354,9 @@ saveService() {
   formatDate(date) {
     return new Date(date).toLocaleDateString();
   },
+  onProviderSelected(providerId) {
+      this.newService.OrganizationID = providerId;
+},
 },
 };
 </script>
