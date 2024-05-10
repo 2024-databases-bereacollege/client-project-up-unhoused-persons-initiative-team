@@ -42,11 +42,14 @@
 
 
 <!-- Edit Service Dialog -->
-<!-- <v-dialog v-model="editDialog" max-width="500px">
+<v-dialog v-model="editDialog" max-width="500px">
   <v-card>
     <v-card-title class="text-h5">Edit Service</v-card-title>
     <v-card-text>
+      <!--Service attributes-->
+      <v-text-field v-model="editedItem.ServiceType" label="Service Type"></v-text-field>
       <v-text-field v-model="editedItem.ServiceDescription" label="Service Description"></v-text-field>
+      <!--Service provider attributes-->
       <v-text-field v-model="editedItem.ContactPerson" label="Contact Person"></v-text-field>
       <v-text-field v-model="editedItem.Email" label="Email"></v-text-field>
       <v-text-field v-model="editedItem.Phone" label="Phone"></v-text-field>
@@ -57,7 +60,7 @@
       <v-btn color="blue darken-1" text @click="saveService">Save</v-btn>
     </v-card-actions>
   </v-card>
-</v-dialog> -->
+</v-dialog>
 
 
     <!-- Add Service Dialog -->
@@ -142,6 +145,7 @@ export default {
       editedIndex: -1,
       editedItem: {
         ServiceID: '',
+        ServiceType: '',
         ServiceDescription: '',
         OrganizationID: '',
         ContactPerson: '',
@@ -150,6 +154,7 @@ export default {
       },
       defaultItem: {
     ServiceID: '',
+    ServiceType: '',
     ServiceDescription: '',
     OrganizationID: '',
     ContactPerson: '',
@@ -203,8 +208,10 @@ openEditDialog(item) {
   this.selectedItem = item;
   this.editedItem = {
     ServiceID: item.ServiceID,
+    ServiceType: item.ServiceType,
     ServiceDescription: item.ServiceDescription,
-    OrganizationID: item.OrganizationID,
+    OrganizationID: item.OrganizationID ? item.OrganizationID.OrganizationID : '',
+    Organization_Name: item.OrganizationID ? item.OrganizationID.Organization_Name : '',
     ContactPerson: item.ContactPerson,
     Email: item.Email,
     Phone: item.Phone,
@@ -216,8 +223,10 @@ closeEditDialog() {
   this.selectedItem = null;
   this.editedItem = {
     ServiceID: '',
+    ServiceType: '',
     ServiceDescription: '',
     OrganizationID: '',
+    Organization_Name: '',
     ContactPerson: '',
     Email: '',
     Phone: '',
@@ -273,39 +282,66 @@ deleteService() {
       console.error('Error deleting service:', error);
     });
 },
-saveService() {
-  const serviceID = this.editedItem.ServiceID;
-  const organizationID = this.editedItem.OrganizationID;
-    console.log('Service ID:', serviceID);
-  console.log('Organization ID:', organizationID);
+// async saveService() { //this does both service and provider
+//     try {
+//       // Update service
+//       await axios.put(`http://127.0.0.1:5000/api/services/${this.editedService.ServiceID}`, this.editedService);
+      
+//       // Update service provider
+//       await axios.put(`http://127.0.0.1:5000/api/service_providers/${this.editedServiceProvider.OrganizationID}`, this.editedServiceProvider);
+      
+//       // Refresh data and close the dialog
+//       this.fetchServices();
+//       this.closeEditDialog();
+//     } catch (error) {
+//       console.error('Error updating service and service provider:', error);
+//     }
+//   },
 
-  if (serviceID && organizationID) {
-    // Update service details
-    axios.put(`http://127.0.0.1:5000/api/ServicesAndProviders/${serviceID}`, {
-      ServiceDescription: this.editedItem.ServiceDescription,
-    })
-      .then(() => {
-        // Update service provider details
-        axios.put(`http://127.0.0.1:5000/api/Service_providers/${organizationID}`, {
-          ContactPerson: this.editedItem.ContactPerson,
-          Email: this.editedItem.Email,
-          Phone: this.editedItem.Phone,
-        })
-          .then(() => {
-            // Refresh the services data after successful update
-            this.fetchServices();
-            this.fetchServiceProviders();
-            this.closeEditDialog();
-          })
-          .catch(error => {
-            console.error('Error updating service provider:', error);
-          });
-      })
-      .catch(error => {
-        console.error('Error updating service:', error);
-      });
-  } else {
-    console.error('Invalid serviceID or organizationID');
+async saveService() {
+  try {
+    const serviceRequestData = {
+  ServiceID: this.editedItem.ServiceID,
+  ServiceType: this.editedItem.ServiceType,
+  OrganizationID: this.editedItem.OrganizationID,
+  ServiceDescription: this.editedItem.ServiceDescription,
+};
+
+const serviceProviderRequestData = {
+  OrganizationID: this.editedItem.OrganizationID,
+  Organization_Name: this.editedItem.Organization_Name,
+  ContactPerson: this.editedItem.ContactPerson,
+  Email: this.editedItem.Email,
+  Phone: this.editedItem.Phone,
+  DateOfStart: this.editedItem.DateOfStart,
+};
+
+
+    console.log('Service Request Data:', serviceRequestData);
+    console.log('Service Provider Request Data:', serviceProviderRequestData);
+
+    // Update service
+    const serviceResponse = await axios.put(
+      `http://127.0.0.1:5000/api/services/${serviceRequestData.ServiceID}`,
+      serviceRequestData
+    );
+    console.log('Service updated successfully:', serviceResponse.data);
+
+    // Update service provider
+    const serviceProviderResponse = await axios.put(
+      `http://127.0.0.1:5000/api/service_providers/${serviceProviderRequestData.OrganizationID}`,
+      serviceProviderRequestData
+    );
+    console.log('Service provider updated successfully:', serviceProviderResponse.data);
+
+    // Handle success response
+    this.fetchServices();
+    this.fetchServiceProviders();
+    this.closeEditDialog();
+    window.dispatchEvent(new Event('refreshData'));
+  } catch (error) {
+    console.error('Error updating service or service provider:', error);
+    // Handle error
   }
 },
 

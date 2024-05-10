@@ -360,41 +360,6 @@ def get_service_providers():
     service_providers = [provider.to_dict() for provider in query]
     return jsonify(service_providers)
 
-# API endpoint to edit a service
-@app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
-def update_service(service_id):
-    data = request.get_json()
-    print(f"Received data for updating service: {data}")  # Add logging statement
-    try:
-        service = Services.get(Services.ServiceID == service_id)
-        service.ServiceType = data.get('ServiceType', service.ServiceType)
-        service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
-        service.OrganizationID = data.get('OrganizationID', service.OrganizationID)
-        service.save()
-        print(f"Service updated successfully: {service.to_dict()}")  # Add logging statement
-        return jsonify({'message': 'Service updated successfully'})
-    except Services.DoesNotExist:
-        return jsonify({'error': 'Service not found'}), 404
-
-# API endpoint to edit a service provider
-@app.route('/api/ServicesAndProviders/<int:organization_id>', methods=['PUT'])
-def update_service_provider(organization_id):
-    data = request.get_json()
-    print(f"Received data for updating service provider: {data}")  # Add logging statement
-    try:
-        provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
-        provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
-        provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
-        provider.Email = data.get('Email', provider.Email)
-        provider.Phone = data.get('Phone', provider.Phone)
-        provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
-        provider.save()
-        print(f"Service provider updated successfully: {provider.to_dict()}")  # Add logging statement
-        return jsonify({'message': 'Service Provider updated successfully'})
-    except Service_Providers.DoesNotExist:
-        return jsonify({'error': 'Service Provider not found'}), 404
-
-
 # API endpoint to create services on ServicesAndProviders page
 @app.route('/api/services', methods=['POST'])
 def create_service_on_ServicesAndProvidersPage():
@@ -456,52 +421,72 @@ def create_service_provider():
 
     return jsonify(service_provider_data), 201
 
+# API endpoint to edit services on ServicesAndProviders page
+@app.route('/api/services/<int:service_id>', methods=['PUT'])
+def update_service(service_id):
+    data = request.get_json()
+    print('Received request data:', data)
 
+    service_type = data.get('ServiceType')
+    organization_id = data.get('OrganizationID')
+    service_description = data.get('ServiceDescription')
 
+    try:
+        service = Services.get(Services.ServiceID == service_id)
+        service.ServiceType = service_type
+        service.OrganizationID = organization_id
+        service.ServiceDescription = service_description
+        service.save()
 
+        updated_service_data = {
+            'ServiceID': service.ServiceID,
+            'ServiceType': service.ServiceType,
+            'ServiceDescription': service.ServiceDescription,
+            'OrganizationName': service.OrganizationID.Organization_Name
+        }
 
-# # API endpoint to edit a service and its associated service provider
-# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
-# def update_service_and_provider(service_id):
-#     data = request.get_json()
-    
-#     try:
-#         service = Services.get(Services.ServiceID == service_id)
-#         provider = Service_Providers.get(Service_Providers.OrganizationID == service.OrganizationID)
-        
-#         # Update service fields
-#         service.ServiceType = data.get('ServiceType', service.ServiceType)
-#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
-#         service.save()
-        
-#         # Update service provider fields
-#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
-#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
-#         provider.Email = data.get('Email', provider.Email)
-#         provider.Phone = data.get('Phone', provider.Phone)
-#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
-#         provider.save()
-        
-#         return jsonify({'message': 'Service and provider updated successfully'})
-#     except Services.DoesNotExist:
-#         return jsonify({'error': 'Service not found'}), 404
-#     except Service_Providers.DoesNotExist:
-#         return jsonify({'error': 'Service Provider not found'}), 404
+        return jsonify(updated_service_data), 200
+    except Services.DoesNotExist:
+        return jsonify({'error': 'Service not found'}), 404
 
+# API endpoint to edit service providers on ServicesAndProviders page
+@app.route('/api/service_providers/<int:organization_id>', methods=['PUT'])
+def update_service_provider(organization_id):
+    data = request.get_json()
+    print('Received request data:', data)
 
+    organization_name = data.get('Organization_Name')
+    contact_person = data.get('ContactPerson')
+    email = data.get('Email')
+    phone = data.get('Phone')
+    date_of_start_str = data.get('DateOfStart')
+    if date_of_start_str:
+        date_of_start = datetime.strptime(date_of_start_str, '%Y-%m-%d').date()
+    else:
+        date_of_start = datetime(2024, 1, 1).date()  
 
-# # API endpoint to edit a service provider
-# @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
-# def update_service_provider(provider_id):
-#     data = request.get_json()
-#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
-#     if provider:
-#         for key, value in data.items():
-#             setattr(provider, key, value)
-#         provider.save()
-#         return jsonify(provider.to_dict())
-#     else:
-#         return jsonify({'error': 'Service Provider not found'}), 404
+    try:
+        service_provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
+        service_provider.Organization_Name = organization_name
+        service_provider.ContactPerson = contact_person
+        service_provider.Email = email
+        service_provider.Phone = phone
+        service_provider.DateOfStart = date_of_start
+        service_provider.save()
+
+        updated_service_provider_data = {
+            'OrganizationID': service_provider.OrganizationID,
+            'Organization_Name': service_provider.Organization_Name,
+            'ContactPerson': service_provider.ContactPerson,
+            'Email': service_provider.Email,
+            'Phone': service_provider.Phone,
+            'DateOfStart': service_provider.DateOfStart.isoformat()
+        }
+
+        return jsonify(updated_service_provider_data), 200
+    except Service_Providers.DoesNotExist:
+        return jsonify({'error': 'Service provider not found'}), 404
+
     
     # API endpoint to delete a service from join table
 @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['DELETE'])
@@ -1100,3 +1085,82 @@ if __name__ == '__main__':
 #         'Volunteer': f"{record.volunteer.FirstName} {record.volunteer.LastName}"
 #     } for record in query]
 #     return jsonify(visit_records)
+
+
+
+# API endpoint to edit a service
+# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
+# def update_service(service_id):
+#     data = request.get_json()
+#     print(f"Received data for updating service: {data}")  # Add logging statement
+#     try:
+#         service = Services.get(Services.ServiceID == service_id)
+#         service.ServiceType = data.get('ServiceType', service.ServiceType)
+#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
+#         service.OrganizationID = data.get('OrganizationID', service.OrganizationID)
+#         service.save()
+#         print(f"Service updated successfully: {service.to_dict()}")  # Add logging statement
+#         return jsonify({'message': 'Service updated successfully'})
+#     except Services.DoesNotExist:
+#         return jsonify({'error': 'Service not found'}), 404
+
+# # API endpoint to edit a service provider
+# @app.route('/api/ServicesAndProviders/<int:organization_id>', methods=['PUT'])
+# def update_service_provider(organization_id):
+#     data = request.get_json()
+#     print(f"Received data for updating service provider: {data}")  # Add logging statement
+#     try:
+#         provider = Service_Providers.get(Service_Providers.OrganizationID == organization_id)
+#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
+#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
+#         provider.Email = data.get('Email', provider.Email)
+#         provider.Phone = data.get('Phone', provider.Phone)
+#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
+#         provider.save()
+#         print(f"Service provider updated successfully: {provider.to_dict()}")  # Add logging statement
+#         return jsonify({'message': 'Service Provider updated successfully'})
+#     except Service_Providers.DoesNotExist:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+
+# # API endpoint to edit a service and its associated service provider
+# @app.route('/api/ServicesAndProviders/<int:service_id>', methods=['PUT'])
+# def update_service_and_provider(service_id):
+#     data = request.get_json()
+    
+#     try:
+#         service = Services.get(Services.ServiceID == service_id)
+#         provider = Service_Providers.get(Service_Providers.OrganizationID == service.OrganizationID)
+        
+#         # Update service fields
+#         service.ServiceType = data.get('ServiceType', service.ServiceType)
+#         service.ServiceDescription = data.get('ServiceDescription', service.ServiceDescription)
+#         service.save()
+        
+#         # Update service provider fields
+#         provider.Organization_Name = data.get('Organization_Name', provider.Organization_Name)
+#         provider.ContactPerson = data.get('ContactPerson', provider.ContactPerson)
+#         provider.Email = data.get('Email', provider.Email)
+#         provider.Phone = data.get('Phone', provider.Phone)
+#         provider.DateOfStart = data.get('DateOfStart', provider.DateOfStart)
+#         provider.save()
+        
+#         return jsonify({'message': 'Service and provider updated successfully'})
+#     except Services.DoesNotExist:
+#         return jsonify({'error': 'Service not found'}), 404
+#     except Service_Providers.DoesNotExist:
+#         return jsonify({'error': 'Service Provider not found'}), 404
+
+
+
+# # API endpoint to edit a service provider
+# @app.route('/api/service_providers/<int:provider_id>', methods=['PUT'])
+# def update_service_provider(provider_id):
+#     data = request.get_json()
+#     provider = Service_Providers.get_or_none(Service_Providers.OrganizationID == provider_id)
+#     if provider:
+#         for key, value in data.items():
+#             setattr(provider, key, value)
+#         provider.save()
+#         return jsonify(provider.to_dict())
+#     else:
+#         return jsonify({'error': 'Service Provider not found'}), 404
