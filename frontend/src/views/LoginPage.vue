@@ -31,18 +31,18 @@ export default {
     };
   },
   methods: {
-    ...mapActions('auth', ['login', 'setVolunteer']),
+    ...mapActions('auth', ['login', 'setVolunteer', 'setHasRecordAccess']),
     async submitLogin() {
       const loginData = {
         username: this.username,
         password: this.password,
       };
-
       try {
         const response = await axios.post('http://127.0.0.1:5000/api/login', loginData);
         const volunteer = response.data.volunteer;
-        await this.setVolunteer(volunteer);
-        await this.login();
+        await this.$store.dispatch('auth/setVolunteer', volunteer);
+        await this.$store.dispatch('auth/login');
+        await this.$store.dispatch('auth/setHasRecordAccess', volunteer.has_record_access);
         this.$router.push('/home');
       } catch (error) {
         console.error('Login failed:', error);

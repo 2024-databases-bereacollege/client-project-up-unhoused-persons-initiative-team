@@ -20,14 +20,14 @@ db.connect()
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
-    print('Received login data:', data)  # Add this line
+    print('Received login data:', data)
     last_name = data.get('username')
     password = data.get('password')
     print(f"Received login request for username: {last_name}")
 
     # Check if the required fields are present
     if not last_name or not password:
-        print('Username and password are required')  # Add this line
+        print('Username and password are required')
         return jsonify({'error': 'Username and password are required'}), 400
 
     # Query the volunteer with the provided last name
@@ -38,7 +38,8 @@ def login():
             # Login successful
             session['logged_in'] = True
             volunteer_data = volunteer.to_dict()
-            print('Login successful')  # Add this line
+            volunteer_data['has_record_access'] = volunteer.HasRecordAccess  # Include HasRecordAccess in the response
+            print('Login successful')
             return jsonify({'message': 'Login successful', 'volunteer': volunteer_data}), 200
         else:
             print("Password does not match")
@@ -46,7 +47,6 @@ def login():
     else:
         print("Volunteer not found")
         return jsonify({'error': 'Invalid username or password'}), 401
-
 # ADD VISIT SECTION ##########################################
 # Function to get neighbors list
 def get_neighborsAV():
