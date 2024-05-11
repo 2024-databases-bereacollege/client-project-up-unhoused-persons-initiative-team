@@ -36,18 +36,22 @@ export default {
   methods: {
     ...mapActions('auth', ['login', 'setVolunteer', 'setHasRecordAccess', 'logout']),
     async submitLogin() {
-      const loginData = {
-        username: this.username,
-        password: this.password,
-      };
-      try {
-        const response = await axios.post('http://127.0.0.1:5000/api/login', loginData);
-        const volunteer = response.data.volunteer;
-        await this.$store.dispatch('auth/setVolunteer', volunteer);
-        await this.$store.dispatch('auth/login');
-        await this.$store.dispatch('auth/setHasRecordAccess', volunteer.has_record_access);
-        this.$router.push('/home');
-      } catch (error) {
+  const loginData = {
+    username: this.username,
+    password: this.password,
+  };
+  try {
+    const response = await axios.post('http://127.0.0.1:5000/api/login', loginData);
+    const volunteer = response.data.volunteer;
+    await this.$store.dispatch('auth/setVolunteer', volunteer);
+    await this.$store.dispatch('auth/login');
+    await this.$store.dispatch('auth/setHasRecordAccess', volunteer.has_record_access);
+
+    // Store the login information in local storage
+    localStorage.setItem('loggedInVolunteer', JSON.stringify(volunteer));
+
+    this.$router.push('/home');
+  } catch (error) {
         console.error('Login failed:', error);
         if (error.response && error.response.status === 401) {
           this.errorMessage = 'Invalid username or password. Please try again.';

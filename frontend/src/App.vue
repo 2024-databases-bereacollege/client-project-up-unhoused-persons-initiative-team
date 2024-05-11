@@ -21,6 +21,9 @@ export default {
     TopBar,
     Sidebar,
   },
+  mounted() {
+    this.$store.dispatch('auth/checkLocalStorage');
+  },
   computed: {
     ...mapGetters('auth', ['isAuthenticated']),
   },

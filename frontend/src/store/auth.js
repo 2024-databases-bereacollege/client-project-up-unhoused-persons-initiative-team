@@ -27,14 +27,23 @@ const authModule = {
   
       login({ commit }) {
         // Perform login logic, e.g., send a request to the server
-        // If login is successful, update the authentication state
         commit('setIsAuthenticated', true);
       },
       logout({ commit }) {
-        // Perform logout logic, e.g., clear token, reset state
         commit('setIsAuthenticated', false);
+        commit('setVolunteer', null);
+        commit('setHasRecordAccess', false);
+        localStorage.removeItem('loggedInVolunteer');
       },
-      // Other authentication-related actions
+      checkLocalStorage({ commit }) {
+        const loggedInVolunteer = localStorage.getItem('loggedInVolunteer');
+        if (loggedInVolunteer) {
+          const volunteer = JSON.parse(loggedInVolunteer);
+          commit('setVolunteer', volunteer);
+          commit('setIsAuthenticated', true);
+          commit('setHasRecordAccess', volunteer.has_record_access);
+        }
+      },
     },
     getters: {
       isAuthenticated: state => state.isAuthenticated,
