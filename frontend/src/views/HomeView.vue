@@ -1,50 +1,42 @@
 <template>
   <div class="homepage">
-    <header>
-      <h1>Welcome to the UP Initiative Database!</h1>
-    </header>
-
-    <main>
-      <section class="hero">
-        <h1></h1>
-     <!--   <p>This database is a robust solution that can streamline the <br>
-          storage, management, and retrieval of your data, <br>
-          enhancing operational efficiency and supporting informed decision-making <br>
-          across your organization.
-        </p> -->
-        <a href="/Instructions" class="cta-button">Get Started</a>
-      </section>
-
-      <section class="features">
-        <div class="feature">
-          <i class="fas fa-rocket"></i>
-          <h2>Centralized Information</h2>
-          <p>Discover everything you need in one convenient location! </p>
-          <p>Explore the side tabs to access comprehensive details about your organization and its operations.  </p>
-          <p> It's all designed to be right at your fingertips, simplifying how you connect with the information that matters most. </p>
-        </div>
-        <div class="feature">
-          <i class="fas fa-mobile-alt"></i>
-          <h2>Keep Track of Your Inventory</h2>
-          <p>Managing your inventory has never been easier!  </p>
-          <p> Add or remove items with just a few clicks, and instantly see which items are most needed. </p>
-          <p> This streamlined view helps you stay prepared and responsive, ensuring you always have the essentials for those we serve. </p>
-        </div>
-        <div class="feature">
-          <i class="fas fa-shield-alt"></i>
-          <h2>Create, Follow Up, and Edit Files with a Single Click</h2>
-          <p> Visit the Neighbors page to quickly create and update profiles for new neighbors.  </p>
-          <p> Here, you can access crucial information and review their recent interactions with UP. </p>
-          <p> Our intuitive tools make it simple to follow each neighbor's journey and provide support every step of the way. </p>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2024 UP Initiative. All rights reserved.</p>
-    </footer>
+  <header>
+  <h1>Welcome to the UP Initiative Database!</h1>
+  </header>
+  <main>
+  <section class="hero">
+  <h1></h1>
+  <a href="/Instructions" class="cta-button">Get Started</a>
+  </section>
+  <section class="features">
+  <div class="feature">
+  <i class="fas fa-rocket"></i>
+  <h2>Centralized Information</h2>
+  <p>Discover everything you need in one convenient location!</p>
+  <p>Explore the side tabs to access comprehensive details about your organization and its operations.</p>
+  <p>It's all designed to be right at your fingertips, simplifying how you connect with the information that matters most.</p>
+  <p>Visit the Queries page to view specialized information about our neighbors and gain valuable insights!</p>
   </div>
-</template>
+  <div class="feature">
+  <i class="fas fa-shield-alt"></i>
+  <h2>Visit Various Pages to Manage Profiles</h2>
+  <p>Navigate to the Neighbors, Organizations, and Users pages to quickly create, update, and delete profiles for various entities.</p>
+  <p>Our intuitive tools make it simple to manage crucial information and keep your database up-to-date.</p>
+  </div>
+  <div class="feature">
+  <i class="fas fa-book"></i>
+  <h2>Keep a Complete Visit Log of Every UP Interaction</h2>
+  <p>We understand the importance of tracking and documenting each interaction with our neighbors.</p>
+  <p>That's why we securely store every relevant aspect of these interactions in a comprehensive visit log.</p>
+  <p>Access to the visit log is tailored to each user's role, ensuring that sensitive information remains protected while still providing valuable insights for our team.</p>
+  </div>
+  </section>
+  </main>
+  <footer>
+  <p>&copy; 2024 UP Initiative. All rights reserved.</p>
+  </footer>
+  </div>
+  </template>
 
 <script>
 export default {
