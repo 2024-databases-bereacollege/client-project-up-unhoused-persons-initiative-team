@@ -543,7 +543,22 @@ def get_neighbor_details(neighbor_id):
         neighbor_info = {
             'NeighborID': neighbor.NeighborID,
             'FullName': f"{neighbor.FirstName} {neighbor.LastName}",
-            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d') if neighbor.DateOfBirth else None
+            'DateOfBirth': neighbor.DateOfBirth.strftime('%Y-%m-%d') if neighbor.DateOfBirth else None,
+            'Phone': neighbor.Phone,
+            'Location': neighbor.Location,
+            'Email': neighbor.Email,
+            'Created_date': neighbor.Created_date.strftime('%Y-%m-%d') if neighbor.Created_date else None,
+            'HasStateID': neighbor.HasStateID,
+            'HasPet': neighbor.HasPet,
+            'HasChildren': neighbor.HasChildren,
+            'HasMedication': neighbor.HasMedication,
+            'HasFoodInsecurity': neighbor.HasFoodInsecurity,
+            'HasTransportation': neighbor.HasTransportation,
+            'HasJob': neighbor.HasJob,
+            'HasHousing': neighbor.HasHousing,
+            'HasInsurance': neighbor.HasInsurance,
+            'HasIncome': neighbor.HasIncome,
+            'Notes': neighbor.Notes
         }
         return jsonify(neighbor_info), 200
     except Neighbor.DoesNotExist:
