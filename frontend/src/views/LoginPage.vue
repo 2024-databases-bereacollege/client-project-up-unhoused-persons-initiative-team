@@ -2,7 +2,7 @@
   <div class="login-page">
     <div class="login-box">
       <h1>Login</h1>
-      <form @submit.prevent="login">
+      <form @submit.prevent="submitLogin">
         <div class="form-group">
           <label for="username">Username:</label>
           <input type="text" id="username" v-model="username" placeholder="Enter your username" required>
@@ -13,7 +13,7 @@
         </div>
         <button type="submit">Login</button>
       </form>
-      <p>Don't have an account? <a href="/register">Register</a></p>
+      <!-- <p>Don't have an account? <a href="/register">Register</a></p> -->
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
     </div>
   </div>
