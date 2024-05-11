@@ -13,11 +13,14 @@
         </div>
         <button type="submit">Login</button>
       </form>
-      <!-- <p>Don't have an account? <a href="/register">Register</a></p> -->
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div class="logout-container">
+        <button class="logout-button" @click="logout">Logout</button>
+      </div>
     </div>
   </div>
 </template>
+
 <script>
 import axios from 'axios';
 import { mapActions } from 'vuex';
@@ -31,7 +34,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions('auth', ['login', 'setVolunteer', 'setHasRecordAccess']),
+    ...mapActions('auth', ['login', 'setVolunteer', 'setHasRecordAccess', 'logout']),
     async submitLogin() {
       const loginData = {
         username: this.username,
@@ -57,7 +60,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .login-page {
   display: flex;
@@ -66,10 +68,12 @@ export default {
   min-height: 100vh;
   background-color: #f2f2f2;
 }
+
 .error-message {
   color: red;
   margin-top: 10px;
 }
+
 .login-box {
   max-width: 400px;
   padding: 40px;
@@ -92,8 +96,7 @@ label {
   margin-bottom: 5px;
 }
 
-input[type="text"],
-input[type="password"] {
+input[type="text"], input[type="password"] {
   width: 100%;
   padding: 12px;
   font-size: 16px;
@@ -110,6 +113,26 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.logout-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.logout-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
 }
 
 a {
