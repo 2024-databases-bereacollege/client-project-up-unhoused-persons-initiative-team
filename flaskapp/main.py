@@ -567,6 +567,10 @@ def get_neighbor_details(neighbor_id):
 #This query gets the visit records for the neighbor profile page
 @app.route('/api/IndividualVisitLog', methods=['GET'])
 def get_IndividualVisitLog():
+    neighborID = request.args.get('neighborID')
+    if not neighborID:
+        return jsonify({'error': 'neighborID is required'}), 400
+
     query = (Visit_Service
              .select(
                  Visit_Service.Date.alias('VisitDate'),
@@ -574,16 +578,17 @@ def get_IndividualVisitLog():
                  Visit_Service.Description,
                  Volunteer.FirstName.concat(' ').concat(Volunteer.LastName).alias('VolunteerName'),
                  Service_Providers.Organization_Name.alias('ServiceProvider')
-
              )
-             .join(Services)  # This joins Visit_Service to Services on the implicit foreign key relationship
-             .join(Service_Providers)  # This joins Services to Service_Providers
-             .switch(Visit_Service)  # Return to Visit_Service to join another table
-             .join(Visit_Record)  # This joins Visit_Service to Visit_Record
-             .join(Volunteer)  # This joins Visit_Record to Volunteer
+             .join(Services)
+             .join(Service_Providers)
+             .switch(Visit_Service)
+             .join(Visit_Record)
+             .join(Volunteer)
+             .where(Visit_Record.NeighborID == neighborID)  # Filter by the provided neighborID
              .order_by(Visit_Service.Date.desc()))
+
     result = [item for item in query.dicts()]
-    return jsonify(result)  
+    return jsonify(result)
 
 ############### Individual Visit logs and neighbor profiles above ###################
 
