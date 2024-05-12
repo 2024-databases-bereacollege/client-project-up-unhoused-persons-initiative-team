@@ -109,42 +109,42 @@ def generate_sample_data():
     def volunteers_sample_data():
         return [
             {
-                'FirstName': 'Alice',
+                'FirstName': 'Alyssa',
                 'LastName': 'Smith',
                 'Password': '123',
-                'Email': 'alice@example.com',
+                'Email': 'alyssa@example.com',
                 'Phone': '987-654-3210',
                 'HasRecordAccess': True
             },
             {
-                'FirstName': 'Bob',
+                'FirstName': 'Bo',
                 'LastName': 'Johnson',
                 'Password': 'qwerty456',
-                'Email': 'bob@example.com',
+                'Email': 'bo@example.com',
                 'Phone': '111-222-3333',
                 'HasRecordAccess': False
             },
             {
-                'FirstName': 'Emily',
+                'FirstName': 'Eve',
                 'LastName': 'Davis',
                 'Password': 'pass1234',
-                'Email': 'emily@example.com',
+                'Email': 'eve@example.com',
                 'Phone': '444-555-6666',
                 'HasRecordAccess': True
             },
             {
-                'FirstName': 'Michael',
+                'FirstName': 'Mike',
                 'LastName': 'Wilson',
                 'Password': 'abcd1234',
-                'Email': 'michael@example.com',
+                'Email': 'mike@example.com',
                 'Phone': '777-888-9999',
                 'HasRecordAccess': False
             },
             {
-                'FirstName': 'Sarah',
-                'LastName': 'Brown',
+                'FirstName': 'Jasmine',
+                'LastName': 'Wilson',
                 'Password': 'password789',
-                'Email': 'sarah@example.com',
+                'Email': 'Jasmine@example.com',
                 'Phone': '555-666-7777',
                 'HasRecordAccess': True
             }
