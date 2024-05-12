@@ -7,6 +7,8 @@
           <span class="text-h5 mx-4">Services and Providers</span>
         </div>
         <v-btn color="primary" @click="openAddServiceProviderDialog">Add Service Provider</v-btn>
+        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn>
+
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -117,6 +119,7 @@
  /* eslint-disable */
 import ServiceProviderSelect from '../components/ServiceProviderSelect.vue';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 export default {
   components: {
     ServiceProviderSelect,
@@ -179,6 +182,21 @@ export default {
 mounted() {
 this.fetchServices();
 this.fetchServiceProviders();
+},
+computed: {
+  servicesAndProviders() {
+    return this.services.map(service => ({
+      ServiceID: service.ServiceID,
+      ServiceType: service.ServiceType,
+      ServiceDescription: service.ServiceDescription,
+      OrganizationID: service.OrganizationID ? service.OrganizationID.OrganizationID : '',
+      OrganizationName: service.OrganizationID ? service.OrganizationID.Organization_Name : '',
+      ContactPerson: service.OrganizationID ? service.OrganizationID.ContactPerson : '',
+      Email: service.OrganizationID ? service.OrganizationID.Email : '',
+      Phone: service.OrganizationID ? service.OrganizationID.Phone : '',
+      DateOfStart: service.OrganizationID ? service.OrganizationID.DateOfStart : '',
+    }));
+  },
 },
 methods: {
 // Fetching data
@@ -379,6 +397,12 @@ async addServiceProvider() {
   onProviderSelected(providerId) {
       this.newService.OrganizationID = providerId;
 },
+exportToExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(this.servicesAndProviders);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'ServicesAndProviders');
+    XLSX.writeFile(workbook, 'ServicesAndProviders.xlsx');
+  },
 },
 };
 </script>

@@ -6,6 +6,7 @@
           <!-- <v-btn color="primary" @click="openAddVisitLogDialog">Add Visit Log</v-btn> -->
           <span class="text-h5 mx-4">Visit Logs</span>
         </div>
+        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -14,61 +15,60 @@
         :loading="loading"
         class="elevation-1"
       >
-                        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.ServiceProvider="{ item }">
           {{ item.ServiceProvider }}
         </template>
       </v-data-table>
     </v-card>
-
     <!-- Add Visit Log Dialog -->
-    <v-dialog v-model="addVisitLogDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5">Add Visit Log</v-card-title>
-        <v-card-text>
-          <v-select
-            v-model="newVisitLog.NeighborID"
-            :items="neighbors"
-            item-text="FullName"
-            item-value="NeighborID"
-            label="Neighbor"
-          ></v-select>
-          <v-select
-            v-model="newVisitLog.ServiceID"
-            :items="services"
-            item-text="ServiceName"
-            item-value="ServiceID"
-            label="Service"
-          ></v-select>
-          <v-select
-            v-model="newVisitLog.ServiceProviderID"
-            :items="serviceProviders"
-            item-text="Organization_Name"
-            item-value="ServiceProviderID"
-            label="Service Provider"
-          ></v-select>
-          <v-select
-            v-model="newVisitLog.VolunteerID"
-            :items="volunteers"
-            item-text="FullName"
-            item-value="VolunteerID"
-            label="Volunteer"
-          ></v-select>
-          <v-text-field v-model="newVisitLog.Date" label="Date" type="date"></v-text-field>
-          <v-textarea v-model="newVisitLog.Description" label="Description"></v-textarea>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeAddVisitLogDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="addVisitLog">Add</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </div>
+<v-dialog v-model="addVisitLogDialog" max-width="500px">
+  <v-card>
+    <v-card-title class="text-h5">Add Visit Log</v-card-title>
+    <v-card-text>
+      <v-select
+        v-model="newVisitLog.NeighborID"
+        :items="neighbors"
+        item-text="FullName"
+        item-value="NeighborID"
+        label="Neighbor"
+      ></v-select>
+      <v-select
+        v-model="newVisitLog.ServiceID"
+        :items="services"
+        item-text="ServiceName"
+        item-value="ServiceID"
+        label="Service"
+      ></v-select>
+      <v-select
+        v-model="newVisitLog.ServiceProviderID"
+        :items="serviceProviders"
+        item-text="Organization_Name"
+        item-value="ServiceProviderID"
+        label="Service Provider"
+      ></v-select>
+      <v-select
+        v-model="newVisitLog.VolunteerID"
+        :items="volunteers"
+        item-text="FullName"
+        item-value="VolunteerID"
+        label="Volunteer"
+      ></v-select>
+      <v-text-field v-model="newVisitLog.Date" label="Date" type="date"></v-text-field>
+      <v-textarea v-model="newVisitLog.Description" label="Description"></v-textarea>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="blue darken-1" text @click="closeAddVisitLogDialog">Cancel</v-btn>
+      <v-btn color="blue darken-1" text @click="addVisitLog">Add</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+</div>
 </template>
-
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 export default {
   data() {
@@ -196,6 +196,12 @@ export default {
         .catch((error) => {
           console.error('Error adding visit log:', error);
         });
+    },
+    exportToExcel() {
+      const worksheet = XLSX.utils.json_to_sheet(this.visitLogs);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'VisitLogs');
+      XLSX.writeFile(workbook, 'VisitLogs.xlsx');
     },
   },
 };

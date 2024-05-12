@@ -5,43 +5,46 @@
       and the other displaying tables without those attributes.
     </h3>
   </div>
-      <v-card>
-      <v-tabs v-model="activeTab" bg-color="deep-purple-darken-4" center-active>
-        <v-tab v-for="(tab, index) in tabs" :key="index">{{ tab.title }}</v-tab>
-      </v-tabs>
-      <v-card-text>
-  <div class="total-count">
-    <h3>Total: {{ currentTabTotal }} out of {{ totalNeighbors }} Neighbors</h3>
-  </div>
-  <v-data-table
-    :headers="headers"
-    :items="currentTabItems"
-    :items-per-page="10"
-    class="elevation-1"
-  ></v-data-table>
-</v-card-text>
-</v-card>
+  <v-card>
+    <v-tabs v-model="activeTab" bg-color="deep-purple-darken-4" center-active>
+      <v-tab v-for="(tab, index) in tabs" :key="index">{{ tab.title }}</v-tab>
+    </v-tabs>
+    <v-card-text>
+      <div class="total-count">
+        <h3>Total: {{ currentTabTotal }} out of {{ totalNeighbors }} Neighbors</h3>
+        <v-btn color="primary" @click="exportToExcel(currentTabItems, tabs[activeTab].title)">Export to Excel</v-btn>
+      </div>
+      <v-data-table
+        :headers="headers"
+        :items="currentTabItems"
+        :items-per-page="10"
+        class="elevation-1"
+      ></v-data-table>
+    </v-card-text>
+  </v-card>
   <v-row>
     <v-card cols="12">
       <v-tabs v-model="activeWithoutTab" bg-color="deep-purple-darken-4" center-active>
         <v-tab v-for="(tab, index) in withoutTabs" :key="index">{{ tab.title }}</v-tab>
       </v-tabs>
       <v-card-text>
-    <div class="total-count">
-      <h3>Total: {{ currentWithoutTabTotal }} out of {{ totalNeighbors }} Neighbors</h3>
-    </div>
-    <v-data-table
-      :headers="headers"
-      :items="currentWithoutTabItems"
-      :items-per-page="100"
-      class="elevation-1"
-    ></v-data-table>
-  </v-card-text>
-</v-card>
-</v-row>
+        <div class="total-count">
+          <h3>Total: {{ currentWithoutTabTotal }} out of {{ totalNeighbors }} Neighbors</h3>
+          <v-btn color="primary" @click="exportToExcel(currentWithoutTabItems, withoutTabs[activeWithoutTab].title)">Export to Excel</v-btn>
+        </div>
+        <v-data-table
+          :headers="headers"
+          :items="currentWithoutTabItems"
+          :items-per-page="100"
+          class="elevation-1"
+        ></v-data-table>
+      </v-card-text>
+    </v-card>
+  </v-row>
 </template>
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 export default {
   data() {
@@ -50,9 +53,9 @@ export default {
       activeWithoutTab: 0,
       neighbors: [],
       headers: [
-        { text: 'ID', value: 'NeighborID' },
-        { text: 'First Name', value: 'FirstName' },
-        { text: 'Last Name', value: 'LastName' },
+        { title: 'ID', value: 'NeighborID' },
+        { title: 'First Name', value: 'FirstName' },
+        { title: 'Last Name', value: 'LastName' },
       ],
       tabs: [
         { title: 'Neighbors with State ID', attribute: 'HasStateID' },
@@ -110,24 +113,33 @@ export default {
           console.error('Error fetching data:', error);
         });
     },
+    exportToExcel(data, title) {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      XLSX.writeFile(workbook, `${title}.xlsx`);
+    },
   },
 };
 </script>
-  
-  <style scoped>
-  .total-count {
-    margin-bottom: 16px;
-  }
-  
-  .total-count h3 {
-    font-size: 20px;
-    font-weight: bold;
-  }
-  
-  .v-data-table {
-    margin-top: 16px;
-  }
-  .title-section {
+<style scoped>
+.total-count {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.total-count h3 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.v-data-table {
+  margin-top: 16px;
+}
+
+.title-section {
   background-color: #f5f5f5;
   padding: 20px;
   text-align: center;
@@ -140,4 +152,4 @@ export default {
   color: #333;
   line-height: 1.5;
 }
-  </style>
+</style>

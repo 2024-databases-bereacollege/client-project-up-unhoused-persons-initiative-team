@@ -6,6 +6,7 @@
             <v-btn color="primary" @click="openAddVolunteerDialog">Add Volunteer</v-btn>
             <span class="text-h5 mx-4">Volunteers</span>
           </div>
+          <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn>
         </v-card-title>
         <v-data-table
           :headers="headers"
@@ -78,6 +79,7 @@
 
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 export default {
   data() {
@@ -244,6 +246,12 @@ addVolunteer() {
       console.error('Error adding volunteer:', error);
     });
 },
+exportToExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(this.volunteers);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Volunteers');
+    XLSX.writeFile(workbook, 'volunteers.xlsx');
+  },
 },
 };
 </script>

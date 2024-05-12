@@ -6,6 +6,7 @@
           <v-btn color="primary" @click="openAddNeighborDialog">Add Neighbor</v-btn>
           <span class="text-h5 mx-4">Neighbors</span>
         </div>
+        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -109,6 +110,7 @@
 
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 export default {
   data() {
@@ -379,6 +381,12 @@ renderNeighborIDButton(params) {
   },
   openNeighborPage(neighborID) {
     this.$router.push({ name: 'NeighborProfile', params: { ID: neighborID } });
+  },
+  exportToExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(this.neighbors);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Neighbors');
+    XLSX.writeFile(workbook, 'neighbors.xlsx');
   },
 },
 };
