@@ -1,0 +1,15 @@
+{
+  "prerun": "# some code here",
+  "directory": "migrations",
+  "history": "migratehistory",
+  "models": [
+    "models.Service_Providers",
+    "models.Services",
+    "models.Volunteer",
+    "models.Neighbor",
+    "models.Visit_Record",
+    "models.Visit_Service",
+    "models.Inventory_Usage",
+    "models.Inventory"
+  ]
+}
